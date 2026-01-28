@@ -207,10 +207,13 @@ class ExperimentTracker:
                 with open(index_file, "r") as f:
                     data = json.load(f)
                     for exp_data in data.get("experiments", []):
-                        exp = Experiment.from_dict(exp_data)
-                        self.experiments[exp.id] = exp
-            except (json.JSONDecodeError, KeyError):
-                pass
+                        try:
+                            exp = Experiment.from_dict(exp_data)
+                            self.experiments[exp.id] = exp
+                        except Exception as e:
+                            print(f"Warning: Failed to load experiment {exp_data.get('id', 'unknown')}: {e}")
+            except (json.JSONDecodeError, KeyError) as e:
+                print(f"Warning: Failed to parse experiments index: {e}")
 
     def _save_experiments(self):
         """Save experiments to storage."""

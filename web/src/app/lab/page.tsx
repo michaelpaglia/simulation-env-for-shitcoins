@@ -100,10 +100,14 @@ export default function Lab() {
       const res = await fetch(`${API_URL}/harness/experiments`)
       if (res.ok) {
         const data = await res.json()
+        console.log('Fetched experiments:', data)
         setPastExperiments(data.experiments || [])
+      } else {
+        console.error('Failed to fetch experiments:', res.status, res.statusText)
       }
     } catch (e) {
       console.error('Failed to fetch past experiments:', e)
+      // API might not be running - that's OK
     }
   }
 
@@ -541,8 +545,13 @@ export default function Lab() {
                   <span className="empty-icon">&#128218;</span>
                   <h3>No Past Experiments</h3>
                   <p>
-                    Run some experiments to see them appear here.
-                    Each experiment tests a different shitcoin concept.
+                    Make sure the API server is running:
+                  </p>
+                  <code style={{ display: 'block', background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px', marginTop: '12px' }}>
+                    python run_api.py
+                  </code>
+                  <p style={{ marginTop: '12px', fontSize: '13px' }}>
+                    Check the browser console for any errors.
                   </p>
                 </div>
               ) : (
