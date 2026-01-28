@@ -2,8 +2,8 @@ import type { Metadata } from 'next'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Shitcoin Simulator',
-  description: 'Simulate how your token performs on CT before launch',
+  title: 'Hopium Lab',
+  description: 'Synthesize fictional shitcoins and simulate CT reactions',
 }
 
 export default function RootLayout({

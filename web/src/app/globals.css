@@ -826,3 +826,380 @@ body {
     white-space: normal;
   }
 }
+
+/* ===================
+   LAB PAGE STYLES
+   =================== */
+
+.lab-container {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.lab-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px 24px;
+  border-bottom: 1px solid var(--border);
+  background: rgba(0, 0, 0, 0.8);
+  backdrop-filter: blur(12px);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.lab-header-left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.lab-logo {
+  font-size: 28px;
+}
+
+.lab-header h1 {
+  font-size: 20px;
+  font-weight: 700;
+  margin: 0;
+}
+
+.lab-badge {
+  font-size: 11px;
+  padding: 4px 8px;
+  background: var(--bg-tertiary);
+  border-radius: 4px;
+  color: var(--text-secondary);
+}
+
+.nav-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  background: var(--bg-secondary);
+  border-radius: 9999px;
+  color: var(--text-primary);
+  text-decoration: none;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.nav-link:hover {
+  background: var(--bg-tertiary);
+}
+
+.lab-content {
+  display: grid;
+  grid-template-columns: 320px 1fr;
+  max-width: 1200px;
+  margin: 0 auto;
+  gap: 24px;
+  padding: 24px;
+}
+
+.lab-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.control-card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.control-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 16px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+}
+
+.control-group {
+  padding: 12px 16px;
+}
+
+.control-group label {
+  display: block;
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 6px;
+}
+
+.control-group select,
+.control-group input {
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--bg-primary);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  color: var(--text-primary);
+  font-size: 14px;
+}
+
+.control-group select:disabled,
+.control-group input:disabled {
+  opacity: 0.5;
+}
+
+.launch-btn, .stop-btn {
+  width: calc(100% - 32px);
+  margin: 16px;
+  padding: 14px;
+  border: none;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.launch-btn {
+  background: var(--accent);
+  color: white;
+}
+
+.launch-btn:hover {
+  background: var(--accent-hover);
+}
+
+.stop-btn {
+  background: var(--danger);
+  color: white;
+}
+
+.run-progress {
+  padding: 0 16px 16px;
+}
+
+.progress-text {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+.progress-bar {
+  height: 6px;
+  background: var(--bg-tertiary);
+  border-radius: 3px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--accent);
+  border-radius: 3px;
+  transition: width 0.3s;
+}
+
+.leaderboard {
+  padding: 8px;
+}
+
+.empty-leaderboard {
+  padding: 24px;
+  text-align: center;
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.leaderboard-entry {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 8px;
+  transition: background 0.2s;
+}
+
+.leaderboard-entry:hover {
+  background: var(--bg-tertiary);
+}
+
+.rank {
+  font-weight: 700;
+  color: var(--text-secondary);
+  width: 28px;
+}
+
+.entry-info {
+  flex: 1;
+  display: flex;
+  justify-content: space-between;
+}
+
+.ticker {
+  font-weight: 700;
+}
+
+.score {
+  color: var(--success);
+  font-weight: 600;
+}
+
+.outcome-badge {
+  font-size: 11px;
+  padding: 3px 8px;
+  border-radius: 4px;
+  color: white;
+  text-transform: uppercase;
+}
+
+.insights-list {
+  padding: 12px 16px;
+}
+
+.insight-item {
+  font-size: 13px;
+  color: var(--text-secondary);
+  padding: 8px 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.insight-item:last-child {
+  border-bottom: none;
+}
+
+.lab-feed {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.error-banner {
+  padding: 16px;
+  background: rgba(244, 33, 46, 0.1);
+  border: 1px solid var(--danger);
+  border-radius: 12px;
+  color: var(--danger);
+}
+
+.experiment-card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  padding: 20px;
+  border: 1px solid var(--border);
+}
+
+.experiment-card.current {
+  border-color: var(--accent);
+  box-shadow: 0 0 20px rgba(29, 155, 240, 0.2);
+}
+
+.experiment-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.experiment-status {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.experiment-status.running {
+  color: var(--accent);
+}
+
+.experiment-id {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.experiment-score {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--success);
+}
+
+.experiment-main h3 {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 4px;
+}
+
+.experiment-name {
+  font-size: 16px;
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+}
+
+.experiment-hook {
+  font-style: italic;
+  color: var(--text-secondary);
+  margin: 0;
+  font-size: 14px;
+}
+
+.experiment-meta {
+  display: flex;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.meta-tag {
+  font-size: 12px;
+  padding: 4px 10px;
+  border-radius: 4px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+}
+
+.meta-tag.strategy {
+  background: rgba(29, 155, 240, 0.15);
+  color: var(--accent);
+}
+
+.experiment-loading {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--border);
+  color: var(--text-secondary);
+  font-size: 14px;
+}
+
+.empty-feed {
+  text-align: center;
+  padding: 60px 40px;
+  background: var(--bg-secondary);
+  border-radius: 16px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  display: block;
+  margin-bottom: 16px;
+}
+
+.empty-feed h3 {
+  font-size: 24px;
+  margin: 0 0 12px;
+}
+
+.empty-feed p {
+  color: var(--text-secondary);
+  margin: 0 0 8px;
+  max-width: 400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.empty-hint {
+  font-size: 13px;
+}
+
+@media (max-width: 900px) {
+  .lab-content {
+    grid-template-columns: 1fr;
+  }
+}
