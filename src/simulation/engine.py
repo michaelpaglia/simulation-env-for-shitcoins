@@ -1,12 +1,16 @@
 """Core simulation engine - runs the shitcoin social simulation."""
 
 import random
+import json
 from typing import Optional
 from pydantic import BaseModel, Field
 import anthropic
 
 from ..models.token import Token, SimulationResult, MarketCondition
 from ..agents.personas import Persona, PersonaType, get_all_personas, get_persona
+
+# Use Haiku for speed and cost efficiency
+DEFAULT_MODEL = "claude-3-5-haiku-20241022"
 
 
 class Tweet(BaseModel):
@@ -47,9 +51,131 @@ class SimulationState(BaseModel):
 class SimulationEngine:
     """Runs shitcoin social simulations."""
 
-    def __init__(self, api_key: Optional[str] = None):
+    def __init__(self, api_key: Optional[str] = None, model: str = DEFAULT_MODEL):
         self.client = anthropic.Anthropic(api_key=api_key) if api_key else None
+        self.model = model
         self.personas = get_all_personas()
+
+    def _generate_tweets_batch(
+        self,
+        personas: list[Persona],
+        token: Token,
+        state: SimulationState,
+        context: Optional[str] = None
+    ) -> list[Tweet]:
+        """Generate tweets for multiple personas in a single API call (much faster)."""
+
+        if not personas:
+            return []
+
+        if not self.client:
+            # Fallback to templates
+            return [self._generate_tweet_template(p, token, state) for p in personas]
+
+        # Build persona descriptions for batch generation
+        persona_list = "\n".join([
+            f"- @{p.handle} ({p.type.value}): {p.name}"
+            for p in personas
+        ])
+
+        system_prompt = """You are simulating Crypto Twitter reactions to a new token.
+Generate realistic tweets from multiple personas. Each persona has a distinct voice:
+- degen: Apes everything, uses emojis, says "ser", "lfg", "wagmi"
+- skeptic: Calls out red flags, warns about rugs, uses "ngmi", "dyor"
+- whale: Minimal words, cryptic, high influence
+- influencer: Hypes for clout, uses threads, builds narrative
+- normie: Asks questions, unsure, follows crowd
+- kol: Key opinion leader, analytical but can shill
+- bot: Automated alerts, stats only
+
+Keep tweets short (under 200 chars). Be authentic to CT culture."""
+
+        user_prompt = f"""Token: ${token.ticker} - {token.name}
+Narrative: {token.narrative}
+Market: {token.market_condition.value}
+CT mood: {"bullish" if state.momentum > 0.3 else "bearish" if state.momentum < -0.3 else "neutral"}
+Awareness: {state.awareness:.0%}
+
+{f"Recent tweets: {context}" if context else ""}
+
+Generate ONE tweet for each of these personas:
+{persona_list}
+
+Return as JSON array:
+[{{"handle": "@handle", "tweet": "tweet text", "sentiment": 0.5}}]
+sentiment: -1 (FUD) to 1 (hype)"""
+
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=1000,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}],
+            )
+            raw = response.content[0].text
+
+            # Parse JSON from response
+            start = raw.find("[")
+            end = raw.rfind("]") + 1
+            if start >= 0 and end > start:
+                tweets_data = json.loads(raw[start:end])
+            else:
+                tweets_data = []
+
+            # Map responses back to personas
+            handle_to_data = {t.get("handle", "").lstrip("@"): t for t in tweets_data}
+
+            tweets = []
+            for persona in personas:
+                data = handle_to_data.get(persona.handle, {})
+                content = data.get("tweet", "")
+                sentiment = float(data.get("sentiment", 0))
+
+                if not content:
+                    # Fallback to template if no content
+                    tweet = self._generate_tweet_template(persona, token, state)
+                else:
+                    tweet = self._create_tweet(persona, content, sentiment, state)
+
+                tweets.append(tweet)
+
+            return tweets
+
+        except Exception as e:
+            # Fallback to templates on error
+            return [self._generate_tweet_template(p, token, state) for p in personas]
+
+    def _generate_tweet_template(
+        self,
+        persona: Persona,
+        token: Token,
+        state: SimulationState
+    ) -> Tweet:
+        """Generate a tweet using templates (fast fallback)."""
+        content, sentiment = self._generate_template_tweet(persona, token, state)
+        return self._create_tweet(persona, content, sentiment, state)
+
+    def _create_tweet(
+        self,
+        persona: Persona,
+        content: str,
+        sentiment: float,
+        state: SimulationState
+    ) -> Tweet:
+        """Create a Tweet object with calculated engagement."""
+        base_engagement = int(persona.influence_score * 1000)
+        momentum_multiplier = 1 + (state.momentum * 0.5)
+
+        return Tweet(
+            id=f"tweet_{state.current_hour}_{persona.handle}",
+            author=persona,
+            content=content,
+            hour=state.current_hour,
+            likes=int(base_engagement * momentum_multiplier * random.uniform(0.5, 1.5)),
+            retweets=int(base_engagement * 0.3 * momentum_multiplier * random.uniform(0.3, 1.2)),
+            replies=int(base_engagement * 0.1 * random.uniform(0.5, 2.0)),
+            sentiment=max(-1, min(1, sentiment)),
+        )
 
     def _generate_tweet(
         self,
@@ -58,56 +184,9 @@ class SimulationEngine:
         state: SimulationState,
         context: Optional[str] = None
     ) -> Tweet:
-        """Generate a tweet from a persona about the token."""
-
-        if self.client:
-            # Use Claude for realistic generation
-            system_prompt = persona.get_system_prompt()
-
-            user_prompt = f"""New token just dropped:
-
-{token.get_pitch()}
-
-Market condition: {token.market_condition.value}
-Current CT sentiment: {"bullish" if state.momentum > 0.3 else "bearish" if state.momentum < -0.3 else "neutral"}
-Awareness level: {state.awareness:.0%} of CT knows about it
-
-{f"Context from other tweets: {context}" if context else ""}
-
-React to this token. Stay in character. One tweet only."""
-
-            response = self.client.messages.create(
-                model="claude-sonnet-4-20250514",
-                max_tokens=100,
-                system=system_prompt,
-                messages=[
-                    {"role": "user", "content": user_prompt}
-                ],
-            )
-            content = response.content[0].text.strip()
-
-            # Estimate sentiment from content
-            sentiment = self._estimate_sentiment(content, persona)
-        else:
-            # Fallback: template-based generation
-            content, sentiment = self._generate_template_tweet(persona, token, state)
-
-        # Calculate engagement based on persona influence and momentum
-        base_engagement = int(persona.influence_score * 1000)
-        momentum_multiplier = 1 + (state.momentum * 0.5)
-
-        tweet = Tweet(
-            id=f"tweet_{state.current_hour}_{persona.handle}",
-            author=persona,
-            content=content,
-            hour=state.current_hour,
-            likes=int(base_engagement * momentum_multiplier * random.uniform(0.5, 1.5)),
-            retweets=int(base_engagement * 0.3 * momentum_multiplier * random.uniform(0.3, 1.2)),
-            replies=int(base_engagement * 0.1 * random.uniform(0.5, 2.0)),
-            sentiment=sentiment,
-        )
-
-        return tweet
+        """Generate a single tweet (used for initial bot tweet)."""
+        # For single tweets, use template for speed
+        return self._generate_tweet_template(persona, token, state)
 
     def _estimate_sentiment(self, content: str, persona: Persona) -> float:
         """Estimate sentiment of tweet content."""
@@ -275,11 +354,8 @@ React to this token. Stay in character. One tweet only."""
             recent_tweets = state.tweets[-5:] if state.tweets else []
             context = "\n".join(f"@{t.author.handle}: {t.content}" for t in recent_tweets)
 
-            # Generate tweets
-            new_tweets = [
-                self._generate_tweet(persona, token, state, context)
-                for persona in active_personas
-            ]
+            # Generate tweets in batch (single API call per hour)
+            new_tweets = self._generate_tweets_batch(active_personas, token, state, context)
 
             self._update_state(state, new_tweets)
 
@@ -332,13 +408,11 @@ React to this token. Stay in character. One tweet only."""
             recent_tweets = state.tweets[-5:] if state.tweets else []
             context = "\n".join(f"@{t.author.handle}: {t.content}" for t in recent_tweets)
 
-            # Generate and yield tweets one by one
-            new_tweets = []
-            for persona in active_personas:
-                tweet = self._generate_tweet(persona, token, state, context)
-                new_tweets.append(tweet)
+            # Generate tweets in batch (single API call per hour - much faster!)
+            new_tweets = self._generate_tweets_batch(active_personas, token, state, context)
 
-                # Yield each tweet immediately
+            # Yield each tweet
+            for tweet in new_tweets:
                 yield {
                     "type": "tweet",
                     "tweet": self._tweet_to_dict(tweet),
