@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(gh repo create:*)",
+      "Bash(git remote set-url:*)",
+      "Bash(git add:*)",
+      "Bash(dir:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)",
+      "WebFetch(domain:kolscan.io)",
+      "Bash(git ls-tree:*)",
+      "Bash(git rev-parse:*)"
+    ]
+  }
+}
