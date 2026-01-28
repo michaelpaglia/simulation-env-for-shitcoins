@@ -55,6 +55,7 @@ class RunConfig:
     on_experiment_start: Optional[Callable[[Experiment], None]] = None
     on_experiment_complete: Optional[Callable[[Experiment], None]] = None
     on_run_complete: Optional[Callable[[list[Experiment]], None]] = None
+    on_simulation_progress: Optional[Callable[[str, int, int, dict], None]] = None  # exp_id, hour, total_hours, metrics
 
     # Behavior
     pause_between_experiments: float = 0.5  # seconds
@@ -155,11 +156,41 @@ class AutonomousRunner:
                     market_condition=config.market_condition,
                 )
 
-                result = self.simulation_engine.run_simulation(
-                    token=token,
-                    hours=config.simulation_hours,
-                    verbose=False,
-                )
+                # Use streaming simulation if progress callback is set
+                if config.on_simulation_progress:
+                    result_dict = None
+                    for event in self.simulation_engine.run_simulation_stream(
+                        token=token,
+                        hours=config.simulation_hours,
+                    ):
+                        if event["type"] == "progress":
+                            config.on_simulation_progress(
+                                experiment.id,
+                                event["hour"],
+                                event["total_hours"],
+                                {
+                                    "momentum": event.get("momentum", 0),
+                                    "awareness": event.get("awareness", 0),
+                                    "tweet_count": event.get("tweet_count", 0),
+                                    "sentiment": event.get("sentiment", 0),
+                                }
+                            )
+                        elif event["type"] == "result":
+                            result_dict = event["result"]
+
+                    if result_dict is None:
+                        raise Exception("Simulation did not return result")
+
+                    # Convert dict to SimulationResult
+                    from ..models.token import SimulationResult
+                    result_dict["token"] = token.model_dump()
+                    result = SimulationResult.model_validate(result_dict)
+                else:
+                    result = self.simulation_engine.run_simulation(
+                        token=token,
+                        hours=config.simulation_hours,
+                        verbose=False,
+                    )
 
                 experiment.complete(result)
                 self.tracker.update_experiment(experiment)

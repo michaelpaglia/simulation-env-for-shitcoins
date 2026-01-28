@@ -25,6 +25,8 @@ _harness_state = {
     "run_id": None,
     "current_experiment": None,
     "events_queue": None,
+    "events_list": [],  # Broadcast list - stores recent events
+    "events_counter": 0,  # Counter for event IDs
     "runner": None,
     "thread": None,
 }
@@ -60,6 +62,14 @@ class HarnessStatusResponse(BaseModel):
 
 def _emit_event(event: dict):
     """Emit an event to all connected SSE clients."""
+    # Add to broadcast list with an ID
+    event["_id"] = _harness_state["events_counter"]
+    _harness_state["events_counter"] += 1
+    _harness_state["events_list"].append(event)
+    # Keep only last 100 events to prevent memory issues
+    if len(_harness_state["events_list"]) > 100:
+        _harness_state["events_list"] = _harness_state["events_list"][-100:]
+    # Also add to queue for backwards compatibility
     if _harness_state["events_queue"]:
         _harness_state["events_queue"].put(event)
 
@@ -121,6 +131,13 @@ def _run_harness_thread(config: RunConfig, run_id: str):
                 "experiment_id": exp.id,
                 "experiment_index": experiments_completed,
                 "total_experiments": original_config.max_experiments,
+                "idea": {
+                    "name": exp.idea.name,
+                    "ticker": exp.idea.ticker,
+                    "hook": exp.idea.hook,
+                    "strategy": exp.idea.strategy.value,
+                    "meme_style": exp.idea.meme_style.value,
+                },
                 "status": exp.status.value,
                 "score": exp.score,
                 "result": {
@@ -157,9 +174,20 @@ def _run_harness_thread(config: RunConfig, run_id: str):
                 "timestamp": datetime.now().isoformat(),
             })
 
+        def on_simulation_progress(exp_id, hour, total_hours, metrics):
+            _emit_event({
+                "type": "simulation_progress",
+                "experiment_id": exp_id,
+                "hour": hour,
+                "total_hours": total_hours,
+                "metrics": metrics,
+                "timestamp": datetime.now().isoformat(),
+            })
+
         config.on_experiment_start = on_experiment_start
         config.on_experiment_complete = on_experiment_complete
         config.on_run_complete = on_run_complete
+        config.on_simulation_progress = on_simulation_progress
         config.verbose = False
 
         # Run the harness
@@ -215,6 +243,8 @@ async def start_harness_run(request: HarnessRunRequest):
     _harness_state["is_running"] = True
     _harness_state["run_id"] = run_id
     _harness_state["events_queue"] = Queue()
+    _harness_state["events_list"] = []  # Reset broadcast list
+    _harness_state["events_counter"] = 0  # Reset counter
     _harness_state["start_time"] = datetime.now()
 
     # Start background thread
@@ -234,28 +264,30 @@ async def stream_harness_events():
     """Stream harness events via SSE."""
 
     async def event_generator():
+        # Track which events this client has seen
+        last_seen_id = -1
+
         # Send initial status
         yield f"data: {json.dumps({'type': 'connected', 'is_running': _harness_state['is_running']})}\n\n"
 
         while True:
-            # Check for events in queue
-            if _harness_state["events_queue"]:
-                try:
-                    # Non-blocking check
-                    while not _harness_state["events_queue"].empty():
-                        event = _harness_state["events_queue"].get_nowait()
-                        yield f"data: {json.dumps(event)}\n\n"
+            # Check for new events in broadcast list
+            events_list = _harness_state["events_list"]
+            for event in events_list:
+                if event.get("_id", -1) > last_seen_id:
+                    last_seen_id = event["_id"]
+                    # Send event without internal _id
+                    event_copy = {k: v for k, v in event.items() if k != "_id"}
+                    yield f"data: {json.dumps(event_copy)}\n\n"
 
-                        if event.get("type") == "done":
-                            return
-                except:
-                    pass
+                    if event.get("type") == "done":
+                        return
 
             # Small delay to prevent busy loop
             await asyncio.sleep(0.1)
 
-            # Send heartbeat every few seconds
-            if not _harness_state["is_running"]:
+            # Send heartbeat if not running
+            if not _harness_state["is_running"] and last_seen_id == _harness_state["events_counter"] - 1:
                 yield f"data: {json.dumps({'type': 'heartbeat', 'is_running': False})}\n\n"
                 await asyncio.sleep(2)
 
@@ -313,10 +345,18 @@ async def list_experiments():
                 "id": e.id,
                 "ticker": e.idea.ticker,
                 "name": e.idea.name,
+                "narrative": e.idea.narrative[:100] + "..." if len(e.idea.narrative) > 100 else e.idea.narrative,
+                "hook": e.idea.hook,
                 "strategy": e.idea.strategy.value,
+                "meme_style": e.idea.meme_style.value,
                 "status": e.status.value,
                 "score": e.score,
                 "outcome": e.result.predicted_outcome if e.result else None,
+                "viral_coefficient": e.result.viral_coefficient if e.result else None,
+                "peak_sentiment": e.result.peak_sentiment if e.result else None,
+                "fud_resistance": e.result.fud_resistance if e.result else None,
+                "total_engagement": e.result.total_engagement if e.result else None,
+                "dominant_narrative": e.result.dominant_narrative if e.result else None,
                 "created_at": e.created_at,
             }
             for e in sorted(experiments, key=lambda x: x.created_at, reverse=True)[:50]

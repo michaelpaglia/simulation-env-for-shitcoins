@@ -41,10 +41,18 @@ interface PastExperiment {
   id: string
   ticker: string
   name: string
+  narrative: string
+  hook: string
   strategy: string
+  meme_style: string
   status: string
   score: number | null
   outcome: string | null
+  viral_coefficient: number | null
+  peak_sentiment: number | null
+  fud_resistance: number | null
+  total_engagement: number | null
+  dominant_narrative: string | null
   created_at: string
 }
 
@@ -85,14 +93,31 @@ export default function Lab() {
   const [insights, setInsights] = useState<string[]>([])
   const [pastExperiments, setPastExperiments] = useState<PastExperiment[]>([])
   const [viewMode, setViewMode] = useState<'current' | 'history'>('history')
+  const [apiStatus, setApiStatus] = useState<'loading' | 'connected' | 'error'>('loading')
 
   const eventSourceRef = useRef<AbortController | null>(null)
 
   // Load initial data
   useEffect(() => {
-    fetchLeaderboard()
-    fetchLearnings()
-    fetchPastExperiments()
+    const loadData = async () => {
+      try {
+        // First check if API is reachable
+        const healthCheck = await fetch(`${API_URL}/health`)
+        if (healthCheck.ok) {
+          setApiStatus('connected')
+          // Fire off fetches without blocking
+          fetchLeaderboard()
+          fetchLearnings()
+          fetchPastExperiments()
+        } else {
+          setApiStatus('error')
+        }
+      } catch (e) {
+        console.error('API not reachable:', e)
+        setApiStatus('error')
+      }
+    }
+    loadData()
   }, [])
 
   const fetchPastExperiments = async () => {
@@ -230,13 +255,14 @@ export default function Lab() {
         break
 
       case 'experiment_completed':
+        const idea = event.idea as Record<string, unknown> | undefined
         const completedExp: Experiment = {
           id: event.experiment_id as string,
-          ticker: currentExperiment?.ticker || 'UNK',
-          name: currentExperiment?.name || 'Unknown',
-          strategy: currentExperiment?.strategy || '',
-          meme_style: currentExperiment?.meme_style || '',
-          hook: currentExperiment?.hook || '',
+          ticker: (idea?.ticker as string) || currentExperiment?.ticker || 'UNK',
+          name: (idea?.name as string) || currentExperiment?.name || 'Unknown',
+          strategy: (idea?.strategy as string) || currentExperiment?.strategy || '',
+          meme_style: (idea?.meme_style as string) || currentExperiment?.meme_style || '',
+          hook: (idea?.hook as string) || currentExperiment?.hook || '',
           score: event.score as number | null,
           status: 'completed',
           outcome: (event.result as Record<string, unknown>)?.predicted_outcome as string || null,
@@ -247,6 +273,21 @@ export default function Lab() {
           completed: event.experiment_index as number,
           total: event.total_experiments as number,
         })
+        // Refresh past experiments list
+        fetchPastExperiments()
+        fetchLeaderboard()
+        break
+
+      case 'simulation_progress':
+        if (currentExperiment) {
+          setCurrentExperiment({
+            ...currentExperiment,
+            progress: {
+              hour: event.hour as number,
+              total: event.total_hours as number,
+            }
+          })
+        }
         break
 
       case 'run_completed':
@@ -290,6 +331,16 @@ export default function Lab() {
           <span className="lab-logo">&#129514;</span>
           <h1>Harness Lab</h1>
           <span className="lab-badge">Autonomous Testing</span>
+          <span className="api-status" style={{
+            marginLeft: '12px',
+            padding: '4px 8px',
+            borderRadius: '4px',
+            fontSize: '12px',
+            background: apiStatus === 'connected' ? 'var(--success)' : apiStatus === 'error' ? 'var(--danger)' : 'var(--warning)',
+            color: '#000'
+          }}>
+            {API_URL} | {apiStatus} | {pastExperiments.length} exp
+          </span>
         </div>
         <Link href="/" className="nav-link">
           <HomeIcon />
@@ -472,7 +523,7 @@ export default function Lab() {
               {currentExperiment && (
                 <div className="experiment-card current">
                   <div className="experiment-header">
-                    <span className="experiment-status running">&#9679; Running</span>
+                    <span className="experiment-status running">● Running</span>
                     <span className="experiment-id">{currentExperiment.id}</span>
                   </div>
                   <div className="experiment-main">
@@ -484,9 +535,25 @@ export default function Lab() {
                     <span className="meta-tag strategy">{currentExperiment.strategy}</span>
                     <span className="meta-tag style">{currentExperiment.meme_style}</span>
                   </div>
-                  <div className="experiment-loading">
-                    <div className="spinner" />
-                    <span>Simulating CT reactions...</span>
+                  <div className="simulation-progress">
+                    {currentExperiment.progress ? (
+                      <>
+                        <div className="progress-header">
+                          <span>Simulating hour {currentExperiment.progress.hour}/{currentExperiment.progress.total}</span>
+                          <span>{Math.round((currentExperiment.progress.hour / currentExperiment.progress.total) * 100)}%</span>
+                        </div>
+                        <div className="progress-bar">
+                          <div
+                            className="progress-fill"
+                            style={{ width: `${(currentExperiment.progress.hour / currentExperiment.progress.total) * 100}%` }}
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="progress-header">
+                        <span>Generating idea...</span>
+                      </div>
+                    )}
                   </div>
                 </div>
               )}
@@ -499,10 +566,10 @@ export default function Lab() {
                       className="experiment-status"
                       style={{ color: getOutcomeColor(exp.outcome) }}
                     >
-                      {exp.outcome === 'moon' ? '&#127773;' :
-                       exp.outcome === 'rug' ? '&#128163;' :
-                       exp.outcome === 'cult_classic' ? '&#11088;' :
-                       exp.outcome === 'pump_and_dump' ? '&#128200;' : '&#128201;'}
+                      {exp.outcome === 'moon' ? '🌕' :
+                       exp.outcome === 'rug' ? '💣' :
+                       exp.outcome === 'cult_classic' ? '⭐' :
+                       exp.outcome === 'pump_and_dump' ? '📈' : '📉'}
                       {' '}{exp.outcome?.replace('_', ' ')}
                     </span>
                     <span className="experiment-score">
@@ -542,46 +609,77 @@ export default function Lab() {
               {/* Past Experiments History */}
               {pastExperiments.length === 0 ? (
                 <div className="empty-feed">
-                  <span className="empty-icon">&#128218;</span>
-                  <h3>No Past Experiments</h3>
-                  <p>
-                    Make sure the API server is running:
-                  </p>
-                  <code style={{ display: 'block', background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px', marginTop: '12px' }}>
-                    python run_api.py
-                  </code>
-                  <p style={{ marginTop: '12px', fontSize: '13px' }}>
-                    Check the browser console for any errors.
-                  </p>
+                  <span className="empty-icon">{apiStatus === 'error' ? '⚠️' : apiStatus === 'loading' ? '⏳' : '📚'}</span>
+                  <h3>{apiStatus === 'error' ? 'API Not Connected' : apiStatus === 'loading' ? 'Connecting...' : 'No Past Experiments'}</h3>
+                  {apiStatus === 'error' ? (
+                    <>
+                      <p>Cannot reach the API server at:</p>
+                      <code style={{ display: 'block', background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px', marginTop: '12px' }}>
+                        {API_URL}
+                      </code>
+                      <p style={{ marginTop: '16px' }}>Start the API server:</p>
+                      <code style={{ display: 'block', background: 'var(--bg-tertiary)', padding: '12px', borderRadius: '8px', marginTop: '8px' }}>
+                        python run_api.py
+                      </code>
+                    </>
+                  ) : apiStatus === 'connected' ? (
+                    <p>No experiments have been run yet. Launch the harness to start experimenting.</p>
+                  ) : (
+                    <p>Checking API connection...</p>
+                  )}
                 </div>
               ) : (
-                pastExperiments.map(exp => (
-                  <div key={exp.id} className="experiment-card completed">
-                    <div className="experiment-header">
-                      <span
-                        className="experiment-status"
-                        style={{ color: getOutcomeColor(exp.outcome) }}
-                      >
-                        {exp.outcome === 'moon' ? '&#127773;' :
-                         exp.outcome === 'rug' ? '&#128163;' :
-                         exp.outcome === 'cult_classic' ? '&#11088;' :
-                         exp.outcome === 'pump_and_dump' ? '&#128200;' : '&#128201;'}
-                        {' '}{exp.outcome?.replace('_', ' ') || exp.status}
-                      </span>
-                      <span className="experiment-score">
-                        {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
-                      </span>
-                    </div>
-                    <div className="experiment-main">
-                      <h3>${exp.ticker}</h3>
-                      <p className="experiment-name">{exp.name}</p>
-                    </div>
-                    <div className="experiment-meta">
-                      <span className="meta-tag strategy">{exp.strategy}</span>
-                      <span className="experiment-id">{exp.id}</span>
-                    </div>
+                <div className="experiments-table">
+                  <div className="table-header">
+                    <span className="col-token">Token</span>
+                    <span className="col-score">Score</span>
+                    <span className="col-outcome">Outcome</span>
+                    <span className="col-viral">Viral</span>
+                    <span className="col-sentiment">Sentiment</span>
+                    <span className="col-fud">FUD Res.</span>
+                    <span className="col-strategy">Strategy</span>
                   </div>
-                ))
+                  {pastExperiments.map(exp => (
+                    <div key={exp.id} className="experiment-row">
+                      <div className="col-token">
+                        <span className="token-ticker">${exp.ticker}</span>
+                        <span className="token-name">{exp.name}</span>
+                        <span className="token-id">{exp.id}</span>
+                      </div>
+                      <div className="col-score">
+                        <span className="score-value" style={{ color: exp.score && exp.score >= 0.8 ? 'var(--success)' : exp.score && exp.score >= 0.5 ? 'var(--warning)' : 'var(--text-secondary)' }}>
+                          {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
+                        </span>
+                      </div>
+                      <div className="col-outcome">
+                        <span className="outcome-badge" style={{ background: getOutcomeColor(exp.outcome) }}>
+                          {exp.outcome === 'moon' ? '🌕 moon' :
+                           exp.outcome === 'rug' ? '💣 rug' :
+                           exp.outcome === 'cult_classic' ? '⭐ cult' :
+                           exp.outcome === 'pump_and_dump' ? '📈 pump' :
+                           exp.outcome === 'slow_bleed' ? '📉 bleed' : exp.status}
+                        </span>
+                      </div>
+                      <div className="col-viral">
+                        {exp.viral_coefficient !== null ? `${exp.viral_coefficient.toFixed(1)}x` : '--'}
+                      </div>
+                      <div className="col-sentiment">
+                        {exp.peak_sentiment !== null ? (
+                          <span style={{ color: exp.peak_sentiment > 0.5 ? 'var(--success)' : exp.peak_sentiment > 0 ? 'var(--warning)' : 'var(--danger)' }}>
+                            {exp.peak_sentiment > 0 ? '+' : ''}{(exp.peak_sentiment * 100).toFixed(0)}%
+                          </span>
+                        ) : '--'}
+                      </div>
+                      <div className="col-fud">
+                        {exp.fud_resistance !== null ? `${(exp.fud_resistance * 100).toFixed(0)}%` : '--'}
+                      </div>
+                      <div className="col-strategy">
+                        <span className="strategy-tag">{exp.strategy}</span>
+                        <span className="style-tag">{exp.meme_style}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
               )}
             </>
           )}
