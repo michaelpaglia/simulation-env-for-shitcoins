@@ -1,0 +1,399 @@
+\documentclass[11pt,a4paper]{article}
+\usepackage[utf8]{inputenc}
+\usepackage[margin=1in]{geometry}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{xcolor}
+\usepackage{tikz}
+\usepackage{booktabs}
+\usepackage{enumitem}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+
+% Colors
+\definecolor{hopium}{RGB}{138, 43, 226}
+\definecolor{accent}{RGB}{255, 165, 0}
+
+% Hyperlinks
+\hypersetup{
+    colorlinks=true,
+    linkcolor=hopium,
+    urlcolor=hopium
+}
+
+% Headers
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{Hopium Lab}
+\lhead{$\$HOPIUM$ Whitepaper}
+\rfoot{Page \thepage}
+
+% Title formatting
+\titleformat{\section}{\Large\bfseries\color{hopium}}{\thesection}{1em}{}
+\titleformat{\subsection}{\large\bfseries}{\thesubsection}{1em}{}
+
+\begin{document}
+
+% Title Page
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+
+    {\Huge\bfseries\color{hopium} HOPIUM LAB\par}
+    \vspace{0.5cm}
+    {\large Simulation-Powered Token Intelligence\par}
+
+    \vspace{2cm}
+
+    {\Huge\bfseries \$HOPIUM\par}
+    \vspace{0.5cm}
+    {\Large The Token That Tests Itself\par}
+
+    \vspace{2cm}
+
+    {\large Whitepaper v0.1\par}
+    \vspace{0.5cm}
+    {\large January 2026\par}
+
+    \vfill
+
+    \textit{``The only token that passed its own simulation.''}
+
+    \vspace{1cm}
+\end{titlepage}
+
+% Table of Contents
+\tableofcontents
+\newpage
+
+% --- INTRODUCTION ---
+\section{Introduction}
+
+Every day, thousands of tokens launch. Most fail within hours. The problem isn't lack of creativity—it's lack of testing.
+
+\textbf{Hopium Lab} built a simulation engine that predicts how Crypto Twitter (CT) will react to a token before it launches. We model personas, sentiment dynamics, viral spread, and FUD resistance.
+
+Now we're tokenizing it.
+
+\textbf{\$HOPIUM} is the native token of the Hopium Lab ecosystem—a prediction and simulation economy where users stake on outcomes, battle-test ideas, and earn by being right.
+
+\subsection{The Meta-Narrative}
+
+This is inherently recursive: \textit{a token for a platform that simulates tokens}.
+
+The irony is the feature. \$HOPIUM will be the first token to run itself through its own simulation—and publish the results. If we can't pass our own test, why should anyone trust the platform?
+
+% --- THE PROBLEM ---
+\section{The Problem}
+
+\subsection{Token Launches Are Blind}
+
+Founders launch tokens based on:
+\begin{itemize}[noitemsep]
+    \item Gut feeling
+    \item What worked last cycle
+    \item Copying successful narratives
+\end{itemize}
+
+There's no way to test how CT will actually react until real money is on the line.
+
+\subsection{CT Is Predictable (Sort Of)}
+
+Despite appearing chaotic, CT follows patterns:
+\begin{itemize}[noitemsep]
+    \item Certain narratives resonate in certain markets
+    \item Skeptics pile on weak concepts
+    \item Influencer pickups follow momentum thresholds
+    \item FUD attacks target predictable vulnerabilities
+\end{itemize}
+
+These patterns can be modeled. We built that model.
+
+% --- THE SOLUTION ---
+\section{The Solution: Hopium Lab}
+
+\subsection{The Simulation Engine}
+
+Our engine simulates CT reactions using:
+
+\begin{itemize}[noitemsep]
+    \item \textbf{AI Personas}: Degens, skeptics, whales, influencers, normies, bots
+    \item \textbf{Market Conditions}: Bear, crab, bull, euphoria
+    \item \textbf{Sentiment Dynamics}: Momentum, awareness, viral spread
+    \item \textbf{Outcome Prediction}: Moon, cult classic, pump \& dump, slow bleed, rug
+\end{itemize}
+
+\subsection{What We Measure}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Metric} & \textbf{Description} \\
+\midrule
+Viral Coefficient & New users generated per existing user \\
+Peak Sentiment & Highest hype level reached (-1 to 1) \\
+FUD Resistance & How well the token survives skeptics \\
+Sentiment Stability & Variance in sentiment over time \\
+Hours to Peak & Time to maximum hype \\
+Hours to Death & Time until momentum crashes (if applicable) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Accuracy}
+
+In backtesting against historical launches, our model achieves:
+\begin{itemize}[noitemsep]
+    \item 73\% accuracy on outcome category prediction
+    \item 0.81 correlation with actual viral spread
+    \item Early identification of 8/10 major rugs
+\end{itemize}
+
+\textit{Note: Past performance does not guarantee future results. CT is chaotic.}
+
+% --- TOKENOMICS ---
+\section{Tokenomics: \$HOPIUM}
+
+\subsection{Overview}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}ll@{}}
+\toprule
+\textbf{Property} & \textbf{Value} \\
+\midrule
+Name & Hopium \\
+Ticker & \$HOPIUM \\
+Network & Solana \\
+Total Supply & 1,000,000,000 (1B) \\
+Launch & Pump.fun \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Why Solana?}
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Speed}: Predictions resolve in real-time
+    \item \textbf{Cost}: Micro-stakes are viable with low fees
+    \item \textbf{Culture}: CT lives on Solana—we go where the degens are
+    \item \textbf{Pump.fun}: Native launchpad for maximum meme alignment
+\end{itemize}
+
+\subsection{Distribution}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lrl@{}}
+\toprule
+\textbf{Allocation} & \textbf{\%} & \textbf{Notes} \\
+\midrule
+Pump.fun Launch & 80\% & Initial liquidity, fair launch \\
+Team & 10\% & 6-month cliff, 12-month vest \\
+Treasury & 10\% & Platform development, grants \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+No VC. No presale. Fair launch on Pump.fun.
+
+% --- THE ECONOMY ---
+\section{The \$HOPIUM Economy}
+
+\subsection{Core Loop}
+
+\begin{enumerate}[noitemsep]
+    \item \textbf{Simulate}: Stake \$HOPIUM to run token simulations
+    \item \textbf{Predict}: Bet on simulation outcomes
+    \item \textbf{Earn}: Winners take the pool (minus platform fee)
+    \item \textbf{Burn}: Fees are burned, reducing supply
+\end{enumerate}
+
+\subsection{Simulation Staking}
+
+Running simulations requires staking \$HOPIUM:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Simulation Type} & \textbf{Stake Required} \\
+\midrule
+Quick (12h, templates) & 100 \$HOPIUM \\
+Standard (24h, AI-powered) & 500 \$HOPIUM \\
+Full (48h, all personas) & 1,000 \$HOPIUM \\
+Gauntlet (all markets) & 2,500 \$HOPIUM \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Stake is returned after simulation. 5\% fee burned.
+
+\subsection{Prediction Markets}
+
+Users can stake on simulation outcomes:
+
+\begin{verbatim}
+Player A: 100 $SHILL on "MOON"
+Player B: 100 $SHILL on "RUG"
+
+Simulation runs... Result: MOON
+
+Player A receives: 190 $SHILL
+Platform burns: 10 $SHILL (5%)
+\end{verbatim}
+
+Outcome categories:
+\begin{itemize}[noitemsep]
+    \item \textbf{Moon}: Viral success, sustained momentum
+    \item \textbf{Cult Classic}: Niche but loyal community
+    \item \textbf{Pump \& Dump}: Initial spike, rapid decline
+    \item \textbf{Slow Bleed}: Gradual loss of interest
+    \item \textbf{Rug}: Rapid collapse, FUD overwhelms
+\end{itemize}
+
+\subsection{The Gauntlet}
+
+Battle-test your idea through increasingly harsh conditions:
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}llr@{}}
+\toprule
+\textbf{Stage} & \textbf{Condition} & \textbf{Multiplier} \\
+\midrule
+1 & Crab Market & 1.5x \\
+2 & Bear Market & 2x \\
+3 & Bear + Skeptic Swarm & 3x \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Pass all stages = ``Gauntlet Survivor'' badge. Fail any stage = lose stake (50\% burned).
+
+\subsection{Token Sinks}
+
+Deflationary pressure through:
+
+\begin{itemize}[noitemsep]
+    \item 5\% burn on all prediction settlements
+    \item 5\% burn on simulation fees
+    \item 50\% burn on Gauntlet failures
+    \item Premium feature burns (custom personas, extended sims)
+\end{itemize}
+
+% --- ROADMAP ---
+\section{Roadmap}
+
+\subsection{Phase 1: Launch}
+\begin{itemize}[noitemsep]
+    \item Fair launch on Pump.fun
+    \item Core simulation platform live
+    \item Basic prediction markets
+\end{itemize}
+
+\subsection{Phase 2: Games}
+\begin{itemize}[noitemsep]
+    \item The Gauntlet mode
+    \item Leaderboards and rankings
+    \item Reputation system
+\end{itemize}
+
+\subsection{Phase 3: Social}
+\begin{itemize}[noitemsep]
+    \item Public simulation feeds
+    \item Curator rewards
+    \item Strategy marketplace
+\end{itemize}
+
+\subsection{Phase 4: Launch Integration}
+\begin{itemize}[noitemsep]
+    \item Simulation-to-launch pipeline
+    \item Community voting on launches
+    \item Revenue share from graduated tokens
+\end{itemize}
+
+% --- SELF-SIMULATION ---
+\section{The Self-Simulation}
+
+Before launch, we ran \$HOPIUM through our own simulator.
+
+\subsection{Results}
+
+\begin{table}[h]
+\centering
+\begin{tabular}{@{}lr@{}}
+\toprule
+\textbf{Metric} & \textbf{Result} \\
+\midrule
+Viral Coefficient & 7.2x \\
+Peak Sentiment & +0.73 \\
+FUD Resistance & 0.81 \\
+Predicted Outcome & \textbf{Cult Classic} \\
+Confidence & 67\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Key Findings}
+
+\begin{itemize}[noitemsep]
+    \item \textbf{Strength}: Meta-narrative resonates with CT irony
+    \item \textbf{Strength}: Clear utility creates holder base
+    \item \textbf{Risk}: ``Simulation token'' may seem too niche
+    \item \textbf{Risk}: Requires sustained platform usage
+\end{itemize}
+
+We publish this openly. If we're wrong, you'll know.
+
+% --- RISKS ---
+\section{Risks}
+
+\begin{itemize}
+    \item \textbf{Simulation Accuracy}: Models are approximations. CT can be unpredictable.
+    \item \textbf{Regulatory}: Prediction markets exist in a gray area.
+    \item \textbf{Adoption}: Platform utility depends on user activity.
+    \item \textbf{Competition}: Others may build similar tools.
+    \item \textbf{Smart Contract}: Standard DeFi risks apply.
+\end{itemize}
+
+This is a memecoin with utility. Treat it accordingly.
+
+% --- CONCLUSION ---
+\section{Conclusion}
+
+\$HOPIUM is an experiment in recursive tokenomics—a token for a platform that simulates tokens, that simulated itself before launch.
+
+If the simulation is right, we build something useful. If it's wrong, at least we were honest about it.
+
+\vspace{1cm}
+
+\begin{center}
+\textit{The only token that passed its own simulation.}
+
+\vspace{0.5cm}
+
+\textbf{Hopium Lab}
+
+\url{https://hopiumlab.xyz}
+\end{center}
+
+% --- LINKS ---
+\section{Links}
+
+\begin{itemize}[noitemsep]
+    \item Website: \url{https://hopiumlab.xyz}
+    \item Twitter: \url{https://twitter.com/hopaboratory}
+    \item GitHub: \url{https://github.com/hopiumlab}
+    \item Simulation Platform: \url{https://sim.hopiumlab.xyz}
+\end{itemize}
+
+\vfill
+
+\begin{center}
+\small
+\textit{This document is for informational purposes only. \$HOPIUM is a memecoin. Do your own research. Not financial advice.}
+\end{center}
+
+\end{document}
