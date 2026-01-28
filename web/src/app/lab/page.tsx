@@ -2,8 +2,9 @@
 
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
+import { config } from '@/config'
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+const API_URL = config.apiUrl
 
 interface HarnessConfig {
   mode: string
@@ -331,16 +332,18 @@ export default function Lab() {
           <span className="lab-logo">&#129514;</span>
           <h1>Harness Lab</h1>
           <span className="lab-badge">Autonomous Testing</span>
-          <span className="api-status" style={{
-            marginLeft: '12px',
-            padding: '4px 8px',
-            borderRadius: '4px',
-            fontSize: '12px',
-            background: apiStatus === 'connected' ? 'var(--success)' : apiStatus === 'error' ? 'var(--danger)' : 'var(--warning)',
-            color: '#000'
-          }}>
-            {API_URL} | {apiStatus} | {pastExperiments.length} exp
-          </span>
+          {apiStatus !== 'connected' && (
+            <span className="api-status" style={{
+              marginLeft: '12px',
+              padding: '4px 8px',
+              borderRadius: '4px',
+              fontSize: '12px',
+              background: apiStatus === 'error' ? 'var(--danger)' : 'var(--warning)',
+              color: '#000'
+            }}>
+              {apiStatus === 'error' ? 'API Offline' : 'Connecting...'}
+            </span>
+          )}
         </div>
         <Link href="/" className="nav-link">
           <HomeIcon />
