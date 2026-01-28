@@ -26,3 +26,11 @@ dist/
 # Output
 simulations/
 *.log
+
+# Web/Next.js
+web/.next/
+web/node_modules/
+web/out/
+
+# Windows
+nul
