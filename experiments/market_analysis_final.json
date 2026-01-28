@@ -1,0 +1,40 @@
+{
+  "timestamp": "2026-01-28T13:19:34.996674",
+  "summary": {
+    "bear": {
+      "moon": 1,
+      "cult_classic": 3,
+      "pump_and_dump": 10,
+      "slow_bleed": 1,
+      "rug": 0,
+      "avg_score": 0.816
+    },
+    "crab": {
+      "moon": 4,
+      "cult_classic": 9,
+      "pump_and_dump": 2,
+      "slow_bleed": 0,
+      "rug": 0,
+      "avg_score": 0.882
+    },
+    "bull": {
+      "moon": 2,
+      "cult_classic": 13,
+      "pump_and_dump": 0,
+      "slow_bleed": 0,
+      "rug": 0,
+      "avg_score": 0.879
+    },
+    "euphoria": {
+      "moon": 12,
+      "cult_classic": 3,
+      "avg_score": 0.9189646332988662
+    }
+  },
+  "insights": [
+    "BEAR market produces most pump_and_dumps (66%) - skeptics dominate",
+    "BULL/CRAB favor cult_classic outcomes - stable communities form",
+    "EUPHORIA produces highest moon rate - everything pumps",
+    "Rugs and slow_bleeds primarily occur in BEAR conditions"
+  ]
+}

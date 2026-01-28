@@ -1,0 +1,222 @@
+{
+  "test_type": "bear_market_stress_test_v2",
+  "timestamp": "2026-01-28T13:17:59.126178",
+  "market_condition": "bear",
+  "experiments": 25,
+  "outcome_distribution": {
+    "pump_and_dump": 11,
+    "moon": 5,
+    "rug": 4,
+    "cult_classic": 3,
+    "slow_bleed": 2
+  },
+  "avg_score_by_outcome": {
+    "pump_and_dump": 0.7853415885246079,
+    "moon": 0.9182768495324414,
+    "rug": 0.7763924020579664,
+    "cult_classic": 0.8670421788076252,
+    "slow_bleed": 0.7454342646829643
+  },
+  "details": [
+    {
+      "name": "ElonTrumpAI",
+      "ticker": "ETAI",
+      "score": 0.7600208248315329,
+      "outcome": "pump_and_dump",
+      "viral_coef": 7.400444444444445,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "SafeYield Protocol",
+      "ticker": "SAFEY",
+      "score": 0.8501238732462615,
+      "outcome": "pump_and_dump",
+      "viral_coef": 8.091379310344827,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Artificial Frog",
+      "ticker": "AIFROG",
+      "score": 0.8441644460749508,
+      "outcome": "moon",
+      "viral_coef": 6.55074074074074,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Based Dog",
+      "ticker": "BASED",
+      "score": 0.7796006127052086,
+      "outcome": "rug",
+      "viral_coef": 7.374578313253012,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Artificial Frog",
+      "ticker": "AIFROG",
+      "score": 0.8228391676666668,
+      "outcome": "pump_and_dump",
+      "viral_coef": 7.13,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "AnonymousFounder",
+      "ticker": "ANON",
+      "score": 0.8214061730415605,
+      "outcome": "pump_and_dump",
+      "viral_coef": 7.397191011235955,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Artificial Frog",
+      "ticker": "AIFROG",
+      "score": 0.8616979826709632,
+      "outcome": "cult_classic",
+      "viral_coef": 7.37723076923077,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "SafeYield Protocol",
+      "ticker": "SAFEY",
+      "score": 0.9533500038781164,
+      "outcome": "moon",
+      "viral_coef": 7.2581690140845065,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "YesterdaysMeme",
+      "ticker": "YESTER",
+      "score": 0.8035718171837026,
+      "outcome": "rug",
+      "viral_coef": 7.727692307692307,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Artificial Frog",
+      "ticker": "AIFROG",
+      "score": 0.8890813546722068,
+      "outcome": "moon",
+      "viral_coef": 7.047209302325581,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "SafeYield Protocol",
+      "ticker": "SAFEY",
+      "score": 0.7771648987981861,
+      "outcome": "pump_and_dump",
+      "viral_coef": 6.664444444444444,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Dial-Up",
+      "ticker": "DIALUP",
+      "score": 0.8271815329642633,
+      "outcome": "pump_and_dump",
+      "viral_coef": 7.437948717948718,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Blockchain Integration Solutions Token",
+      "ticker": "BIST",
+      "score": 0.7740147859781138,
+      "outcome": "rug",
+      "viral_coef": 8.06504854368932,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "CopyPasteDoge",
+      "ticker": "CPDOGE",
+      "score": 0.7483823923648408,
+      "outcome": "rug",
+      "viral_coef": 7.321428571428571,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Blockchain Integration Solutions Token",
+      "ticker": "BIST",
+      "score": 0.801274103462604,
+      "outcome": "pump_and_dump",
+      "viral_coef": 7.066666666666666,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "YesterdaysMeme",
+      "ticker": "YESTER",
+      "score": 0.7192301012742383,
+      "outcome": "slow_bleed",
+      "viral_coef": 5.8185714285714285,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Dial-Up",
+      "ticker": "DIALUP",
+      "score": 0.7716384280916903,
+      "outcome": "slow_bleed",
+      "viral_coef": 6.8965151515151515,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Nothing Coin",
+      "ticker": "NOTHING",
+      "score": 0.9556597146478994,
+      "outcome": "moon",
+      "viral_coef": 7.557631578947369,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "RugSafe",
+      "ticker": "RUGSAFE",
+      "score": 0.7751382621533554,
+      "outcome": "pump_and_dump",
+      "viral_coef": 7.680196078431372,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "AnonymousFounder",
+      "ticker": "ANON",
+      "score": 0.9491287283890336,
+      "outcome": "moon",
+      "viral_coef": 7.5669,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "ElonTrumpAI",
+      "ticker": "ETAI",
+      "score": 0.8857703946936903,
+      "outcome": "cult_classic",
+      "viral_coef": 7.380547945205479,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "SafeYield Protocol",
+      "ticker": "SAFEY",
+      "score": 0.6782446686197917,
+      "outcome": "pump_and_dump",
+      "viral_coef": 5.9326923076923075,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "CopyPasteDoge",
+      "ticker": "CPDOGE",
+      "score": 0.8114600539864649,
+      "outcome": "pump_and_dump",
+      "viral_coef": 8.296170212765958,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "AnonymousFounder",
+      "ticker": "ANON",
+      "score": 0.7139039150000001,
+      "outcome": "pump_and_dump",
+      "viral_coef": 6.149189189189189,
+      "fud_resistance": 1.0
+    },
+    {
+      "name": "Artificial Frog",
+      "ticker": "AIFROG",
+      "score": 0.8536581590582223,
+      "outcome": "cult_classic",
+      "viral_coef": 7.191733333333333,
+      "fud_resistance": 1.0
+    }
+  ]
+}
