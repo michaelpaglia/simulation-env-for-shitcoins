@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import Link from 'next/link'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
 
@@ -248,8 +249,8 @@ export default function Home() {
     <div className="container">
       {/* Left Sidebar */}
       <aside className="sidebar">
-        <div className="logo" title="Definitely not X">
-          <span style={{ fontSize: '28px' }}>&#129313;</span>
+        <div className="logo" title="Hopium Lab">
+          <span style={{ fontSize: '28px' }}>&#129514;</span>
         </div>
         <nav className="nav-items">
           <div className="nav-item active">
@@ -268,6 +269,12 @@ export default function Home() {
             <MessageIcon />
             <span>Messages</span>
           </div>
+          <Link href="/lab" className="nav-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+              <path d="M9 3v8.5L5 18h14l-4-6.5V3H9zm-1-2h8a1 1 0 011 1v8.5l4 6.5a2 2 0 01-1.7 3H4.7A2 2 0 013 18l4-6.5V2a1 1 0 011-1z"/>
+            </svg>
+            <span>Harness Lab</span>
+          </Link>
         </nav>
         <button className="post-btn" title="You can't actually post, this is fake">
           <span>Shill</span>
@@ -278,7 +285,7 @@ export default function Home() {
       {/* Main Feed */}
       <main className="main-feed">
         <div className="feed-header">
-          <div className="feed-title">&#129313; The Timeline</div>
+          <div className="feed-title">&#129489;&#8205;&#128300; The Lab</div>
           <div className="feed-tabs">
             <div
               className={`feed-tab ${activeTab === 'foryou' ? 'active' : ''}`}
@@ -306,16 +313,16 @@ export default function Home() {
 
         {tweets.length === 0 && !isRunning && !error ? (
           <div className="empty-state">
-            <span className="jester-icon">&#129313;</span>
+            <span className="jester-icon">&#129514;</span>
             <span className="parody-badge">100% Satire</span>
-            <h3>Welcome to Fake CT</h3>
+            <h3>Welcome to Hopium Lab</h3>
             <p>
-              Conjure up a fictional shitcoin and watch our AI jesters roleplay as Crypto Twitter degenerates.
+              Synthesize a fictional shitcoin and observe how our AI test subjects react in a simulated CT environment.
               <br /><br />
-              No real tokens harmed in this simulation. Side effects may include questioning your life choices.
+              No real tokens harmed in this experiment. Side effects may include questioning your life choices.
             </p>
             <div className="disclaimer">
-              This is parody software. Not financial advice. NFA. DYOR. WAGMI? Probably not.
+              For research purposes only. Not financial advice. NFA. DYOR. WAGMI? Results inconclusive.
             </div>
           </div>
         ) : (
@@ -367,7 +374,7 @@ export default function Home() {
               <div className="loading">
                 <div className="spinner" />
                 <div>
-                  <div>&#129313; Summoning CT NPCs...</div>
+                  <div>&#129514; Running experiment...</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
                     {progress ? (
                       <>
@@ -403,7 +410,7 @@ export default function Home() {
         </div>
 
         <div className="config-card">
-          <div className="config-card-header">&#129313; Conjure a Shitcoin</div>
+          <div className="config-card-header">&#129514; Synthesize Token</div>
           <div className="config-card-body">
             <div className="form-group">
               <label className="form-label">Token Name</label>
@@ -542,7 +549,7 @@ export default function Home() {
             </div>
 
             <div className="narrative-section">
-              <div className="narrative-label">&#129313; The Hive Mind Has Spoken</div>
+              <div className="narrative-label">&#129514; Lab Conclusion</div>
               <div className="narrative-text">&quot;{result.dominant_narrative}&quot;</div>
             </div>
           </div>
@@ -550,7 +557,7 @@ export default function Home() {
 
         <div className="footer-links">
           <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
-            &#129313; A parody for entertainment only
+            &#129514; Hopium Lab - For research purposes only
           </span>
         </div>
         <div className="footer-links">

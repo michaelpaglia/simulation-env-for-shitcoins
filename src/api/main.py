@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from ..models.token import Token, MarketCondition, MemeStyle
 from ..simulation.engine import SimulationEngine
 from ..utils.twitter import TwitterClient, get_market_sentiment
+from .harness_routes import router as harness_router
 
 load_dotenv()
 
@@ -30,6 +31,9 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Include harness routes
+app.include_router(harness_router)
 
 # Initialize engine
 engine = SimulationEngine(api_key=os.getenv("ANTHROPIC_API_KEY"))
