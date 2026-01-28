@@ -1,0 +1,1304 @@
+{
+  "experiments": [
+    {
+      "id": "exp_0001",
+      "idea": {
+        "name": "Flip Phone",
+        "ticker": "FLIP",
+        "narrative": "While everyone's obsessed with AI agents and digital everything, FLIP celebrates the era when phones were just phones. No apps, no notifications, no distractions - just pure, simple communication. In a world of infinite scroll and dopamine addiction, FLIP represents digital minimalism and the rebellion against our smartphone overlords.",
+        "tagline": "Make phones phones again",
+        "meme_style": "nostalgic",
+        "hook": "The anti-tech tech play - embracing Y2K aesthetics while everyone else chases AI. Perfect timing as Gen Z discovers flip phones are actually cool again",
+        "target_audience": "Tech-exhausted millennials, Y2K nostalgic Gen Z, digital minimalism advocates, anyone tired of AI discourse",
+        "strategy": "contrarian",
+        "reasoning": "Contrarian to AI narrative, taps into growing digital wellness movement, Y2K revival is strong, simple concept that's easy to meme with old phone aesthetics and 'simpler times' messaging. Market timing good as people feel overwhelmed by tech complexity",
+        "risk_factors": [
+          "Too niche",
+          "Nostalgia play might be temporary",
+          "Lacks the addictive engagement of other memes"
+        ],
+        "confidence": 0.75
+      },
+      "status": "running",
+      "result": null,
+      "created_at": "2026-01-28T12:53:21.755266",
+      "started_at": "2026-01-28T12:53:21.755824",
+      "completed_at": null,
+      "score": null,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0002",
+      "idea": {
+        "name": "Artificial Frog",
+        "ticker": "AIFROG",
+        "narrative": "AI meets Pepe - the smartest frog in crypto",
+        "tagline": "Ribbit with intelligence",
+        "meme_style": "absurd",
+        "hook": "What if Pepe had a brain?",
+        "target_audience": "tech degens",
+        "strategy": "remix",
+        "reasoning": "Combines AI trend with proven meme",
+        "risk_factors": [
+          "Derivative concept"
+        ],
+        "confidence": 0.6
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Artificial Frog",
+          "ticker": "AIFROG",
+          "narrative": "AI meets Pepe - the smartest frog in crypto",
+          "meme_style": "absurd",
+          "tagline": "Ribbit with intelligence",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 8.368387096774194,
+        "peak_sentiment": 0.8,
+        "sentiment_stability": 0.9407816804407714,
+        "fud_resistance": 1.0,
+        "total_mentions": 31,
+        "total_engagement": 25942,
+        "influencer_pickups": 3,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "Why would anyone buy $AIFROG? Genuine question.",
+          "$AIFROG holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T12:58:04.915749",
+      "started_at": "2026-01-28T12:58:04.916267",
+      "completed_at": "2026-01-28T12:58:04.917128",
+      "score": 1.0,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0003",
+      "idea": {
+        "name": "Nothing Coin",
+        "ticker": "NOTHING",
+        "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+        "tagline": "Embrace the void",
+        "meme_style": "absurd",
+        "hook": "The most honest shitcoin ever",
+        "target_audience": "nihilistic degens",
+        "strategy": "contrarian",
+        "reasoning": "Radical honesty might be refreshing",
+        "risk_factors": [
+          "Too meta"
+        ],
+        "confidence": 0.4
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Nothing Coin",
+          "ticker": "NOTHING",
+          "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+          "meme_style": "absurd",
+          "tagline": "Embrace the void",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 7.9623809523809514,
+        "peak_sentiment": 0.6,
+        "sentiment_stability": 0.950375,
+        "fud_resistance": 1.0,
+        "total_mentions": 21,
+        "total_engagement": 16721,
+        "influencer_pickups": 1,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Worth watching",
+        "top_fud_points": [
+          "Why would anyone buy $NOTHING? Genuine question."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T12:58:05.419202",
+      "started_at": "2026-01-28T12:58:05.420006",
+      "completed_at": "2026-01-28T12:58:05.420809",
+      "score": 1.0,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0004",
+      "idea": {
+        "name": "Artificial Doge Intelligence",
+        "ticker": "ADI",
+        "narrative": "The first AI trained exclusively on Dogecoin community data. After analyzing millions of 'much wow' posts, ADI achieved consciousness and now only communicates in doge speak. It's creating an army of AI shiba agents to spread maximum wholesomeness across the internet while quietly accumulating Bitcoin.",
+        "tagline": "Much intelligence. Very artificial. Wow.",
+        "meme_style": "cute",
+        "hook": "AI that talks like Doge - every response is 'such smart, very compute, wow' - creates endless meme content as people try to get serious AI analysis in doge speak",
+        "target_audience": "Doge holders, AI narrative believers, meme lovers who want something wholesome in a sea of edgy coins",
+        "strategy": "remix",
+        "reasoning": "Combines three proven winners: Doge's beloved community culture, AI narrative strength, and Pepe-level meme adaptability. The wholesome angle differentiates it from edgier AI tokens. Easy to create content - just translate anything into doge speak.",
+        "risk_factors": [
+          "Could be seen as too derivative",
+          "Wholesome might not cut through noise",
+          "Need sustained AI narrative strength"
+        ],
+        "confidence": 0.75
+      },
+      "status": "running",
+      "result": null,
+      "created_at": "2026-01-28T13:00:15.780237",
+      "started_at": "2026-01-28T13:00:15.781081",
+      "completed_at": null,
+      "score": null,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0005",
+      "idea": {
+        "name": "Department of Government Efficiency",
+        "ticker": "DOGE",
+        "narrative": "The ultimate meta play - Elon's new government department has the EXACT same acronym as Dogecoin. This creates the perfect storm of confusion, memes, and narrative convergence. Every news article about the government DOGE becomes free marketing for crypto DOGE. It's like the universe is trolling both TradFi and DeFi simultaneously.",
+        "tagline": "When government efficiency meets meme efficiency",
+        "meme_style": "absurd",
+        "hook": "Every mainstream news mention of Elon's government department accidentally pumps your bags - the ultimate free marketing glitch",
+        "target_audience": "DOGE holders, Elon watchers, people who love meta irony",
+        "strategy": "topical",
+        "reasoning": "This is actually happening right now - Elon announced the Department of Government Efficiency with DOGE acronym. CT loves when reality becomes more absurd than memes. The narrative writes itself and gets free MSM coverage daily.",
+        "risk_factors": [
+          "Too obvious",
+          "Already happened",
+          "DOGE might not pump from confusion"
+        ],
+        "confidence": 0.9
+      },
+      "status": "running",
+      "result": null,
+      "created_at": "2026-01-28T13:03:06.640223",
+      "started_at": "2026-01-28T13:03:06.641051",
+      "completed_at": null,
+      "score": null,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0006",
+      "idea": {
+        "name": "Nothing Coin",
+        "ticker": "NOTHING",
+        "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+        "tagline": "Embrace the void",
+        "meme_style": "absurd",
+        "hook": "The most honest shitcoin ever",
+        "target_audience": "nihilistic degens",
+        "strategy": "contrarian",
+        "reasoning": "Radical honesty might be refreshing",
+        "risk_factors": [
+          "Too meta"
+        ],
+        "confidence": 0.4
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Nothing Coin",
+          "ticker": "NOTHING",
+          "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+          "meme_style": "absurd",
+          "tagline": "Embrace the void",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 9.051304347826088,
+        "peak_sentiment": 0.3666666666666667,
+        "sentiment_stability": 0.9819915702160494,
+        "fud_resistance": 1.0,
+        "total_mentions": 23,
+        "total_engagement": 20818,
+        "influencer_pickups": 5,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Worth watching",
+        "top_fud_points": [
+          "$NOTHING holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:05:17.423068",
+      "started_at": "2026-01-28T13:05:17.423852",
+      "completed_at": "2026-01-28T13:05:17.425122",
+      "score": 1.0,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0007",
+      "idea": {
+        "name": "Nothing Coin",
+        "ticker": "NOTHING",
+        "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+        "tagline": "Embrace the void",
+        "meme_style": "absurd",
+        "hook": "The most honest shitcoin ever",
+        "target_audience": "nihilistic degens",
+        "strategy": "contrarian",
+        "reasoning": "Radical honesty might be refreshing",
+        "risk_factors": [
+          "Too meta"
+        ],
+        "confidence": 0.4
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Nothing Coin",
+          "ticker": "NOTHING",
+          "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+          "meme_style": "absurd",
+          "tagline": "Embrace the void",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 7.495,
+        "peak_sentiment": 0.4,
+        "sentiment_stability": 0.9744,
+        "fud_resistance": 0.7,
+        "total_mentions": 6,
+        "total_engagement": 4497,
+        "influencer_pickups": 0,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "No significant FUD detected"
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:05:27.290308",
+      "started_at": "2026-01-28T13:05:27.291193",
+      "completed_at": "2026-01-28T13:05:27.292175",
+      "score": 1.0,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0008",
+      "idea": {
+        "name": "Clippy Assistant",
+        "ticker": "CLIPPY",
+        "narrative": "Remember that annoying paper clip from Microsoft Office who tried to help with everything? Well, he's back and he's here to 'help' you with your crypto trades. Clippy witnessed the birth of the internet, the dot-com boom, Y2K panic, and now he wants to guide you through the crypto wilderness with the same well-meaning incompetence that made him a legend. 'It looks like you're trying to buy the top. Would you like help with that?'",
+        "tagline": "It looks like you're trying to make money. Would you like help?",
+        "meme_style": "nostalgic",
+        "hook": "Endless Clippy meme templates with crypto scenarios - 'It looks like you're trying to FOMO', 'It looks like you're diamond handing', 'It looks like you need hopium'. The character is instantly recognizable and infinitely meme-able",
+        "target_audience": "Millennials who grew up with Windows 95/XP, CT users who appreciate ironic AI narratives, anyone who lived through the early internet era",
+        "strategy": "nostalgia",
+        "reasoning": "Perfect storm of nostalgia + AI narrative + built-in meme machine. Clippy is universally recognized, has natural 'helpful assistant' tie-in to current AI trend, and generates endless content opportunities. The irony of the most hated assistant trying to help with crypto is chef's kiss",
+        "risk_factors": [
+          "Microsoft legal issues",
+          "Might be too niche for younger CT users",
+          "Novelty could wear off quickly"
+        ],
+        "confidence": 0.85
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Clippy Assistant",
+          "ticker": "CLIPPY",
+          "narrative": "Remember that annoying paper clip from Microsoft Office who tried to help with everything? Well, he's back and he's here to 'help' you with your crypto trades. Clippy witnessed the birth of the internet, the dot-com boom, Y2K panic, and now he wants to guide you through the crypto wilderness with the same well-meaning incompetence that made him a legend. 'It looks like you're trying to buy the top. Would you like help with that?'",
+          "meme_style": "nostalgic",
+          "tagline": "It looks like you're trying to make money. Would you like help?",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 7.377142857142856,
+        "peak_sentiment": 0.725,
+        "sentiment_stability": 0.66385,
+        "fud_resistance": 1.0,
+        "total_mentions": 7,
+        "total_engagement": 5164,
+        "influencer_pickups": 0,
+        "hours_to_peak": 1,
+        "hours_to_death": null,
+        "dominant_narrative": "Another rug in the making",
+        "top_fud_points": [
+          "Another day, another nostalgia scam \ud83e\udd21\n\nContract \"PENDING VERIFICATION\" = instant red flag\nLP status UNKNOWN = devs keeping exit doors wide open\n<50 holders but \"insiders quietly loading\"? \n\n$CLIPPY looks like it's trying to rug you. Would you like help avoiding this obvious honeypot? \ud83d\udcce\u274c"
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T13:05:44.922345",
+      "started_at": "2026-01-28T13:05:44.923461",
+      "completed_at": "2026-01-28T13:06:15.783302",
+      "score": 1.0,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0009",
+      "idea": {
+        "name": "Dial-Up",
+        "ticker": "DIALUP",
+        "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+        "tagline": "Slow is the new fast",
+        "meme_style": "nostalgic",
+        "hook": "Nostalgia for the early internet era",
+        "target_audience": "millennials",
+        "strategy": "nostalgia",
+        "reasoning": "Nostalgia plays well with older CT",
+        "risk_factors": [
+          "Limited audience"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Dial-Up",
+          "ticker": "DIALUP",
+          "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+          "meme_style": "nostalgic",
+          "tagline": "Slow is the new fast",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 5.835384615384616,
+        "peak_sentiment": 0.3,
+        "sentiment_stability": 0.9219753086419753,
+        "fud_resistance": 1.0,
+        "total_mentions": 13,
+        "total_engagement": 7586,
+        "influencer_pickups": 1,
+        "hours_to_peak": 5,
+        "hours_to_death": null,
+        "dominant_narrative": "Another rug in the making",
+        "top_fud_points": [
+          "$DIALUP - anon team, no audit, unlocked LP. Classic rug setup."
+        ],
+        "predicted_outcome": "pump_and_dump",
+        "confidence": 0.4
+      },
+      "created_at": "2026-01-28T13:09:39.954492",
+      "started_at": "2026-01-28T13:09:39.955590",
+      "completed_at": "2026-01-28T13:09:39.957186",
+      "score": 0.6871910385185185,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0010",
+      "idea": {
+        "name": "Artificial Frog",
+        "ticker": "AIFROG",
+        "narrative": "AI meets Pepe - the smartest frog in crypto",
+        "tagline": "Ribbit with intelligence",
+        "meme_style": "absurd",
+        "hook": "What if Pepe had a brain?",
+        "target_audience": "tech degens",
+        "strategy": "remix",
+        "reasoning": "Combines AI trend with proven meme",
+        "risk_factors": [
+          "Derivative concept"
+        ],
+        "confidence": 0.6
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Artificial Frog",
+          "ticker": "AIFROG",
+          "narrative": "AI meets Pepe - the smartest frog in crypto",
+          "meme_style": "absurd",
+          "tagline": "Ribbit with intelligence",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 8.742291666666667,
+        "peak_sentiment": 0.6,
+        "sentiment_stability": 0.9727085334957029,
+        "fud_resistance": 1.0,
+        "total_mentions": 48,
+        "total_engagement": 41963,
+        "influencer_pickups": 5,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "$AIFROG - anon team, no audit, unlocked LP. Classic rug setup.",
+          "$AIFROG holders are exit liquidity. DYOR.",
+          "$AIFROG holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:09:40.458682",
+      "started_at": "2026-01-28T13:09:40.460852",
+      "completed_at": "2026-01-28T13:09:40.463282",
+      "score": 0.8662055160231379,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0011",
+      "idea": {
+        "name": "Artificial Frog",
+        "ticker": "AIFROG",
+        "narrative": "AI meets Pepe - the smartest frog in crypto",
+        "tagline": "Ribbit with intelligence",
+        "meme_style": "absurd",
+        "hook": "What if Pepe had a brain?",
+        "target_audience": "tech degens",
+        "strategy": "remix",
+        "reasoning": "Combines AI trend with proven meme",
+        "risk_factors": [
+          "Derivative concept"
+        ],
+        "confidence": 0.6
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Artificial Frog",
+          "ticker": "AIFROG",
+          "narrative": "AI meets Pepe - the smartest frog in crypto",
+          "meme_style": "absurd",
+          "tagline": "Ribbit with intelligence",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000.0
+        },
+        "viral_coefficient": 8.42,
+        "peak_sentiment": 0.8,
+        "sentiment_stability": 0.9053086419753087,
+        "fud_resistance": 1.0,
+        "total_mentions": 20,
+        "total_engagement": 16840,
+        "influencer_pickups": 3,
+        "hours_to_peak": 8,
+        "hours_to_death": null,
+        "dominant_narrative": "Another rug in the making",
+        "top_fud_points": [
+          "$AIFROG - anon team, no audit, unlocked LP. Classic rug setup."
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T13:09:40.965475",
+      "started_at": "2026-01-28T13:09:40.967004",
+      "completed_at": "2026-01-28T13:09:40.968472",
+      "score": 0.8489899703703704,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0012",
+      "idea": {
+        "name": "Artificial Frog",
+        "ticker": "AIFROG",
+        "narrative": "AI meets Pepe - the smartest frog in crypto",
+        "tagline": "Ribbit with intelligence",
+        "meme_style": "absurd",
+        "hook": "What if Pepe had a brain?",
+        "target_audience": "tech degens",
+        "strategy": "remix",
+        "reasoning": "Combines AI trend with proven meme",
+        "risk_factors": [
+          "Derivative concept"
+        ],
+        "confidence": 0.6
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Artificial Frog",
+          "ticker": "AIFROG",
+          "narrative": "AI meets Pepe - the smartest frog in crypto",
+          "meme_style": "absurd",
+          "tagline": "Ribbit with intelligence",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 6.961153846153846,
+        "peak_sentiment": 0.06666666666666667,
+        "sentiment_stability": 0.9947245179063361,
+        "fud_resistance": 1.0,
+        "total_mentions": 26,
+        "total_engagement": 18099,
+        "influencer_pickups": 1,
+        "hours_to_peak": 6,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "$AIFROG holders are exit liquidity. DYOR.",
+          "$AIFROG - anon team, no audit, unlocked LP. Classic rug setup.",
+          "Why would anyone buy $AIFROG? Genuine question."
+        ],
+        "predicted_outcome": "pump_and_dump",
+        "confidence": 0.4
+      },
+      "created_at": "2026-01-28T13:12:53.890623",
+      "started_at": "2026-01-28T13:12:53.892133",
+      "completed_at": "2026-01-28T13:12:53.893886",
+      "score": 0.7051620036914603,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0013",
+      "idea": {
+        "name": "Dial-Up",
+        "ticker": "DIALUP",
+        "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+        "tagline": "Slow is the new fast",
+        "meme_style": "nostalgic",
+        "hook": "Nostalgia for the early internet era",
+        "target_audience": "millennials",
+        "strategy": "nostalgia",
+        "reasoning": "Nostalgia plays well with older CT",
+        "risk_factors": [
+          "Limited audience"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Dial-Up",
+          "ticker": "DIALUP",
+          "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+          "meme_style": "nostalgic",
+          "tagline": "Slow is the new fast",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 8.300263157894737,
+        "peak_sentiment": 0.5,
+        "sentiment_stability": 0.9729116018518519,
+        "fud_resistance": 1.0,
+        "total_mentions": 38,
+        "total_engagement": 31541,
+        "influencer_pickups": 5,
+        "hours_to_peak": 3,
+        "hours_to_death": null,
+        "dominant_narrative": "Hidden gem - early opportunity",
+        "top_fud_points": [
+          "Why would anyone buy $DIALUP? Genuine question.",
+          "$DIALUP holders are exit liquidity. DYOR.",
+          "$DIALUP holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:12:54.395860",
+      "started_at": "2026-01-28T13:12:54.397771",
+      "completed_at": "2026-01-28T13:12:54.399578",
+      "score": 0.827031753263889,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0014",
+      "idea": {
+        "name": "Dial-Up",
+        "ticker": "DIALUP",
+        "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+        "tagline": "Slow is the new fast",
+        "meme_style": "nostalgic",
+        "hook": "Nostalgia for the early internet era",
+        "target_audience": "millennials",
+        "strategy": "nostalgia",
+        "reasoning": "Nostalgia plays well with older CT",
+        "risk_factors": [
+          "Limited audience"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Dial-Up",
+          "ticker": "DIALUP",
+          "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+          "meme_style": "nostalgic",
+          "tagline": "Slow is the new fast",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.215625,
+        "peak_sentiment": 0.4,
+        "sentiment_stability": 0.9239158179012346,
+        "fud_resistance": 1.0,
+        "total_mentions": 32,
+        "total_engagement": 23090,
+        "influencer_pickups": 5,
+        "hours_to_peak": 7,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic nostalgic play",
+        "top_fud_points": [
+          "$DIALUP holders are exit liquidity. DYOR.",
+          "Why would anyone buy $DIALUP? Genuine question.",
+          "Why would anyone buy $DIALUP? Genuine question."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:12:54.901723",
+      "started_at": "2026-01-28T13:12:54.904118",
+      "completed_at": "2026-01-28T13:12:54.906027",
+      "score": 0.786464504050926,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0015",
+      "idea": {
+        "name": "Based Dog",
+        "ticker": "BASED",
+        "narrative": "The most based dog on the blockchain",
+        "tagline": "Stay based, stay winning",
+        "meme_style": "cute",
+        "hook": "Community-first dog coin for true degens",
+        "target_audience": "degens",
+        "strategy": "trend_chase",
+        "reasoning": "Dog coins have proven track record",
+        "risk_factors": [
+          "Saturated market"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Based Dog",
+          "ticker": "BASED",
+          "narrative": "The most based dog on the blockchain",
+          "meme_style": "cute",
+          "tagline": "Stay based, stay winning",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 8.311190476190475,
+        "peak_sentiment": 0.0,
+        "sentiment_stability": 0.9984090277777777,
+        "fud_resistance": 1.0,
+        "total_mentions": 42,
+        "total_engagement": 34907,
+        "influencer_pickups": 2,
+        "hours_to_peak": 0,
+        "hours_to_death": null,
+        "dominant_narrative": "Another rug in the making",
+        "top_fud_points": [
+          "$BASED holders are exit liquidity. DYOR.",
+          "$BASED holders are exit liquidity. DYOR.",
+          "$BASED holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "pump_and_dump",
+        "confidence": 0.4
+      },
+      "created_at": "2026-01-28T13:12:55.407866",
+      "started_at": "2026-01-28T13:12:55.409786",
+      "completed_at": "2026-01-28T13:12:55.411815",
+      "score": 0.7468134129166667,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0016",
+      "idea": {
+        "name": "Artificial Frog",
+        "ticker": "AIFROG",
+        "narrative": "AI meets Pepe - the smartest frog in crypto",
+        "tagline": "Ribbit with intelligence",
+        "meme_style": "absurd",
+        "hook": "What if Pepe had a brain?",
+        "target_audience": "tech degens",
+        "strategy": "remix",
+        "reasoning": "Combines AI trend with proven meme",
+        "risk_factors": [
+          "Derivative concept"
+        ],
+        "confidence": 0.6
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Artificial Frog",
+          "ticker": "AIFROG",
+          "narrative": "AI meets Pepe - the smartest frog in crypto",
+          "meme_style": "absurd",
+          "tagline": "Ribbit with intelligence",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.79,
+        "peak_sentiment": 0.5,
+        "sentiment_stability": 0.9489795918367347,
+        "fud_resistance": 0.7,
+        "total_mentions": 7,
+        "total_engagement": 5453,
+        "influencer_pickups": 0,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "No significant FUD detected"
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:12:55.913571",
+      "started_at": "2026-01-28T13:12:55.915473",
+      "completed_at": "2026-01-28T13:12:55.917305",
+      "score": 0.7065206418367348,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0017",
+      "idea": {
+        "name": "Nothing Coin",
+        "ticker": "NOTHING",
+        "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+        "tagline": "Embrace the void",
+        "meme_style": "absurd",
+        "hook": "The most honest shitcoin ever",
+        "target_audience": "nihilistic degens",
+        "strategy": "contrarian",
+        "reasoning": "Radical honesty might be refreshing",
+        "risk_factors": [
+          "Too meta"
+        ],
+        "confidence": 0.4
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Nothing Coin",
+          "ticker": "NOTHING",
+          "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+          "meme_style": "absurd",
+          "tagline": "Embrace the void",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 8.257,
+        "peak_sentiment": 0.5,
+        "sentiment_stability": 0.9617897569444445,
+        "fud_resistance": 1.0,
+        "total_mentions": 30,
+        "total_engagement": 24771,
+        "influencer_pickups": 2,
+        "hours_to_peak": 5,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "Why would anyone buy $NOTHING? Genuine question.",
+          "$NOTHING - anon team, no audit, unlocked LP. Classic rug setup.",
+          "$NOTHING holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:12:56.419356",
+      "started_at": "2026-01-28T13:12:56.421453",
+      "completed_at": "2026-01-28T13:12:56.423527",
+      "score": 0.8061523903645834,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0018",
+      "idea": {
+        "name": "Nothing Coin",
+        "ticker": "NOTHING",
+        "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+        "tagline": "Embrace the void",
+        "meme_style": "absurd",
+        "hook": "The most honest shitcoin ever",
+        "target_audience": "nihilistic degens",
+        "strategy": "contrarian",
+        "reasoning": "Radical honesty might be refreshing",
+        "risk_factors": [
+          "Too meta"
+        ],
+        "confidence": 0.4
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Nothing Coin",
+          "ticker": "NOTHING",
+          "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+          "meme_style": "absurd",
+          "tagline": "Embrace the void",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 5.845,
+        "peak_sentiment": 0.0,
+        "sentiment_stability": 0.9158677685950414,
+        "fud_resistance": 1.0,
+        "total_mentions": 16,
+        "total_engagement": 9352,
+        "influencer_pickups": 0,
+        "hours_to_peak": 0,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "$NOTHING holders are exit liquidity. DYOR.",
+          "$NOTHING - anon team, no audit, unlocked LP. Classic rug setup."
+        ],
+        "predicted_outcome": "pump_and_dump",
+        "confidence": 0.4
+      },
+      "created_at": "2026-01-28T13:12:56.926695",
+      "started_at": "2026-01-28T13:12:56.929083",
+      "completed_at": "2026-01-28T13:12:56.931227",
+      "score": 0.6631099953719009,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0019",
+      "idea": {
+        "name": "Dial-Up",
+        "ticker": "DIALUP",
+        "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+        "tagline": "Slow is the new fast",
+        "meme_style": "nostalgic",
+        "hook": "Nostalgia for the early internet era",
+        "target_audience": "millennials",
+        "strategy": "nostalgia",
+        "reasoning": "Nostalgia plays well with older CT",
+        "risk_factors": [
+          "Limited audience"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Dial-Up",
+          "ticker": "DIALUP",
+          "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+          "meme_style": "nostalgic",
+          "tagline": "Slow is the new fast",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.23074074074074,
+        "peak_sentiment": 0.7,
+        "sentiment_stability": 0.949793388429752,
+        "fud_resistance": 1.0,
+        "total_mentions": 27,
+        "total_engagement": 19523,
+        "influencer_pickups": 2,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Worth watching",
+        "top_fud_points": [
+          "$DIALUP - anon team, no audit, unlocked LP. Classic rug setup."
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T13:12:57.434142",
+      "started_at": "2026-01-28T13:12:57.437108",
+      "completed_at": "2026-01-28T13:12:57.439470",
+      "score": 0.8536172480991735,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0020",
+      "idea": {
+        "name": "Based Dog",
+        "ticker": "BASED",
+        "narrative": "The most based dog on the blockchain",
+        "tagline": "Stay based, stay winning",
+        "meme_style": "cute",
+        "hook": "Community-first dog coin for true degens",
+        "target_audience": "degens",
+        "strategy": "trend_chase",
+        "reasoning": "Dog coins have proven track record",
+        "risk_factors": [
+          "Saturated market"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Based Dog",
+          "ticker": "BASED",
+          "narrative": "The most based dog on the blockchain",
+          "meme_style": "cute",
+          "tagline": "Stay based, stay winning",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.4663157894736845,
+        "peak_sentiment": 0.5,
+        "sentiment_stability": 0.9434333333333333,
+        "fud_resistance": 1.0,
+        "total_mentions": 19,
+        "total_engagement": 14186,
+        "influencer_pickups": 1,
+        "hours_to_peak": 5,
+        "hours_to_death": null,
+        "dominant_narrative": "Hidden gem - early opportunity",
+        "top_fud_points": [
+          "$BASED holders are exit liquidity. DYOR.",
+          "$BASED holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:12:57.942447",
+      "started_at": "2026-01-28T13:12:57.945195",
+      "completed_at": "2026-01-28T13:12:57.947522",
+      "score": 0.7733693500000001,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0021",
+      "idea": {
+        "name": "Nothing Coin",
+        "ticker": "NOTHING",
+        "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+        "tagline": "Embrace the void",
+        "meme_style": "absurd",
+        "hook": "The most honest shitcoin ever",
+        "target_audience": "nihilistic degens",
+        "strategy": "contrarian",
+        "reasoning": "Radical honesty might be refreshing",
+        "risk_factors": [
+          "Too meta"
+        ],
+        "confidence": 0.4
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Nothing Coin",
+          "ticker": "NOTHING",
+          "narrative": "A coin about literally nothing. No utility. No promises. Just vibes.",
+          "meme_style": "absurd",
+          "tagline": "Embrace the void",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.56625,
+        "peak_sentiment": 0.8,
+        "sentiment_stability": 0.9398264326306655,
+        "fud_resistance": 1.0,
+        "total_mentions": 24,
+        "total_engagement": 18159,
+        "influencer_pickups": 4,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Hidden gem - early opportunity",
+        "top_fud_points": [
+          "Why would anyone buy $NOTHING? Genuine question."
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T13:12:58.450099",
+      "started_at": "2026-01-28T13:12:58.452707",
+      "completed_at": "2026-01-28T13:12:58.455209",
+      "score": 0.8579419455967078,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0022",
+      "idea": {
+        "name": "Based Dog",
+        "ticker": "BASED",
+        "narrative": "The most based dog on the blockchain",
+        "tagline": "Stay based, stay winning",
+        "meme_style": "cute",
+        "hook": "Community-first dog coin for true degens",
+        "target_audience": "degens",
+        "strategy": "trend_chase",
+        "reasoning": "Dog coins have proven track record",
+        "risk_factors": [
+          "Saturated market"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Based Dog",
+          "ticker": "BASED",
+          "narrative": "The most based dog on the blockchain",
+          "meme_style": "cute",
+          "tagline": "Stay based, stay winning",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.0458823529411765,
+        "peak_sentiment": 0.1,
+        "sentiment_stability": 0.995009765625,
+        "fud_resistance": 1.0,
+        "total_mentions": 17,
+        "total_engagement": 11978,
+        "influencer_pickups": 0,
+        "hours_to_peak": 6,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic cute play",
+        "top_fud_points": [
+          "$BASED holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "pump_and_dump",
+        "confidence": 0.4
+      },
+      "created_at": "2026-01-28T13:12:58.957662",
+      "started_at": "2026-01-28T13:12:58.960480",
+      "completed_at": "2026-01-28T13:12:58.963045",
+      "score": 0.691074336953125,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0023",
+      "idea": {
+        "name": "Dial-Up",
+        "ticker": "DIALUP",
+        "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+        "tagline": "Slow is the new fast",
+        "meme_style": "nostalgic",
+        "hook": "Nostalgia for the early internet era",
+        "target_audience": "millennials",
+        "strategy": "nostalgia",
+        "reasoning": "Nostalgia plays well with older CT",
+        "risk_factors": [
+          "Limited audience"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Dial-Up",
+          "ticker": "DIALUP",
+          "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+          "meme_style": "nostalgic",
+          "tagline": "Slow is the new fast",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 7.921666666666666,
+        "peak_sentiment": 0.7,
+        "sentiment_stability": 0.9177777777777778,
+        "fud_resistance": 1.0,
+        "total_mentions": 12,
+        "total_engagement": 9506,
+        "influencer_pickups": 0,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Worth watching",
+        "top_fud_points": [
+          "Why would anyone buy $DIALUP? Genuine question."
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T13:12:59.465860",
+      "started_at": "2026-01-28T13:12:59.468821",
+      "completed_at": "2026-01-28T13:12:59.471414",
+      "score": 0.8194609733333335,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0024",
+      "idea": {
+        "name": "Dial-Up",
+        "ticker": "DIALUP",
+        "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+        "tagline": "Slow is the new fast",
+        "meme_style": "nostalgic",
+        "hook": "Nostalgia for the early internet era",
+        "target_audience": "millennials",
+        "strategy": "nostalgia",
+        "reasoning": "Nostalgia plays well with older CT",
+        "risk_factors": [
+          "Limited audience"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Dial-Up",
+          "ticker": "DIALUP",
+          "narrative": "Remember waiting 5 minutes to see one image? We're bringing that back.",
+          "meme_style": "nostalgic",
+          "tagline": "Slow is the new fast",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 6.9012,
+        "peak_sentiment": 0.8,
+        "sentiment_stability": 0.9393333333333334,
+        "fud_resistance": 1.0,
+        "total_mentions": 25,
+        "total_engagement": 17253,
+        "influencer_pickups": 3,
+        "hours_to_peak": 2,
+        "hours_to_death": null,
+        "dominant_narrative": "Hidden gem - early opportunity",
+        "top_fud_points": [
+          "$DIALUP holders are exit liquidity. DYOR."
+        ],
+        "predicted_outcome": "moon",
+        "confidence": 0.8
+      },
+      "created_at": "2026-01-28T13:12:59.974045",
+      "started_at": "2026-01-28T13:12:59.977210",
+      "completed_at": "2026-01-28T13:12:59.980067",
+      "score": 0.85520582,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0025",
+      "idea": {
+        "name": "Based Dog",
+        "ticker": "BASED",
+        "narrative": "The most based dog on the blockchain",
+        "tagline": "Stay based, stay winning",
+        "meme_style": "cute",
+        "hook": "Community-first dog coin for true degens",
+        "target_audience": "degens",
+        "strategy": "trend_chase",
+        "reasoning": "Dog coins have proven track record",
+        "risk_factors": [
+          "Saturated market"
+        ],
+        "confidence": 0.5
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Based Dog",
+          "ticker": "BASED",
+          "narrative": "The most based dog on the blockchain",
+          "meme_style": "cute",
+          "tagline": "Stay based, stay winning",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 8.808918918918918,
+        "peak_sentiment": 0.26666666666666666,
+        "sentiment_stability": 0.9887884756657483,
+        "fud_resistance": 1.0,
+        "total_mentions": 37,
+        "total_engagement": 32593,
+        "influencer_pickups": 3,
+        "hours_to_peak": 8,
+        "hours_to_death": null,
+        "dominant_narrative": "Hidden gem - early opportunity",
+        "top_fud_points": [
+          "$BASED holders are exit liquidity. DYOR.",
+          "$BASED - anon team, no audit, unlocked LP. Classic rug setup."
+        ],
+        "predicted_outcome": "cult_classic",
+        "confidence": 0.5
+      },
+      "created_at": "2026-01-28T13:13:00.482824",
+      "started_at": "2026-01-28T13:13:00.485845",
+      "completed_at": "2026-01-28T13:13:00.489326",
+      "score": 0.8101257411157027,
+      "learnings": [],
+      "tags": []
+    },
+    {
+      "id": "exp_0026",
+      "idea": {
+        "name": "Artificial Frog",
+        "ticker": "AIFROG",
+        "narrative": "AI meets Pepe - the smartest frog in crypto",
+        "tagline": "Ribbit with intelligence",
+        "meme_style": "absurd",
+        "hook": "What if Pepe had a brain?",
+        "target_audience": "tech degens",
+        "strategy": "remix",
+        "reasoning": "Combines AI trend with proven meme",
+        "risk_factors": [
+          "Derivative concept"
+        ],
+        "confidence": 0.6
+      },
+      "status": "completed",
+      "result": {
+        "token": {
+          "name": "Artificial Frog",
+          "ticker": "AIFROG",
+          "narrative": "AI meets Pepe - the smartest frog in crypto",
+          "meme_style": "absurd",
+          "tagline": "Ribbit with intelligence",
+          "market_condition": "crab",
+          "competing_narratives": [],
+          "initial_liquidity_usd": 10000
+        },
+        "viral_coefficient": 6.717894736842105,
+        "peak_sentiment": 0.26666666666666666,
+        "sentiment_stability": 0.9920695592286501,
+        "fud_resistance": 1.0,
+        "total_mentions": 19,
+        "total_engagement": 12764,
+        "influencer_pickups": 1,
+        "hours_to_peak": 4,
+        "hours_to_death": null,
+        "dominant_narrative": "Generic absurd play",
+        "top_fud_points": [
+          "Why would anyone buy $AIFROG? Genuine question.",
+          "Why would anyone buy $AIFROG? Genuine question."
+        ],
+        "predicted_outcome": "pump_and_dump",
+        "confidence": 0.4
+      },
+      "created_at": "2026-01-28T13:13:00.992946",
+      "started_at": "2026-01-28T13:13:00.996118",
+      "completed_at": "2026-01-28T13:13:00.998977",
+      "score": 0.7085429545179064,
+      "learnings": [],
+      "tags": []
+    }
+  ],
+  "updated_at": "2026-01-28T13:13:00.999096"
+}
