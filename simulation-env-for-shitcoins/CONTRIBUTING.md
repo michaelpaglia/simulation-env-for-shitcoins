@@ -38,12 +38,36 @@ cp .env.example .env
 - Add docstrings for public functions
 - Run tests before submitting
 
+## Commit Guidelines
+
+**One feature = one commit.** We enforce atomic commits so we can easily revert if something breaks.
+
+### Do
+- `feat: add whale persona` - single persona addition
+- `fix: sentiment calculation overflow` - single bug fix
+- `ui: add token input form` - single UI component
+
+### Don't
+- `add whale persona, fix bugs, update readme` - too many things
+- `wip` or `updates` - meaningless messages
+- Large commits touching unrelated files
+
+### Commit Message Format
+```
+type: short description
+
+Optional longer explanation if needed.
+```
+
+Types: `feat`, `fix`, `ui`, `docs`, `refactor`, `test`
+
 ## Pull Requests
 
 1. Keep PRs focused on a single change
 2. Update README if adding new features
 3. Add tests for new functionality
 4. Describe what and why in the PR description
+5. Each commit in the PR should be atomic and revertable
 
 ## Issues
 
