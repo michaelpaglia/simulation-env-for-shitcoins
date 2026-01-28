@@ -565,9 +565,21 @@ body {
   color: var(--accent);
 }
 
-.prediction-badge.slow_bleed {
+.prediction-badge.slow_bleed,
+.prediction-badge.pending,
+.prediction-badge.running {
   background: rgba(113, 118, 123, 0.2);
   color: var(--text-secondary);
+}
+
+.prediction-badge.completed {
+  background: rgba(29, 155, 240, 0.2);
+  color: var(--accent);
+}
+
+.prediction-badge.failed {
+  background: rgba(244, 33, 46, 0.2);
+  color: var(--danger);
 }
 
 .confidence-text {

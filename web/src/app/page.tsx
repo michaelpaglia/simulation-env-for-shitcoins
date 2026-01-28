@@ -1,9 +1,19 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import Link from 'next/link'
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
+interface PastExperiment {
+  id: string
+  ticker: string
+  name: string
+  strategy: string
+  status: string
+  score: number | null
+  outcome: string | null
+}
 
 interface Tweet {
   id: string
@@ -139,6 +149,26 @@ export default function Home() {
   const [useTwitterPriors, setUseTwitterPriors] = useState(false)
   const [activeTab, setActiveTab] = useState<'foryou' | 'following'>('foryou')
   const [progress, setProgress] = useState<{ hour: number; total: number; momentum: number } | null>(null)
+  const [pastExperiments, setPastExperiments] = useState<PastExperiment[]>([])
+  const [loadingExperiments, setLoadingExperiments] = useState(true)
+
+  // Fetch past experiments on mount
+  useEffect(() => {
+    const fetchExperiments = async () => {
+      try {
+        const response = await fetch(`${API_URL}/harness/experiments`)
+        if (response.ok) {
+          const data = await response.json()
+          setPastExperiments(data.experiments.slice(0, 5))
+        }
+      } catch {
+        // Silently fail - experiments are optional
+      } finally {
+        setLoadingExperiments(false)
+      }
+    }
+    fetchExperiments()
+  }, [])
 
   const runSimulation = async () => {
     setIsRunning(true)
@@ -497,6 +527,43 @@ export default function Home() {
             </button>
           </div>
         </div>
+
+        {/* Past Experiments */}
+        {!result && pastExperiments.length > 0 && (
+          <div className="config-card" style={{ marginTop: '16px' }}>
+            <div className="config-card-header">&#128200; Past Experiments</div>
+            <div style={{ padding: '0' }}>
+              {pastExperiments.map((exp) => (
+                <div
+                  key={exp.id}
+                  className="result-row"
+                  style={{ cursor: 'pointer' }}
+                  onClick={() => {
+                    setConfig(prev => ({
+                      ...prev,
+                      name: exp.name,
+                      ticker: exp.ticker,
+                    }))
+                  }}
+                  title="Click to load this token config"
+                >
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 600, fontSize: '14px' }}>${exp.ticker}</div>
+                    <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>{exp.name}</div>
+                  </div>
+                  <span className={`prediction-badge ${exp.outcome || 'pending'}`} style={{ fontSize: '10px', padding: '4px 8px' }}>
+                    {exp.outcome ? exp.outcome.replace('_', ' ') : exp.status}
+                  </span>
+                </div>
+              ))}
+              {loadingExperiments && (
+                <div style={{ padding: '16px', color: 'var(--text-secondary)', fontSize: '13px', textAlign: 'center' }}>
+                  Loading experiments...
+                </div>
+              )}
+            </div>
+          </div>
+        )}
 
         {/* Results */}
         {result && (
