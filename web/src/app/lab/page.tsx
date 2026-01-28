@@ -37,6 +37,17 @@ interface LeaderboardEntry {
   viral_coefficient: number
 }
 
+interface PastExperiment {
+  id: string
+  ticker: string
+  name: string
+  strategy: string
+  status: string
+  score: number | null
+  outcome: string | null
+  created_at: string
+}
+
 // Icons
 const FlaskIcon = () => (
   <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
@@ -72,14 +83,29 @@ export default function Lab() {
   const [runProgress, setRunProgress] = useState<{ completed: number; total: number } | null>(null)
   const [error, setError] = useState<string | null>(null)
   const [insights, setInsights] = useState<string[]>([])
+  const [pastExperiments, setPastExperiments] = useState<PastExperiment[]>([])
+  const [viewMode, setViewMode] = useState<'current' | 'history'>('history')
 
   const eventSourceRef = useRef<AbortController | null>(null)
 
-  // Load initial leaderboard
+  // Load initial data
   useEffect(() => {
     fetchLeaderboard()
     fetchLearnings()
+    fetchPastExperiments()
   }, [])
+
+  const fetchPastExperiments = async () => {
+    try {
+      const res = await fetch(`${API_URL}/harness/experiments`)
+      if (res.ok) {
+        const data = await res.json()
+        setPastExperiments(data.experiments || [])
+      }
+    } catch (e) {
+      console.error('Failed to fetch past experiments:', e)
+    }
+  }
 
   const fetchLeaderboard = async () => {
     try {
@@ -159,6 +185,7 @@ export default function Lab() {
                 setIsRunning(false)
                 fetchLeaderboard()
                 fetchLearnings()
+                fetchPastExperiments()
                 return
               }
             } catch {
@@ -413,79 +440,141 @@ export default function Lab() {
 
         {/* Main Area - Experiments Feed */}
         <main className="lab-feed">
+          {/* View Toggle */}
+          <div className="view-toggle">
+            <button
+              className={`toggle-btn ${viewMode === 'current' ? 'active' : ''}`}
+              onClick={() => setViewMode('current')}
+            >
+              Current Run
+            </button>
+            <button
+              className={`toggle-btn ${viewMode === 'history' ? 'active' : ''}`}
+              onClick={() => setViewMode('history')}
+            >
+              Past Experiments ({pastExperiments.length})
+            </button>
+          </div>
+
           {error && (
             <div className="error-banner">
               <strong>Error:</strong> {error}
             </div>
           )}
 
-          {/* Current Experiment */}
-          {currentExperiment && (
-            <div className="experiment-card current">
-              <div className="experiment-header">
-                <span className="experiment-status running">&#9679; Running</span>
-                <span className="experiment-id">{currentExperiment.id}</span>
-              </div>
-              <div className="experiment-main">
-                <h3>${currentExperiment.ticker}</h3>
-                <p className="experiment-name">{currentExperiment.name}</p>
-                <p className="experiment-hook">&quot;{currentExperiment.hook}&quot;</p>
-              </div>
-              <div className="experiment-meta">
-                <span className="meta-tag strategy">{currentExperiment.strategy}</span>
-                <span className="meta-tag style">{currentExperiment.meme_style}</span>
-              </div>
-              <div className="experiment-loading">
-                <div className="spinner" />
-                <span>Simulating CT reactions...</span>
-              </div>
-            </div>
-          )}
+          {viewMode === 'current' ? (
+            <>
+              {/* Current Experiment */}
+              {currentExperiment && (
+                <div className="experiment-card current">
+                  <div className="experiment-header">
+                    <span className="experiment-status running">&#9679; Running</span>
+                    <span className="experiment-id">{currentExperiment.id}</span>
+                  </div>
+                  <div className="experiment-main">
+                    <h3>${currentExperiment.ticker}</h3>
+                    <p className="experiment-name">{currentExperiment.name}</p>
+                    <p className="experiment-hook">&quot;{currentExperiment.hook}&quot;</p>
+                  </div>
+                  <div className="experiment-meta">
+                    <span className="meta-tag strategy">{currentExperiment.strategy}</span>
+                    <span className="meta-tag style">{currentExperiment.meme_style}</span>
+                  </div>
+                  <div className="experiment-loading">
+                    <div className="spinner" />
+                    <span>Simulating CT reactions...</span>
+                  </div>
+                </div>
+              )}
 
-          {/* Completed Experiments */}
-          {experiments.slice().reverse().map(exp => (
-            <div key={exp.id} className="experiment-card completed">
-              <div className="experiment-header">
-                <span
-                  className="experiment-status"
-                  style={{ color: getOutcomeColor(exp.outcome) }}
-                >
-                  {exp.outcome === 'moon' ? '&#127773;' :
-                   exp.outcome === 'rug' ? '&#128163;' :
-                   exp.outcome === 'cult_classic' ? '&#11088;' :
-                   exp.outcome === 'pump_and_dump' ? '&#128200;' : '&#128201;'}
-                  {' '}{exp.outcome?.replace('_', ' ')}
-                </span>
-                <span className="experiment-score">
-                  {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
-                </span>
-              </div>
-              <div className="experiment-main">
-                <h3>${exp.ticker}</h3>
-                <p className="experiment-name">{exp.name}</p>
-                <p className="experiment-hook">&quot;{exp.hook}&quot;</p>
-              </div>
-              <div className="experiment-meta">
-                <span className="meta-tag strategy">{exp.strategy}</span>
-                <span className="meta-tag style">{exp.meme_style}</span>
-              </div>
-            </div>
-          ))}
+              {/* Completed Experiments from Current Run */}
+              {experiments.slice().reverse().map(exp => (
+                <div key={exp.id} className="experiment-card completed">
+                  <div className="experiment-header">
+                    <span
+                      className="experiment-status"
+                      style={{ color: getOutcomeColor(exp.outcome) }}
+                    >
+                      {exp.outcome === 'moon' ? '&#127773;' :
+                       exp.outcome === 'rug' ? '&#128163;' :
+                       exp.outcome === 'cult_classic' ? '&#11088;' :
+                       exp.outcome === 'pump_and_dump' ? '&#128200;' : '&#128201;'}
+                      {' '}{exp.outcome?.replace('_', ' ')}
+                    </span>
+                    <span className="experiment-score">
+                      {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
+                    </span>
+                  </div>
+                  <div className="experiment-main">
+                    <h3>${exp.ticker}</h3>
+                    <p className="experiment-name">{exp.name}</p>
+                    <p className="experiment-hook">&quot;{exp.hook}&quot;</p>
+                  </div>
+                  <div className="experiment-meta">
+                    <span className="meta-tag strategy">{exp.strategy}</span>
+                    <span className="meta-tag style">{exp.meme_style}</span>
+                  </div>
+                </div>
+              ))}
 
-          {/* Empty State */}
-          {!isRunning && experiments.length === 0 && !currentExperiment && (
-            <div className="empty-feed">
-              <span className="empty-icon">&#129514;</span>
-              <h3>Harness Lab</h3>
-              <p>
-                Configure your experiment parameters and launch the harness
-                to automatically generate and test shitcoin concepts.
-              </p>
-              <p className="empty-hint">
-                The AI will brainstorm ideas, simulate CT reactions, and learn
-                what strategies work best.
-              </p>
-            </div>
+              {/* Empty State for Current Run */}
+              {!isRunning && experiments.length === 0 && !currentExperiment && (
+                <div className="empty-feed">
+                  <span className="empty-icon">&#129514;</span>
+                  <h3>No Active Run</h3>
+                  <p>
+                    Configure your experiment parameters and launch the harness
+                    to automatically generate and test shitcoin concepts.
+                  </p>
+                  <p className="empty-hint">
+                    The AI will brainstorm ideas, simulate CT reactions, and learn
+                    what strategies work best.
+                  </p>
+                </div>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Past Experiments History */}
+              {pastExperiments.length === 0 ? (
+                <div className="empty-feed">
+                  <span className="empty-icon">&#128218;</span>
+                  <h3>No Past Experiments</h3>
+                  <p>
+                    Run some experiments to see them appear here.
+                    Each experiment tests a different shitcoin concept.
+                  </p>
+                </div>
+              ) : (
+                pastExperiments.map(exp => (
+                  <div key={exp.id} className="experiment-card completed">
+                    <div className="experiment-header">
+                      <span
+                        className="experiment-status"
+                        style={{ color: getOutcomeColor(exp.outcome) }}
+                      >
+                        {exp.outcome === 'moon' ? '&#127773;' :
+                         exp.outcome === 'rug' ? '&#128163;' :
+                         exp.outcome === 'cult_classic' ? '&#11088;' :
+                         exp.outcome === 'pump_and_dump' ? '&#128200;' : '&#128201;'}
+                        {' '}{exp.outcome?.replace('_', ' ') || exp.status}
+                      </span>
+                      <span className="experiment-score">
+                        {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
+                      </span>
+                    </div>
+                    <div className="experiment-main">
+                      <h3>${exp.ticker}</h3>
+                      <p className="experiment-name">{exp.name}</p>
+                    </div>
+                    <div className="experiment-meta">
+                      <span className="meta-tag strategy">{exp.strategy}</span>
+                      <span className="experiment-id">{exp.id}</span>
+                    </div>
+                  </div>
+                ))
+              )}
+            </>
           )}
         </main>
       </div>
