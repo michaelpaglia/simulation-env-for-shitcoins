@@ -1,0 +1,1 @@
+"""Shitcoin Social Simulation Environment."""
