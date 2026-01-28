@@ -93,107 +93,113 @@ const whitepaperThread: WhitepaperTweet[] = [
 
 export default function WhitepaperPage() {
   return (
-    <div className="min-h-screen bg-black text-white">
+    <div className="container">
       {/* Header */}
-      <header className="border-b border-gray-800 px-4 py-3 sticky top-0 bg-black/80 backdrop-blur z-10">
-        <div className="max-w-2xl mx-auto flex items-center gap-4">
-          <Link href="/" className="text-gray-400 hover:text-white">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-            </svg>
+      <div className="feed-header">
+        <div className="feed-title" style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <Link href="/" style={{ color: 'var(--text-secondary)', textDecoration: 'none' }}>
+            ← Back
           </Link>
-          <div>
-            <h1 className="font-bold text-xl">$HOPIUM Whitepaper</h1>
-            <p className="text-gray-500 text-sm">Thread format</p>
-          </div>
+          <span>$HOPIUM Whitepaper</span>
         </div>
-      </header>
+      </div>
 
       {/* Thread */}
-      <main className="max-w-2xl mx-auto">
+      <div style={{ maxWidth: '600px', margin: '0 auto' }}>
         {whitepaperThread.map((tweet, index) => (
-          <article key={tweet.id} className="border-b border-gray-800 px-4 py-4 hover:bg-gray-900/50 transition-colors">
-            <div className="flex gap-3">
-              {/* Avatar */}
-              <div className="flex-shrink-0">
-                <div className="w-12 h-12 rounded-full bg-gradient-to-br from-purple-500 to-orange-500 flex items-center justify-center text-white font-bold text-lg">
-                  H
-                </div>
-                {/* Thread line */}
-                {index < whitepaperThread.length - 1 && (
-                  <div className="w-0.5 h-full bg-gray-800 mx-auto mt-2" style={{ minHeight: '20px' }} />
+          <div key={tweet.id} className="tweet">
+            {/* Avatar */}
+            <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+              <div className="avatar">H</div>
+              {/* Thread line */}
+              {index < whitepaperThread.length - 1 && (
+                <div style={{
+                  width: '2px',
+                  flex: 1,
+                  background: 'var(--border)',
+                  marginTop: '8px',
+                  minHeight: '20px'
+                }} />
+              )}
+            </div>
+
+            {/* Content */}
+            <div className="tweet-content">
+              {/* Author info */}
+              <div className="tweet-header">
+                <span className="tweet-name">Hopium Lab</span>
+                <span className="tweet-handle">@hopaboratory</span>
+                <span className="tweet-time">·</span>
+                <span className="tweet-time">{tweet.id}/16</span>
+              </div>
+
+              {/* Tweet content */}
+              <div className="tweet-text">
+                <p style={{
+                  fontSize: '17px',
+                  fontWeight: '600',
+                  color: 'var(--accent)',
+                  marginBottom: '8px'
+                }}>
+                  {tweet.content}
+                </p>
+                {tweet.subtitle && (
+                  <p style={{ whiteSpace: 'pre-line', color: 'var(--text-primary)' }}>
+                    {tweet.subtitle}
+                  </p>
                 )}
               </div>
 
-              {/* Content */}
-              <div className="flex-1 min-w-0">
-                {/* Author info */}
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="font-bold hover:underline cursor-pointer">Hopium Lab</span>
-                  <span className="text-gray-500">@hopaboratory</span>
-                  <span className="text-gray-500">·</span>
-                  <span className="text-gray-500 text-sm">{tweet.id}/16</span>
+              {/* Engagement */}
+              <div className="tweet-actions">
+                <div className="tweet-action reply">
+                  <svg viewBox="0 0 24 24"><path d="M1.751 10c0-4.42 3.584-8 8.005-8h4.366c4.49 0 8.129 3.64 8.129 8.13 0 2.96-1.607 5.68-4.196 7.11l-8.054 4.46v-3.69h-.067c-4.49.1-8.183-3.51-8.183-8.01zm8.005-6c-3.317 0-6.005 2.69-6.005 6 0 3.37 2.77 6.08 6.138 6.01l.351-.01h1.761v2.3l5.087-2.81c1.951-1.08 3.163-3.13 3.163-5.36 0-3.39-2.744-6.13-6.129-6.13H9.756z"/></svg>
+                  <span>{12 + tweet.id * 3}</span>
                 </div>
-
-                {/* Tweet content */}
-                <div className="space-y-2">
-                  <p className="text-lg font-semibold text-purple-400">{tweet.content}</p>
-                  {tweet.subtitle && (
-                    <p className="text-gray-300 whitespace-pre-line">{tweet.subtitle}</p>
-                  )}
+                <div className="tweet-action repost">
+                  <svg viewBox="0 0 24 24"><path d="M4.5 3.88l4.432 4.14-1.364 1.46L5.5 7.55V16c0 1.1.896 2 2 2H13v2H7.5c-2.209 0-4-1.79-4-4V7.55L1.432 9.48.068 8.02 4.5 3.88zM16.5 6H11V4h5.5c2.209 0 4 1.79 4 4v8.45l2.068-1.93 1.364 1.46-4.432 4.14-4.432-4.14 1.364-1.46 2.068 1.93V8c0-1.1-.896-2-2-2z"/></svg>
+                  <span>{50 + tweet.id * 15}</span>
                 </div>
-
-                {/* Engagement (static to avoid hydration mismatch) */}
-                <div className="flex items-center gap-6 mt-3 text-gray-500">
-                  <button className="flex items-center gap-2 hover:text-blue-400 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
-                    </svg>
-                    <span className="text-sm">{12 + tweet.id * 3}</span>
-                  </button>
-                  <button className="flex items-center gap-2 hover:text-green-400 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                    </svg>
-                    <span className="text-sm">{50 + tweet.id * 15}</span>
-                  </button>
-                  <button className="flex items-center gap-2 hover:text-pink-400 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                    </svg>
-                    <span className="text-sm">{100 + tweet.id * 30}</span>
-                  </button>
-                  <button className="flex items-center gap-2 hover:text-blue-400 transition-colors">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                    </svg>
-                  </button>
+                <div className="tweet-action like">
+                  <svg viewBox="0 0 24 24"><path d="M16.697 5.5c-1.222-.06-2.679.51-3.89 2.16l-.805 1.09-.806-1.09C9.984 6.01 8.526 5.44 7.304 5.5c-1.243.07-2.349.78-2.91 1.91-.552 1.12-.633 2.78.479 4.82 1.074 1.97 3.257 4.27 7.129 6.61 3.87-2.34 6.052-4.64 7.126-6.61 1.111-2.04 1.03-3.7.477-4.82-.561-1.13-1.666-1.84-2.908-1.91zm4.187 7.69c-1.351 2.48-4.001 5.12-8.379 7.67l-.503.3-.504-.3c-4.379-2.55-7.029-5.19-8.382-7.67-1.36-2.5-1.41-4.86-.514-6.67.887-1.79 2.647-2.91 4.601-3.01 1.651-.09 3.368.56 4.798 2.01 1.429-1.45 3.146-2.1 4.796-2.01 1.954.1 3.714 1.22 4.601 3.01.896 1.81.846 4.17-.514 6.67z"/></svg>
+                  <span>{100 + tweet.id * 30}</span>
+                </div>
+                <div className="tweet-action views">
+                  <svg viewBox="0 0 24 24"><path d="M8.75 21V3h2v18h-2zM18 21V8.5h2V21h-2zM4 21l.004-10h2L6 21H4zm9.248 0v-7h2v7h-2z"/></svg>
+                  <span>{(tweet.id * 1.2).toFixed(0)}K</span>
                 </div>
               </div>
             </div>
-          </article>
+          </div>
         ))}
 
         {/* Download section */}
-        <div className="px-4 py-8 border-b border-gray-800">
-          <div className="bg-gray-900 rounded-xl p-6 text-center">
-            <h3 className="text-xl font-bold mb-2">Full Whitepaper</h3>
-            <p className="text-gray-400 mb-4">Download the complete technical document</p>
-            <a
-              href="/whitepaper.pdf"
-              className="inline-block bg-purple-600 hover:bg-purple-700 text-white font-semibold px-6 py-3 rounded-full transition-colors"
-            >
-              Download PDF
-            </a>
+        <div style={{ padding: '32px 16px', borderBottom: '1px solid var(--border)' }}>
+          <div className="config-card">
+            <div className="config-card-header" style={{ textAlign: 'center' }}>
+              Full Whitepaper (PDF)
+            </div>
+            <div className="config-card-body" style={{ textAlign: 'center', paddingTop: '16px' }}>
+              <p style={{ color: 'var(--text-secondary)', marginBottom: '16px' }}>
+                Download the complete IEEE-format technical document
+              </p>
+              <a
+                href="/HOPIUM_Whitepaper.pdf"
+                className="btn btn-primary"
+                style={{ display: 'inline-block', width: 'auto', padding: '12px 32px' }}
+              >
+                Download PDF
+              </a>
+            </div>
           </div>
         </div>
 
         {/* Footer */}
-        <div className="px-4 py-8 text-center text-gray-500">
-          <p className="mb-2">Hopium Lab © 2026</p>
-          <p className="text-sm">This is a memecoin with utility. NFA. DYOR.</p>
+        <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>
+          <p style={{ marginBottom: '8px' }}>Hopium Lab 2026</p>
+          <p style={{ fontSize: '13px' }}>This is a memecoin with utility. NFA. DYOR.</p>
         </div>
-      </main>
+      </div>
     </div>
   )
 }
