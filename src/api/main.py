@@ -1,8 +1,11 @@
 """FastAPI application for shitcoin simulation."""
 
 import os
+import json
+import asyncio
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 from typing import Optional
 from dotenv import load_dotenv
@@ -203,6 +206,62 @@ async def run_simulation(request: SimulationRequest):
         top_fud_points=final_result.top_fud_points,
         predicted_outcome=final_result.predicted_outcome,
         confidence=final_result.confidence,
+    )
+
+
+@app.post("/simulate/stream")
+async def stream_simulation(request: SimulationRequest):
+    """Stream simulation tweets as they're generated using Server-Sent Events."""
+
+    try:
+        meme_style = MemeStyle(request.token.meme_style)
+        market_condition = MarketCondition(request.token.market_condition)
+    except ValueError as e:
+        raise HTTPException(status_code=400, detail=f"Invalid enum value: {e}")
+
+    # Optionally fetch Twitter priors
+    if request.use_twitter_priors and os.getenv("TWITTER_BEARER_TOKEN"):
+        try:
+            market_data = get_market_sentiment(request.similar_tokens)
+            market_condition = MarketCondition(market_data["condition"])
+        except Exception as e:
+            print(f"Twitter prior fetch failed, using defaults: {e}")
+
+    token = Token(
+        name=request.token.name,
+        ticker=request.token.ticker.upper(),
+        narrative=request.token.narrative,
+        tagline=request.token.tagline,
+        meme_style=meme_style,
+        market_condition=market_condition,
+    )
+
+    async def event_generator():
+        """Generate SSE events from simulation."""
+        try:
+            for event in engine.run_simulation_stream(token, hours=request.hours):
+                # Format as SSE
+                data = json.dumps(event)
+                yield f"data: {data}\n\n"
+
+                # Small delay to allow client to process
+                await asyncio.sleep(0.05)
+
+            # Send done event
+            yield f"data: {json.dumps({'type': 'done'})}\n\n"
+
+        except Exception as e:
+            error_event = json.dumps({"type": "error", "message": str(e)})
+            yield f"data: {error_event}\n\n"
+
+    return StreamingResponse(
+        event_generator(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+            "X-Accel-Buffering": "no",
+        }
     )
 
 

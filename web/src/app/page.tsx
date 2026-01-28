@@ -137,15 +137,17 @@ export default function Home() {
   const [error, setError] = useState<string | null>(null)
   const [useTwitterPriors, setUseTwitterPriors] = useState(false)
   const [activeTab, setActiveTab] = useState<'foryou' | 'following'>('foryou')
+  const [progress, setProgress] = useState<{ hour: number; total: number; momentum: number } | null>(null)
 
   const runSimulation = async () => {
     setIsRunning(true)
     setTweets([])
     setResult(null)
     setError(null)
+    setProgress(null)
 
     try {
-      const response = await fetch(`${API_URL}/simulate`, {
+      const response = await fetch(`${API_URL}/simulate/stream`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -167,22 +169,54 @@ export default function Home() {
         throw new Error(err.detail || 'Simulation failed')
       }
 
-      const data: SimulationResult = await response.json()
+      // Read the SSE stream
+      const reader = response.body?.getReader()
+      if (!reader) throw new Error('No response body')
 
-      // Animate tweets appearing
-      for (let i = 0; i < data.tweets.length; i++) {
-        await new Promise(r => setTimeout(r, 120))
-        setTweets(prev => [...prev, data.tweets[i]])
+      const decoder = new TextDecoder()
+      let buffer = ''
+
+      while (true) {
+        const { done, value } = await reader.read()
+        if (done) break
+
+        buffer += decoder.decode(value, { stream: true })
+
+        // Parse SSE events from buffer
+        const lines = buffer.split('\n')
+        buffer = lines.pop() || '' // Keep incomplete line in buffer
+
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            try {
+              const data = JSON.parse(line.slice(6))
+
+              if (data.type === 'tweet') {
+                setTweets(prev => [...prev, data.tweet])
+              } else if (data.type === 'progress') {
+                setProgress({
+                  hour: data.hour,
+                  total: data.total_hours,
+                  momentum: data.momentum,
+                })
+              } else if (data.type === 'result') {
+                setResult(data.result)
+              } else if (data.type === 'error') {
+                throw new Error(data.message)
+              }
+            } catch {
+              // Ignore parse errors for incomplete JSON
+            }
+          }
+        }
       }
-
-      const { tweets: _, ...resultWithoutTweets } = data
-      setResult(resultWithoutTweets)
 
     } catch (err) {
       console.error('Simulation error:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
     } finally {
       setIsRunning(false)
+      setProgress(null)
     }
   }
 
@@ -214,8 +248,8 @@ export default function Home() {
     <div className="container">
       {/* Left Sidebar */}
       <aside className="sidebar">
-        <div className="logo">
-          <XLogo />
+        <div className="logo" title="Definitely not X">
+          <span style={{ fontSize: '28px' }}>&#129313;</span>
         </div>
         <nav className="nav-items">
           <div className="nav-item active">
@@ -235,8 +269,8 @@ export default function Home() {
             <span>Messages</span>
           </div>
         </nav>
-        <button className="post-btn">
-          <span>Post</span>
+        <button className="post-btn" title="You can't actually post, this is fake">
+          <span>Shill</span>
           <FeatherIcon />
         </button>
       </aside>
@@ -244,19 +278,19 @@ export default function Home() {
       {/* Main Feed */}
       <main className="main-feed">
         <div className="feed-header">
-          <div className="feed-title">Home</div>
+          <div className="feed-title">&#129313; The Timeline</div>
           <div className="feed-tabs">
             <div
               className={`feed-tab ${activeTab === 'foryou' ? 'active' : ''}`}
               onClick={() => setActiveTab('foryou')}
             >
-              For you
+              For You (Allegedly)
             </div>
             <div
               className={`feed-tab ${activeTab === 'following' ? 'active' : ''}`}
               onClick={() => setActiveTab('following')}
             >
-              Following
+              Following (lol)
             </div>
           </div>
         </div>
@@ -272,8 +306,17 @@ export default function Home() {
 
         {tweets.length === 0 && !isRunning && !error ? (
           <div className="empty-state">
-            <h3>Welcome to CT</h3>
-            <p>Configure your shitcoin and run a simulation to see how Crypto Twitter reacts.</p>
+            <span className="jester-icon">&#129313;</span>
+            <span className="parody-badge">100% Satire</span>
+            <h3>Welcome to Fake CT</h3>
+            <p>
+              Conjure up a fictional shitcoin and watch our AI jesters roleplay as Crypto Twitter degenerates.
+              <br /><br />
+              No real tokens harmed in this simulation. Side effects may include questioning your life choices.
+            </p>
+            <div className="disclaimer">
+              This is parody software. Not financial advice. NFA. DYOR. WAGMI? Probably not.
+            </div>
           </div>
         ) : (
           <>
@@ -324,10 +367,27 @@ export default function Home() {
               <div className="loading">
                 <div className="spinner" />
                 <div>
-                  <div>Generating CT reactions...</div>
+                  <div>&#129313; Summoning CT NPCs...</div>
                   <div style={{ fontSize: '13px', color: 'var(--text-secondary)', marginTop: '4px' }}>
-                    Simulating 48h of Crypto Twitter ({tweets.length} tweets so far)
+                    {progress ? (
+                      <>
+                        Hour {progress.hour}/{progress.total} | Momentum: {progress.momentum > 0 ? '+' : ''}{progress.momentum.toFixed(2)} | {tweets.length} tweets
+                      </>
+                    ) : (
+                      <>Starting simulation...</>
+                    )}
                   </div>
+                  {progress && (
+                    <div style={{ marginTop: '8px', background: 'var(--bg-tertiary)', borderRadius: '4px', height: '4px', width: '200px' }}>
+                      <div style={{
+                        width: `${(progress.hour / progress.total) * 100}%`,
+                        height: '100%',
+                        background: progress.momentum > 0 ? 'var(--success)' : progress.momentum < -0.3 ? 'var(--danger)' : 'var(--accent)',
+                        borderRadius: '4px',
+                        transition: 'width 0.3s, background 0.3s',
+                      }} />
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -343,7 +403,7 @@ export default function Home() {
         </div>
 
         <div className="config-card">
-          <div className="config-card-header">Simulate your shitcoin</div>
+          <div className="config-card-header">&#129313; Conjure a Shitcoin</div>
           <div className="config-card-body">
             <div className="form-group">
               <label className="form-label">Token Name</label>
@@ -426,7 +486,7 @@ export default function Home() {
               onClick={runSimulation}
               disabled={isRunning || !config.ticker || !config.narrative}
             >
-              {isRunning ? 'Simulating...' : 'Run Simulation'}
+              {isRunning ? 'Summoning CT Chaos...' : 'Unleash the Degens'}
             </button>
           </div>
         </div>
@@ -434,7 +494,7 @@ export default function Home() {
         {/* Results */}
         {result && (
           <div className="results-card">
-            <div className="results-header">Results</div>
+            <div className="results-header">&#128302; The Oracle Speaks</div>
 
             <div className="result-row">
               <span className="result-label">Viral Score</span>
@@ -482,19 +542,22 @@ export default function Home() {
             </div>
 
             <div className="narrative-section">
-              <div className="narrative-label">CT Verdict</div>
+              <div className="narrative-label">&#129313; The Hive Mind Has Spoken</div>
               <div className="narrative-text">&quot;{result.dominant_narrative}&quot;</div>
             </div>
           </div>
         )}
 
         <div className="footer-links">
-          <a href="#">Terms of Service</a>
-          <a href="#">Privacy Policy</a>
-          <a href="#">Cookie Policy</a>
-          <a href="#">Accessibility</a>
-          <a href="#">Ads info</a>
-          <a href="#">More</a>
+          <span style={{ color: 'var(--text-secondary)', fontSize: '12px' }}>
+            &#129313; A parody for entertainment only
+          </span>
+        </div>
+        <div className="footer-links">
+          <a href="#">Terms of Tomfoolery</a>
+          <a href="#">Privacy? LOL</a>
+          <a href="#">Not Financial Advice</a>
+          <a href="#">DYOR</a>
         </div>
       </aside>
     </div>

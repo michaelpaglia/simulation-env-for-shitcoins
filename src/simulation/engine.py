@@ -205,11 +205,36 @@ React to this token. Stay in character. One tweet only."""
         """Select which personas tweet this hour based on engagement rates and awareness."""
 
         active = []
+        market = state.token.market_condition
+
         for persona in self.personas:
             # Higher awareness = more people talking
             adjusted_rate = persona.engagement_rate * state.awareness
 
-            # Momentum affects engagement
+            # Market condition affects persona behavior
+            if market == MarketCondition.BEAR:
+                if persona.type == PersonaType.SKEPTIC:
+                    adjusted_rate *= 2.0  # Skeptics dominate in bear
+                elif persona.type == PersonaType.DEGEN:
+                    adjusted_rate *= 0.5  # Degens retreat
+                elif persona.type == PersonaType.INFLUENCER:
+                    adjusted_rate *= 0.6  # Influencers less active
+                else:
+                    adjusted_rate *= 0.7
+            elif market == MarketCondition.EUPHORIA:
+                if persona.type == PersonaType.DEGEN:
+                    adjusted_rate *= 2.0  # Degens go wild
+                elif persona.type == PersonaType.SKEPTIC:
+                    adjusted_rate *= 0.4  # Skeptics drowned out
+                else:
+                    adjusted_rate *= 1.5
+            elif market == MarketCondition.BULL:
+                if persona.type == PersonaType.DEGEN:
+                    adjusted_rate *= 1.5
+                elif persona.type == PersonaType.SKEPTIC:
+                    adjusted_rate *= 0.7
+
+            # Momentum also affects engagement
             if state.momentum > 0.3:  # Bullish momentum
                 adjusted_rate *= 1.3
             elif state.momentum < -0.3:  # Bearish momentum
@@ -267,6 +292,114 @@ React to this token. Stay in character. One tweet only."""
         # Calculate final results
         return self._compile_results(state)
 
+    def run_simulation_stream(
+        self,
+        token: Token,
+        hours: int = 48,
+    ):
+        """
+        Generator that yields simulation events as they occur.
+
+        Yields dicts with type: 'tweet', 'progress', or 'result'
+        """
+        state = SimulationState(token=token)
+
+        # Initial seeding - bot alerts first
+        bot = get_persona(PersonaType.BOT)
+        initial_tweet = self._generate_tweet(bot, token, state)
+        self._update_state(state, [initial_tweet])
+
+        # Yield initial tweet
+        yield {
+            "type": "tweet",
+            "tweet": self._tweet_to_dict(initial_tweet),
+        }
+
+        yield {
+            "type": "progress",
+            "hour": 0,
+            "total_hours": hours,
+            "momentum": state.momentum,
+            "awareness": state.awareness,
+            "tweet_count": len(state.tweets),
+        }
+
+        # Run simulation
+        for hour in range(1, hours):
+            active_personas = self._select_active_personas(state)
+
+            # Get recent context for LLM
+            recent_tweets = state.tweets[-5:] if state.tweets else []
+            context = "\n".join(f"@{t.author.handle}: {t.content}" for t in recent_tweets)
+
+            # Generate and yield tweets one by one
+            new_tweets = []
+            for persona in active_personas:
+                tweet = self._generate_tweet(persona, token, state, context)
+                new_tweets.append(tweet)
+
+                # Yield each tweet immediately
+                yield {
+                    "type": "tweet",
+                    "tweet": self._tweet_to_dict(tweet),
+                }
+
+            self._update_state(state, new_tweets)
+
+            # Yield progress update
+            yield {
+                "type": "progress",
+                "hour": hour,
+                "total_hours": hours,
+                "momentum": round(state.momentum, 3),
+                "awareness": round(state.awareness, 3),
+                "tweet_count": len(state.tweets),
+            }
+
+            # Check for death
+            if state.momentum < -0.7 and state.awareness < 0.3 and hour > 12:
+                yield {
+                    "type": "status",
+                    "message": f"Token died at hour {hour}",
+                }
+                break
+
+        # Yield final results
+        result = self._compile_results(state)
+        yield {
+            "type": "result",
+            "result": {
+                "viral_coefficient": result.viral_coefficient,
+                "peak_sentiment": result.peak_sentiment,
+                "sentiment_stability": result.sentiment_stability,
+                "fud_resistance": result.fud_resistance,
+                "total_mentions": result.total_mentions,
+                "total_engagement": result.total_engagement,
+                "influencer_pickups": result.influencer_pickups,
+                "hours_to_peak": result.hours_to_peak,
+                "hours_to_death": result.hours_to_death,
+                "dominant_narrative": result.dominant_narrative,
+                "top_fud_points": result.top_fud_points,
+                "predicted_outcome": result.predicted_outcome,
+                "confidence": result.confidence,
+            }
+        }
+
+    def _tweet_to_dict(self, tweet: Tweet) -> dict:
+        """Convert a Tweet to a serializable dict."""
+        return {
+            "id": tweet.id,
+            "author_name": tweet.author.name,
+            "author_handle": tweet.author.handle,
+            "author_type": tweet.author.type.value,
+            "content": tweet.content,
+            "hour": tweet.hour,
+            "likes": tweet.likes,
+            "retweets": tweet.retweets,
+            "replies": tweet.replies,
+            "sentiment": tweet.sentiment,
+        }
+
     def _compile_results(self, state: SimulationState) -> SimulationResult:
         """Compile final simulation results."""
 
@@ -315,16 +448,47 @@ React to this token. Stay in character. One tweet only."""
         fud_tweets = [t.content for t in state.tweets if t.sentiment < -0.3]
         top_fud = fud_tweets[:3] if fud_tweets else ["No significant FUD detected"]
 
+        # Predict outcome - market conditions affect thresholds
+        market = state.token.market_condition
+
+        # Market-adjusted thresholds
+        if market == MarketCondition.BEAR:
+            moon_viral_threshold = 3.0  # Harder to moon in bear
+            moon_sentiment_threshold = 0.7
+            cult_viral_threshold = 1.5
+            death_momentum_threshold = -0.3  # Easier to die
+            # Add randomness - bear markets are unpredictable
+            random_factor = random.uniform(-0.2, 0.1)
+        elif market == MarketCondition.EUPHORIA:
+            moon_viral_threshold = 1.0  # Easy to moon
+            moon_sentiment_threshold = 0.3
+            cult_viral_threshold = 0.5
+            death_momentum_threshold = -0.8  # Hard to kill
+            random_factor = random.uniform(-0.1, 0.2)
+        else:  # CRAB or BULL
+            moon_viral_threshold = 2.0
+            moon_sentiment_threshold = 0.6
+            cult_viral_threshold = 1.0
+            death_momentum_threshold = -0.5
+            random_factor = random.uniform(-0.1, 0.1)
+
+        # Adjust momentum with random factor for outcome calculation
+        adjusted_momentum = state.momentum + random_factor
+
         # Predict outcome
-        if viral_coef > 2 and peak_sentiment > 0.6 and fud_resistance > 0.6:
+        if viral_coef > moon_viral_threshold and peak_sentiment > moon_sentiment_threshold and fud_resistance > 0.6:
             outcome = "moon"
             confidence = min(0.8, viral_coef / 5)
-        elif viral_coef > 1 and state.momentum > 0:
+        elif viral_coef > cult_viral_threshold and adjusted_momentum > 0:
             outcome = "cult_classic"
             confidence = 0.5
-        elif state.momentum < -0.5:
-            outcome = "rug" if fud_resistance < 0.3 else "slow_bleed"
+        elif adjusted_momentum < death_momentum_threshold:
+            outcome = "rug" if fud_resistance < 0.5 else "slow_bleed"
             confidence = 0.6
+        elif fud_resistance < 0.4 or (market == MarketCondition.BEAR and random.random() < 0.3):
+            # In bear markets, there's a chance of slow bleed even without crashed momentum
+            outcome = "slow_bleed" if random.random() < 0.7 else "rug"
+            confidence = 0.5
         else:
             outcome = "pump_and_dump"
             confidence = 0.4
