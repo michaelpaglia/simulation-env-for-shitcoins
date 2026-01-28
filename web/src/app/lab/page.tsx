@@ -77,7 +77,7 @@ const TrophyIcon = () => (
 )
 
 export default function Lab() {
-  const [config, setConfig] = useState<HarnessConfig>({
+  const [harnessConfig, setHarnessConfig] = useState<HarnessConfig>({
     mode: 'balanced',
     max_experiments: 5,
     simulation_hours: 24,
@@ -167,19 +167,28 @@ export default function Lab() {
     setCurrentExperiment(null)
     setError(null)
     setRunProgress(null)
+    setViewMode('current')  // Switch to current run view
 
     try {
+      console.log('Starting harness with config:', harnessConfig)
+
       // Start the harness run
       const startRes = await fetch(`${API_URL}/harness/run`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(config),
+        body: JSON.stringify(harnessConfig),
       })
+
+      console.log('Harness run response status:', startRes.status)
 
       if (!startRes.ok) {
         const err = await startRes.json()
+        console.error('Harness run failed:', err)
         throw new Error(err.detail || 'Failed to start harness')
       }
+
+      const runData = await startRes.json()
+      console.log('Harness started:', runData)
 
       // Subscribe to SSE stream
       const controller = new AbortController()
@@ -209,6 +218,7 @@ export default function Lab() {
           if (line.startsWith('data: ')) {
             try {
               const event = JSON.parse(line.slice(6))
+              console.log('SSE event:', event)
               handleHarnessEvent(event)
 
               if (event.type === 'done' || event.type === 'run_completed') {
@@ -227,9 +237,12 @@ export default function Lab() {
     } catch (err) {
       if ((err as Error).name !== 'AbortError') {
         console.error('Harness error:', err)
-        setError(err instanceof Error ? err.message : 'Unknown error')
+        const errorMsg = err instanceof Error ? err.message : 'Unknown error'
+        setError(errorMsg)
+        // Keep showing error even after harness stops
       }
     } finally {
+      console.log('Harness finished/stopped')
       setIsRunning(false)
     }
   }
@@ -363,8 +376,8 @@ export default function Lab() {
             <div className="control-group">
               <label>Mode</label>
               <select
-                value={config.mode}
-                onChange={e => setConfig({ ...config, mode: e.target.value })}
+                value={harnessConfig.mode}
+                onChange={e => setHarnessConfig({ ...harnessConfig, mode: e.target.value })}
                 disabled={isRunning}
               >
                 <option value="balanced">Balanced (Explore + Exploit)</option>
@@ -374,14 +387,14 @@ export default function Lab() {
               </select>
             </div>
 
-            {config.mode === 'targeted' && (
+            {harnessConfig.mode === 'targeted' && (
               <div className="control-group">
                 <label>Target Theme</label>
                 <input
                   type="text"
                   placeholder="e.g., AI cats, nostalgic memes"
-                  value={config.target_theme}
-                  onChange={e => setConfig({ ...config, target_theme: e.target.value })}
+                  value={harnessConfig.target_theme}
+                  onChange={e => setHarnessConfig({ ...harnessConfig, target_theme: e.target.value })}
                   disabled={isRunning}
                 />
               </div>
@@ -393,8 +406,8 @@ export default function Lab() {
                 type="number"
                 min={1}
                 max={20}
-                value={config.max_experiments}
-                onChange={e => setConfig({ ...config, max_experiments: parseInt(e.target.value) || 5 })}
+                value={harnessConfig.max_experiments}
+                onChange={e => setHarnessConfig({ ...harnessConfig, max_experiments: parseInt(e.target.value) || 5 })}
                 disabled={isRunning}
               />
             </div>
@@ -402,8 +415,8 @@ export default function Lab() {
             <div className="control-group">
               <label>Hours per Simulation</label>
               <select
-                value={config.simulation_hours}
-                onChange={e => setConfig({ ...config, simulation_hours: parseInt(e.target.value) })}
+                value={harnessConfig.simulation_hours}
+                onChange={e => setHarnessConfig({ ...harnessConfig, simulation_hours: parseInt(e.target.value) })}
                 disabled={isRunning}
               >
                 <option value={12}>12 hours (Quick)</option>
@@ -415,8 +428,8 @@ export default function Lab() {
             <div className="control-group">
               <label>Market Condition</label>
               <select
-                value={config.market_condition}
-                onChange={e => setConfig({ ...config, market_condition: e.target.value })}
+                value={harnessConfig.market_condition}
+                onChange={e => setHarnessConfig({ ...harnessConfig, market_condition: e.target.value })}
                 disabled={isRunning}
               >
                 <option value="bear">Bear Market</option>
@@ -590,6 +603,18 @@ export default function Lab() {
                   </div>
                 </div>
               ))}
+
+              {/* Running but no experiment yet */}
+              {isRunning && !currentExperiment && experiments.length === 0 && (
+                <div className="empty-feed">
+                  <span className="empty-icon">⏳</span>
+                  <h3>Starting Harness...</h3>
+                  <p>
+                    Connecting to server and initializing experiments.
+                    This may take a moment.
+                  </p>
+                </div>
+              )}
 
               {/* Empty State for Current Run */}
               {!isRunning && experiments.length === 0 && !currentExperiment && (
