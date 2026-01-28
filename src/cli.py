@@ -9,6 +9,7 @@ from dotenv import load_dotenv
 
 from .models.token import Token, MarketCondition, MemeStyle
 from .simulation.engine import SimulationEngine
+from .presets import get_preset, list_presets, get_preset_info
 
 load_dotenv()
 
@@ -65,27 +66,39 @@ def simulate(
 
 @app.command()
 def quick(
-    ticker: str = typer.Argument(..., help="Token ticker"),
+    ticker: str = typer.Argument(None, help="Token ticker (optional if using --preset)"),
     vibe: str = typer.Argument("random memecoin", help="Quick description"),
+    preset: str = typer.Option(None, "--preset", "-p", help="Use a preset template"),
 ):
     """Quick simulation with minimal config."""
 
-    token = Token(
-        name=ticker,
-        ticker=ticker.upper(),
-        narrative=vibe,
-    )
+    if preset:
+        try:
+            token = get_preset(preset, ticker_override=ticker)
+            console.print(f"[bold]Using preset:[/bold] {preset}")
+        except ValueError as e:
+            console.print(f"[red]Error: {e}[/red]")
+            raise typer.Exit(code=1)
+    elif ticker:
+        token = Token(
+            name=ticker,
+            ticker=ticker.upper(),
+            narrative=vibe,
+        )
+    else:
+        console.print("[red]Error: Provide a ticker or use --preset[/red]")
+        raise typer.Exit(code=1)
 
     api_key = os.getenv("ANTHROPIC_API_KEY")
     engine = SimulationEngine(api_key=api_key)
 
-    console.print(f"[bold]Quick sim for ${ticker.upper()}[/bold]: {vibe}\n")
+    console.print(f"[bold]Quick sim for ${token.ticker}[/bold]: {token.narrative}\n")
 
     with console.status("[bold green]Running quick simulation..."):
         result = engine.run_simulation(token, hours=24)
 
     # Compact output
-    table = Table(title=f"${ticker.upper()} Results")
+    table = Table(title=f"${token.ticker} Results")
     table.add_column("Metric", style="cyan")
     table.add_column("Value", style="green")
 
@@ -141,6 +154,30 @@ def compare(
 
     winner = max(results, key=lambda x: x.viral_coefficient)
     console.print(f"\n[bold green]Winner: ${winner.token.ticker}[/bold green]")
+
+
+@app.command()
+def presets():
+    """List available token presets."""
+
+    table = Table(title="Available Presets")
+    table.add_column("Name", style="cyan")
+    table.add_column("Ticker", style="yellow")
+    table.add_column("Style", style="green")
+    table.add_column("Description", style="dim")
+
+    for name in list_presets():
+        info = get_preset_info(name)
+        token = info["token"]
+        table.add_row(
+            name,
+            f"${token.ticker}",
+            token.meme_style.value,
+            info["description"],
+        )
+
+    console.print(table)
+    console.print("\n[dim]Usage: python -m src.cli quick --preset <name>[/dim]")
 
 
 if __name__ == "__main__":
