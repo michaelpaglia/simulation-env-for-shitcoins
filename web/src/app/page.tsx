@@ -306,6 +306,12 @@ export default function Home() {
             </svg>
             <span>Harness Lab</span>
           </Link>
+          <Link href="/arena" className="nav-item" style={{ textDecoration: 'none', color: 'inherit' }}>
+            <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
+              <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
+            </svg>
+            <span>Arena</span>
+          </Link>
           <Link href="/whitepaper" className="nav-item" style={{ textDecoration: 'none', color: 'inherit' }}>
             <svg viewBox="0 0 24 24" width="26" height="26" fill="currentColor">
               <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8l-6-6zm4 18H6V4h7v5h5v11zM8 12h8v2H8v-2zm0 4h8v2H8v-2z"/>
