@@ -17,7 +17,14 @@ const OUTCOME_DISPLAY: Record<Outcome, { emoji: string; label: string; color: st
   rug: { emoji: '💀', label: 'Rug', color: 'var(--danger)' },
 }
 
-const STAKE_OPTIONS = [100, 250, 500, 1000]
+// Whitepaper-aligned tiers: stake → hours
+const STAKE_TIERS = {
+  100: { hours: 12, label: 'Quick (12h)' },
+  500: { hours: 24, label: 'Standard (24h)' },
+  1000: { hours: 48, label: 'Full (48h)' },
+  2500: { hours: 48, label: 'Gauntlet' },
+} as const
+const STAKE_OPTIONS = [100, 500, 1000, 2500] as const
 
 interface BetHistory {
   id: string
@@ -101,6 +108,10 @@ export default function Arena() {
     setStats(prev => ({ ...prev, balance: prev.balance - stake }))
 
     try {
+      // Get hours based on stake tier (whitepaper-aligned)
+      const tier = STAKE_TIERS[stake as keyof typeof STAKE_TIERS]
+      const simHours = tier?.hours || 12
+
       // Run actual simulation via API
       const response = await fetch(`${API_URL}/simulate`, {
         method: 'POST',
@@ -111,11 +122,9 @@ export default function Arena() {
             ticker: ticker.toUpperCase(),
             narrative: `A ${market} market meme token`,
             meme_style: 'absurd',
-          },
-          config: {
-            hours: 12,
             market_condition: market,
           },
+          hours: simHours,
         }),
       })
 
@@ -133,9 +142,10 @@ export default function Arena() {
 
       setResult({ outcome: actualOutcome, score })
 
-      // Calculate payout
+      // Calculate payout with 5% burn (whitepaper-aligned)
       const won = prediction === actualOutcome
-      const payout = won ? stake * 2 : 0 // 2x return on win
+      const burnAmount = Math.floor(stake * 0.05) // 5% burn
+      const payout = won ? (stake * 2) - burnAmount : 0 // 2x return minus burn
 
       // Update stats
       setStats(prev => ({
@@ -397,29 +407,34 @@ export default function Arena() {
                   </select>
                 </div>
 
-                {/* Stake Selection */}
+                {/* Stake Selection - Whitepaper Tiers */}
                 <div style={{ marginBottom: '24px' }}>
-                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Stake Amount</label>
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: '8px' }}>
-                    {STAKE_OPTIONS.map(amount => (
-                      <button
-                        key={amount}
-                        onClick={() => setStake(amount)}
-                        disabled={amount > stats.balance}
-                        style={{
-                          padding: '12px',
-                          background: stake === amount ? 'var(--accent)' : 'var(--bg-tertiary)',
-                          border: 'none',
-                          borderRadius: '8px',
-                          color: stake === amount ? 'white' : amount > stats.balance ? 'var(--text-secondary)' : 'var(--text-primary)',
-                          fontWeight: 600,
-                          cursor: amount > stats.balance ? 'not-allowed' : 'pointer',
-                          opacity: amount > stats.balance ? 0.5 : 1,
-                        }}
-                      >
-                        {amount}
-                      </button>
-                    ))}
+                  <label style={{ display: 'block', marginBottom: '8px', fontWeight: 600 }}>Simulation Tier</label>
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '8px' }}>
+                    {STAKE_OPTIONS.map(amount => {
+                      const tier = STAKE_TIERS[amount]
+                      return (
+                        <button
+                          key={amount}
+                          onClick={() => setStake(amount)}
+                          disabled={amount > stats.balance}
+                          style={{
+                            padding: '12px',
+                            background: stake === amount ? 'var(--accent)' : 'var(--bg-tertiary)',
+                            border: stake === amount ? '2px solid var(--accent)' : '2px solid transparent',
+                            borderRadius: '8px',
+                            color: stake === amount ? 'white' : amount > stats.balance ? 'var(--text-secondary)' : 'var(--text-primary)',
+                            fontWeight: 600,
+                            cursor: amount > stats.balance ? 'not-allowed' : 'pointer',
+                            opacity: amount > stats.balance ? 0.5 : 1,
+                            textAlign: 'left',
+                          }}
+                        >
+                          <div style={{ fontSize: '16px' }}>{amount} $HOPIUM</div>
+                          <div style={{ fontSize: '11px', opacity: 0.8 }}>{tier.label}</div>
+                        </button>
+                      )
+                    })}
                   </div>
                 </div>
 
@@ -471,7 +486,7 @@ export default function Arena() {
                 </button>
 
                 <div style={{ textAlign: 'center', marginTop: '12px', fontSize: '14px', color: 'var(--text-secondary)' }}>
-                  Win = 2x return • Lose = stake burned
+                  Win = 2x return (minus 5% burn) • Lose = stake burned
                 </div>
               </div>
             </div>
