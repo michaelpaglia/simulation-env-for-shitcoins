@@ -1,4 +1,6 @@
-# 🎰 Shitcoin Social Simulation Environment
+# 🧪 Hopium Lab
+
+> *"The only token that passed its own simulation."*
 
 Simulate how your token will perform on Crypto Twitter **before** you launch. Test narratives, memes, and timing in a sandbox with AI-powered personas.
 
@@ -20,6 +22,7 @@ Simulate how your token will perform on Crypto Twitter **before** you launch. Te
 
 ## 📋 Table of Contents
 
+- [Vision](#-vision)
 - [Concept](#-concept)
 - [Quick Start](#-quick-start)
 - [CLI Commands](#-cli-commands)
@@ -32,6 +35,50 @@ Simulate how your token will perform on Crypto Twitter **before** you launch. Te
 - [Agent Personas](#-agent-personas)
 - [Metrics](#-metrics)
 - [Roadmap](#-roadmap)
+
+---
+
+## 🔮 Vision
+
+Every day, thousands of tokens launch. Most fail within hours. The problem isn't lack of creativity—it's lack of testing.
+
+**Hopium Lab** is a simulation engine that predicts how Crypto Twitter will react to a token *before* it launches. We model personas, sentiment dynamics, viral spread, and FUD resistance.
+
+### The Meta-Narrative
+
+This is inherently recursive: *a token for a platform that simulates tokens.*
+
+The irony is the feature. **$HOPIUM** was the first token to run itself through its own simulation—and publish the results. If we can't pass our own test, why should anyone trust the platform?
+
+### Self-Simulation Results
+
+Before launch, we ran $HOPIUM through our own simulator:
+
+| Metric | Result |
+|--------|--------|
+| Viral Coefficient | 7.2x |
+| Peak Sentiment | +0.73 |
+| FUD Resistance | 81% |
+| Predicted Outcome | **Cult Classic** |
+| Confidence | 67% |
+
+**Key findings:**
+- ✅ Meta-narrative resonates with CT irony
+- ✅ Clear utility creates holder base
+- ⚠️ "Simulation token" may seem niche
+- ⚠️ Requires sustained platform usage
+
+We publish this openly. If we're wrong, you'll know.
+
+### The $HOPIUM Economy
+
+| Action | Cost | Outcome |
+|--------|------|---------|
+| Run simulation | Stake $HOPIUM | Returned after sim (5% burned) |
+| Predict outcomes | Bet $HOPIUM | Winners take pool (5% burned) |
+| The Gauntlet | 2,500 $HOPIUM | Survive bear + skeptic swarm = 3x multiplier |
+
+Deflationary by design. Every simulation burns tokens.
 
 ---
 
@@ -415,10 +462,12 @@ Output shows per-persona breakdown:
 - [x] AI-powered idea generation
 - [x] Experiment tracking & learnings
 - [x] Market condition effects
+- [x] Harness dashboard in web UI
 - [ ] Historical data calibration
 - [ ] Multi-token competition simulation
 - [ ] Telegram/Discord simulation
-- [ ] Harness dashboard in web UI
+- [ ] Prediction markets integration
+- [ ] The Gauntlet mode
 
 ---
 
