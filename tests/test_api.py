@@ -82,7 +82,7 @@ class TestSimulateEndpoint:
         assert response.status_code == 422
 
     def test_simulate_invalid_meme_style(self, client):
-        """Invalid meme style returns error."""
+        """Invalid meme style returns validation error."""
         response = client.post("/simulate", json={
             "token": {
                 "name": "Test",
@@ -91,10 +91,11 @@ class TestSimulateEndpoint:
                 "meme_style": "invalid_style"
             }
         })
-        assert response.status_code == 400
+        # 422 Unprocessable Entity is the correct status for Pydantic validation errors
+        assert response.status_code == 422
 
     def test_simulate_invalid_market_condition(self, client):
-        """Invalid market condition returns error."""
+        """Invalid market condition returns validation error."""
         response = client.post("/simulate", json={
             "token": {
                 "name": "Test",
@@ -103,7 +104,8 @@ class TestSimulateEndpoint:
                 "market_condition": "super_bull"
             }
         })
-        assert response.status_code == 400
+        # 422 Unprocessable Entity is the correct status for Pydantic validation errors
+        assert response.status_code == 422
 
     def test_simulate_returns_tweets(self, client):
         """Simulation returns tweet list."""

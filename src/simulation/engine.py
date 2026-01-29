@@ -2,9 +2,13 @@
 
 import random
 import json
+import re
+import logging
 from typing import Optional
 from pydantic import BaseModel, Field
 import anthropic
+
+logger = logging.getLogger(__name__)
 
 from ..models.token import Token, SimulationResult, MarketCondition
 from ..agents.personas import Persona, PersonaType, get_all_personas, get_persona
@@ -114,12 +118,12 @@ sentiment: -1 (FUD) to 1 (hype)"""
             )
             raw = response.content[0].text
 
-            # Parse JSON from response
-            start = raw.find("[")
-            end = raw.rfind("]") + 1
-            if start >= 0 and end > start:
-                tweets_data = json.loads(raw[start:end])
+            # Parse JSON array from response using regex for robustness
+            match = re.search(r'\[[\s\S]*\]', raw)
+            if match:
+                tweets_data = json.loads(match.group())
             else:
+                logger.warning("No JSON array found in LLM response, using templates")
                 tweets_data = []
 
             # Map responses back to personas
@@ -142,7 +146,7 @@ sentiment: -1 (FUD) to 1 (hype)"""
             return tweets
 
         except Exception as e:
-            # Fallback to templates on error
+            logger.warning(f"LLM tweet generation failed, using templates: {e}")
             return [self._generate_tweet_template(p, token, state) for p in personas]
 
     def _generate_tweet_template(
@@ -182,10 +186,14 @@ sentiment: -1 (FUD) to 1 (hype)"""
         persona: Persona,
         token: Token,
         state: SimulationState,
-        context: Optional[str] = None
+        _context: Optional[str] = None  # Unused, kept for backwards compatibility
     ) -> Tweet:
-        """Generate a single tweet (used for initial bot tweet)."""
-        # For single tweets, use template for speed
+        """Generate a single tweet (used for initial bot tweet).
+
+        Note: _context parameter is accepted but unused. Tweet generation
+        uses templates for speed. For context-aware batch generation,
+        use _generate_tweets_batch() instead.
+        """
         return self._generate_tweet_template(persona, token, state)
 
     def _estimate_sentiment(self, content: str, persona: Persona) -> float:

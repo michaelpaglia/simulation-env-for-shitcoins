@@ -10,10 +10,13 @@ This is the main entry point for autonomous testing. It:
 
 import random
 import time
+import logging
 from dataclasses import dataclass, field
 from datetime import datetime
 from typing import Optional, Callable, Any
 from enum import Enum
+
+logger = logging.getLogger(__name__)
 
 from ..models.token import Token, MemeStyle, MarketCondition
 from ..simulation.engine import SimulationEngine
@@ -368,6 +371,7 @@ class AutonomousRunner:
             return ideas[0] if ideas else None
 
         except Exception as e:
+            logger.warning(f"Idea generation failed: {e}")
             return None
 
     def _select_strategy_weighted(self) -> IdeaStrategy:

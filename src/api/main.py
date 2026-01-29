@@ -3,6 +3,7 @@
 import os
 import json
 import asyncio
+import logging
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import StreamingResponse
@@ -16,6 +17,8 @@ from ..utils.twitter import TwitterClient, get_market_sentiment
 from .harness_routes import router as harness_router
 
 load_dotenv()
+
+logger = logging.getLogger(__name__)
 
 app = FastAPI(
     title="Shitcoin Simulation API",
@@ -35,8 +38,14 @@ app.add_middleware(
 # Include harness routes
 app.include_router(harness_router)
 
-# Initialize engine
-engine = SimulationEngine(api_key=os.getenv("ANTHROPIC_API_KEY"))
+
+def get_engine() -> SimulationEngine:
+    """Create a SimulationEngine instance for this request.
+
+    Each request gets its own engine instance to ensure thread safety
+    when handling concurrent requests from multiple users.
+    """
+    return SimulationEngine(api_key=os.getenv("ANTHROPIC_API_KEY"))
 
 
 # Request/Response Models
@@ -45,8 +54,8 @@ class TokenConfig(BaseModel):
     ticker: str = Field(..., min_length=1, max_length=10)
     narrative: str = Field(..., min_length=1, max_length=500)
     tagline: Optional[str] = Field(default=None, max_length=100)
-    meme_style: str = Field(default="absurd")
-    market_condition: str = Field(default="crab")
+    meme_style: MemeStyle = Field(default=MemeStyle.ABSURD)
+    market_condition: MarketCondition = Field(default=MarketCondition.CRAB)
 
 
 class SimulationRequest(BaseModel):
@@ -115,12 +124,9 @@ async def health():
 async def run_simulation(request: SimulationRequest):
     """Run a full simulation for a token."""
 
-    try:
-        # Map string enums
-        meme_style = MemeStyle(request.token.meme_style)
-        market_condition = MarketCondition(request.token.market_condition)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid enum value: {e}")
+    # Enums are already validated by Pydantic, just extract values
+    meme_style = request.token.meme_style
+    market_condition = request.token.market_condition
 
     # Optionally fetch Twitter priors to calibrate
     if request.use_twitter_priors and os.getenv("TWITTER_BEARER_TOKEN"):
@@ -128,7 +134,7 @@ async def run_simulation(request: SimulationRequest):
             market_data = get_market_sentiment(request.similar_tokens)
             market_condition = MarketCondition(market_data["condition"])
         except Exception as e:
-            print(f"Twitter prior fetch failed, using defaults: {e}")
+            logger.warning(f"Twitter prior fetch failed, using defaults: {e}")
 
     # Create token
     token = Token(
@@ -140,76 +146,51 @@ async def run_simulation(request: SimulationRequest):
         market_condition=market_condition,
     )
 
-    # Run simulation
-    result = engine.run_simulation(token, hours=request.hours, verbose=False)
+    # Create per-request engine instance for thread safety
+    engine = get_engine()
 
-    # Get tweets from the simulation state (need to re-run to capture tweets)
-    # For now, run a shorter sim to get tweet samples
-    state = engine.run_simulation(token, hours=min(request.hours, 24), verbose=False)
+    # Run simulation ONCE using streaming to capture both tweets and results
+    tweet_responses: list[TweetResponse] = []
+    final_result = None
 
-    # Extract tweets from the last run
-    # Since we return SimulationResult, we need to access the engine's internal state
-    # Let's modify to capture tweets during simulation
-    tweet_responses = []
+    for event in engine.run_simulation_stream(token, hours=request.hours):
+        if event["type"] == "tweet":
+            tweet = event["tweet"]
+            # Only keep first 50 tweets
+            if len(tweet_responses) < 50:
+                tweet_responses.append(TweetResponse(
+                    id=tweet["id"],
+                    author_name=tweet["author_name"],
+                    author_handle=tweet["author_handle"],
+                    author_type=tweet["author_type"],
+                    content=tweet["content"],
+                    hour=tweet["hour"],
+                    likes=tweet["likes"],
+                    retweets=tweet["retweets"],
+                    replies=tweet["replies"],
+                    sentiment=tweet["sentiment"],
+                ))
+        elif event["type"] == "result":
+            final_result = event["result"]
 
-    # Run simulation again with tweet capture
-    from ..simulation.engine import SimulationState
-    sim_state = SimulationState(token=token)
-
-    # Seed
-    from ..agents.personas import get_persona, PersonaType
-    bot = get_persona(PersonaType.BOT)
-    initial = engine._generate_tweet(bot, token, sim_state)
-    engine._update_state(sim_state, [initial])
-
-    # Run and capture tweets
-    for hour in range(1, min(request.hours, 48)):
-        active = engine._select_active_personas(sim_state)
-        if not active:
-            continue
-
-        recent = sim_state.tweets[-5:] if sim_state.tweets else []
-        context = "\n".join(f"@{t.author.handle}: {t.content}" for t in recent)
-
-        new_tweets = [engine._generate_tweet(p, token, sim_state, context) for p in active]
-        engine._update_state(sim_state, new_tweets)
-
-        if sim_state.momentum < -0.7 and sim_state.awareness < 0.3 and hour > 12:
-            break
-
-    # Convert tweets to response format
-    for t in sim_state.tweets[:50]:  # Limit to 50 tweets
-        tweet_responses.append(TweetResponse(
-            id=t.id,
-            author_name=t.author.name,
-            author_handle=t.author.handle,
-            author_type=t.author.type.value,
-            content=t.content,
-            hour=t.hour,
-            likes=t.likes,
-            retweets=t.retweets,
-            replies=t.replies,
-            sentiment=t.sentiment,
-        ))
-
-    # Compile final results
-    final_result = engine._compile_results(sim_state)
+    if final_result is None:
+        raise HTTPException(status_code=500, detail="Simulation did not produce results")
 
     return SimulationResponse(
         tweets=tweet_responses,
-        viral_coefficient=final_result.viral_coefficient,
-        peak_sentiment=final_result.peak_sentiment,
-        sentiment_stability=final_result.sentiment_stability,
-        fud_resistance=final_result.fud_resistance,
-        total_mentions=final_result.total_mentions,
-        total_engagement=final_result.total_engagement,
-        influencer_pickups=final_result.influencer_pickups,
-        hours_to_peak=final_result.hours_to_peak,
-        hours_to_death=final_result.hours_to_death,
-        dominant_narrative=final_result.dominant_narrative,
-        top_fud_points=final_result.top_fud_points,
-        predicted_outcome=final_result.predicted_outcome,
-        confidence=final_result.confidence,
+        viral_coefficient=final_result["viral_coefficient"],
+        peak_sentiment=final_result["peak_sentiment"],
+        sentiment_stability=final_result["sentiment_stability"],
+        fud_resistance=final_result["fud_resistance"],
+        total_mentions=final_result["total_mentions"],
+        total_engagement=final_result["total_engagement"],
+        influencer_pickups=final_result["influencer_pickups"],
+        hours_to_peak=final_result["hours_to_peak"],
+        hours_to_death=final_result["hours_to_death"],
+        dominant_narrative=final_result["dominant_narrative"],
+        top_fud_points=final_result["top_fud_points"],
+        predicted_outcome=final_result["predicted_outcome"],
+        confidence=final_result["confidence"],
     )
 
 
@@ -217,11 +198,9 @@ async def run_simulation(request: SimulationRequest):
 async def stream_simulation(request: SimulationRequest):
     """Stream simulation tweets as they're generated using Server-Sent Events."""
 
-    try:
-        meme_style = MemeStyle(request.token.meme_style)
-        market_condition = MarketCondition(request.token.market_condition)
-    except ValueError as e:
-        raise HTTPException(status_code=400, detail=f"Invalid enum value: {e}")
+    # Enums are already validated by Pydantic
+    meme_style = request.token.meme_style
+    market_condition = request.token.market_condition
 
     # Optionally fetch Twitter priors
     if request.use_twitter_priors and os.getenv("TWITTER_BEARER_TOKEN"):
@@ -229,7 +208,7 @@ async def stream_simulation(request: SimulationRequest):
             market_data = get_market_sentiment(request.similar_tokens)
             market_condition = MarketCondition(market_data["condition"])
         except Exception as e:
-            print(f"Twitter prior fetch failed, using defaults: {e}")
+            logger.warning(f"Twitter prior fetch failed, using defaults: {e}")
 
     token = Token(
         name=request.token.name,
@@ -239,6 +218,9 @@ async def stream_simulation(request: SimulationRequest):
         meme_style=meme_style,
         market_condition=market_condition,
     )
+
+    # Create per-request engine instance for thread safety
+    engine = get_engine()
 
     async def event_generator():
         """Generate SSE events from simulation."""
@@ -255,6 +237,7 @@ async def stream_simulation(request: SimulationRequest):
             yield f"data: {json.dumps({'type': 'done'})}\n\n"
 
         except Exception as e:
+            logger.error(f"Simulation stream error: {e}")
             error_event = json.dumps({"type": "error", "message": str(e)})
             yield f"data: {error_event}\n\n"
 
