@@ -43,12 +43,12 @@ const whitepaperThread: WhitepaperTweet[] = [
   {
     id: 7,
     content: "The economy is simple",
-    subtitle: "Stake $HOPIUM → Run simulation → Get stake back minus 5% burn.\n\nNo speculation. No prediction markets. Just pay-to-play with deflationary pressure. Every simulation burns tokens."
+    subtitle: "Stake $HOPIUM → Lock period (1-7 days) → Get stake back minus 5% burn.\n\nNo speculation. Just pay-to-play with time commitment + deflationary pressure. Higher stake = shorter lock."
   },
   {
     id: 8,
     content: "Simulation staking tiers",
-    subtitle: "Quick sim (12h): 100 $HOPIUM\nStandard (24h): 500 $HOPIUM\nFull (48h): 1,000 $HOPIUM\n\nHigher stake = deeper simulation = more accurate results."
+    subtitle: "Quick (12h): 100 $HOPIUM → 7 day lock\nStandard (24h): 500 $HOPIUM → 3 day lock\nFull (48h): 1,000 $HOPIUM → 1 day lock\n\nHigher stake = deeper sim + shorter lock. Rewards commitment."
   },
   {
     id: 9,
