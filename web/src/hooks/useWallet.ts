@@ -115,11 +115,12 @@ export function useWallet() {
   }
 }
 
-// Stake tiers - determines simulation depth
+// Stake tiers - determines simulation depth and lock period
+// Higher stake = deeper sim + shorter lock (rewards commitment)
 export const STAKE_TIERS = {
-  100: { hours: 12, label: 'Quick (12h)' },
-  500: { hours: 24, label: 'Standard (24h)' },
-  1000: { hours: 48, label: 'Full (48h)' },
+  100: { hours: 12, lockDays: 7, label: 'Quick (12h)', lockLabel: '7 day lock' },
+  500: { hours: 24, lockDays: 3, label: 'Standard (24h)', lockLabel: '3 day lock' },
+  1000: { hours: 48, lockDays: 1, label: 'Full (48h)', lockLabel: '1 day lock' },
 } as const
 
 export type StakeTier = keyof typeof STAKE_TIERS

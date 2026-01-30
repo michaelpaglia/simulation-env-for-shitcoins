@@ -12,7 +12,7 @@ interface StakingGateProps {
 
 export function StakingGate({ balance, onStake, onCancel, isStaking = false }: StakingGateProps) {
   const [selectedTier, setSelectedTier] = useState<StakeTier>(100)
-  const tiers = Object.entries(STAKE_TIERS) as [string, { hours: number; label: string }][]
+  const tiers = Object.entries(STAKE_TIERS) as [string, { hours: number; lockDays: number; label: string; lockLabel: string }][]
 
   const canAfford = balance >= selectedTier
 
@@ -48,10 +48,10 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
           </span>
         </div>
         <p style={{ color: 'var(--text-secondary)', margin: '0 0 20px 0', fontSize: '14px' }}>
-          Stake $HOPIUM to run this simulation. Your stake is returned after completion, minus a 5% burn.
+          Stake $HOPIUM to run this simulation. Your stake is locked for a period based on tier, then returned minus 5% burn.
           <br />
           <span style={{ fontSize: '12px', fontStyle: 'italic' }}>
-            This uses synthetic tokens for demo purposes - no real value.
+            Higher stake = shorter lock period. Demo mode: lock periods are simulated.
           </span>
         </p>
 
@@ -104,9 +104,12 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
                     <div style={{ fontWeight: 600 }}>{amountNum.toLocaleString()} $HOPIUM</div>
                     <div style={{ fontSize: '12px', opacity: 0.8 }}>{tier.label}</div>
                   </div>
+                  <div style={{ textAlign: 'center', fontSize: '11px', padding: '4px 8px', background: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)', borderRadius: '4px' }}>
+                    <div>🔒 {tier.lockLabel}</div>
+                  </div>
                   <div style={{ textAlign: 'right', fontSize: '12px' }}>
                     <div>Returns: {(amountNum * 0.95).toLocaleString()}</div>
-                    <div style={{ color: 'var(--danger)' }}>Burns: {(amountNum * 0.05).toLocaleString()}</div>
+                    <div style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--danger)' }}>Burns: {(amountNum * 0.05).toLocaleString()}</div>
                   </div>
                 </button>
               )
