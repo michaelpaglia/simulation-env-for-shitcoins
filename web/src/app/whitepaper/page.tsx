@@ -43,22 +43,22 @@ const whitepaperThread: WhitepaperTweet[] = [
   {
     id: 7,
     content: "The economy is simple",
-    subtitle: "1. Stake $HOPIUM to run simulations\n2. Predict outcomes, winners take pool\n3. 5% of everything burned\n\nUse it or lose it to deflation."
+    subtitle: "Stake $HOPIUM → Run simulation → Get stake back minus 5% burn.\n\nNo speculation. No prediction markets. Just pay-to-play with deflationary pressure. Every simulation burns tokens."
   },
   {
     id: 8,
     content: "Simulation staking tiers",
-    subtitle: "Quick sim (12h): 100 $HOPIUM\nStandard (24h): 500 $HOPIUM\nFull (48h): 1,000 $HOPIUM\nGauntlet (all markets): 2,500 $HOPIUM"
+    subtitle: "Quick sim (12h): 100 $HOPIUM\nStandard (24h): 500 $HOPIUM\nFull (48h): 1,000 $HOPIUM\n\nHigher stake = deeper simulation = more accurate results."
   },
   {
     id: 9,
-    content: "Prediction markets",
-    subtitle: "Bet on outcomes: Moon, Cult Classic, Pump & Dump, Slow Bleed, Rug. Winners split the pool minus 5% burn. Put your money where your alpha is."
+    content: "Harness Lab",
+    subtitle: "Run multiple experiments autonomously. The AI generates token ideas, tests them, and learns what works. Stake 50 $HOPIUM per experiment. Batch-test 10 ideas while you sleep."
   },
   {
     id: 10,
-    content: "The Gauntlet",
-    subtitle: "Battle-test ideas through increasing difficulty:\n\nStage 1: Crab → 1.5x\nStage 2: Bear → 2x\nStage 3: Bear + Skeptics → 3x\n\nFail = 50% burned. Pass all = 'Gauntlet Survivor' badge."
+    content: "The Gauntlet (Phase 2)",
+    subtitle: "Coming soon: Battle-test ideas through increasing difficulty.\n\nStage 1: Crab market\nStage 2: Bear market\nStage 3: Bear + Skeptic swarm\n\nSurvive all three = 'Gauntlet Survivor' badge."
   },
   {
     id: 11,
@@ -73,12 +73,12 @@ const whitepaperThread: WhitepaperTweet[] = [
   {
     id: 13,
     content: "Roadmap",
-    subtitle: "Phase 1: Fair launch + core platform\nPhase 2: Gauntlet mode + leaderboards\nPhase 3: Curator rewards + social\nPhase 4: Simulation-to-launch pipeline"
+    subtitle: "Phase 1: Core platform + staking economy ✓\nPhase 2: Gauntlet mode + on-chain integration\nPhase 3: Leaderboards + social features\nPhase 4: Simulation-to-launch pipeline"
   },
   {
     id: 14,
     content: "Risks (we're honest)",
-    subtitle: "• Simulation accuracy: CT can be unpredictable\n• Regulatory: Prediction markets are gray area\n• Adoption: Utility needs users\n\nThis is a memecoin with utility. Treat it accordingly."
+    subtitle: "• Simulation accuracy: CT is chaotic, predictions are probabilistic\n• Token value: Burns create deflation but adoption drives value\n• Utility dependency: Platform needs users to be useful\n\nThis is a memecoin with utility. Treat it accordingly."
   },
   {
     id: 15,
