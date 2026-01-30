@@ -453,7 +453,7 @@ export default function Lab() {
                 style={{
                   flex: 2,
                   padding: '12px',
-                  background: 'linear-gradient(90deg, #1d9bf0, #9333ea)',
+                  background: 'var(--accent)',
                   border: 'none',
                   borderRadius: '8px',
                   color: 'white',
