@@ -327,29 +327,15 @@ export default function Home() {
           <span style={{ fontSize: '28px' }}>&#129514;</span>
         </div>
         {/* Wallet Connection */}
-        <div style={{ padding: '0 12px', marginBottom: '12px' }}>
+        <div className="wallet-section">
           <ConnectWalletButton compact />
         </div>
         {/* $HOPIUM Balance */}
         {auth.isConnected && (
-          <div style={{ padding: '0 12px', marginBottom: '16px' }}>
+          <div className="wallet-balance-section">
             <WalletDisplay balance={wallet.balance} pendingStake={wallet.pendingStake} compact />
             {wallet.balance <= 0 && (
-              <button
-                onClick={wallet.claimFaucet}
-                style={{
-                  width: '100%',
-                  marginTop: '8px',
-                  padding: '8px',
-                  background: 'var(--accent)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  color: 'white',
-                  fontSize: '12px',
-                  fontWeight: 600,
-                  cursor: 'pointer',
-                }}
-              >
+              <button onClick={wallet.claimFaucet} className="faucet-btn">
                 Claim 1,000 $HOPIUM
               </button>
             )}
@@ -605,9 +591,7 @@ export default function Home() {
               {isRunning ? 'Summoning CT Chaos...' : !auth.isConnected ? 'Connect Wallet to Simulate' : 'Stake & Simulate'}
             </button>
             {auth.isConnected && !isRunning && (
-              <div style={{ textAlign: 'center', marginTop: '8px', fontSize: '12px', color: 'var(--text-secondary)' }}>
-                100-1,000 $HOPIUM · 5% burned per sim
-              </div>
+              <div className="stake-hint">100-1,000 $HOPIUM · 5% burned per sim</div>
             )}
           </div>
         </div>
