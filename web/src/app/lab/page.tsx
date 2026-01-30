@@ -500,10 +500,6 @@ export default function Lab() {
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
           <WalletDisplay balance={wallet.balance} pendingStake={wallet.pendingStake} />
-          <Link href="/arena" className="nav-link">
-            <span>🔬</span>
-            <span>Arena</span>
-          </Link>
           <Link href="/" className="nav-link">
             <HomeIcon />
             <span>Single Sim</span>
