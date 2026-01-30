@@ -7,6 +7,31 @@ interface ConnectWalletButtonProps {
   compact?: boolean
 }
 
+const styles = {
+  base: {
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px',
+    border: 'none',
+    color: 'white',
+    fontWeight: 600,
+    transition: 'all 0.2s',
+    justifyContent: 'center',
+  },
+  compact: {
+    padding: '8px 16px',
+    borderRadius: '9999px',
+    fontSize: '14px',
+    width: '100%',
+  },
+  full: {
+    padding: '12px 20px',
+    borderRadius: '12px',
+    fontSize: '15px',
+    boxShadow: '0 4px 14px rgba(124, 77, 255, 0.3)',
+  },
+} as const
+
 export function ConnectWalletButton({ compact = false }: ConnectWalletButtonProps) {
   const { isConnected, isConnecting, truncatedAddress, disconnect } = useAuth()
   const { setVisible } = useWalletModal()
@@ -19,99 +44,41 @@ export function ConnectWalletButton({ compact = false }: ConnectWalletButtonProp
     }
   }
 
-  if (compact) {
-    return (
-      <button
-        onClick={handleClick}
-        disabled={isConnecting}
-        style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '8px',
-          padding: '8px 16px',
-          background: isConnected ? 'var(--bg-secondary)' : 'var(--accent)',
-          border: isConnected ? '1px solid var(--border-color)' : 'none',
-          borderRadius: '9999px',
-          color: 'white',
-          fontSize: '14px',
-          fontWeight: 600,
-          cursor: isConnecting ? 'wait' : 'pointer',
-          transition: 'all 0.2s',
-          width: '100%',
-          justifyContent: 'center',
-        }}
-      >
-        {isConnecting ? (
-          'Connecting...'
-        ) : isConnected ? (
-          <>
-            <PhantomIcon />
-            {truncatedAddress}
-          </>
-        ) : (
-          <>
-            <PhantomIcon />
-            Connect Wallet
-          </>
-        )}
-      </button>
-    )
+  const getBackground = () => {
+    if (compact) {
+      return isConnected ? 'var(--bg-secondary)' : 'var(--accent)'
+    }
+    return isConnected
+      ? 'linear-gradient(135deg, #512da8, #7c4dff)'
+      : 'linear-gradient(135deg, #ab47bc, #7c4dff)'
+  }
+
+  const getLabel = () => {
+    if (isConnecting) return 'Connecting...'
+    if (isConnected) return truncatedAddress
+    return compact ? 'Connect Wallet' : 'Connect Phantom'
+  }
+
+  const style = {
+    ...styles.base,
+    ...(compact ? styles.compact : styles.full),
+    background: getBackground(),
+    border: compact && isConnected ? '1px solid var(--border-color)' : 'none',
+    cursor: isConnecting ? 'wait' : 'pointer',
   }
 
   return (
-    <button
-      onClick={handleClick}
-      disabled={isConnecting}
-      style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-        padding: '12px 20px',
-        background: isConnected
-          ? 'linear-gradient(135deg, #512da8, #7c4dff)'
-          : 'linear-gradient(135deg, #ab47bc, #7c4dff)',
-        border: 'none',
-        borderRadius: '12px',
-        color: 'white',
-        fontSize: '15px',
-        fontWeight: 600,
-        cursor: isConnecting ? 'wait' : 'pointer',
-        transition: 'all 0.2s',
-        boxShadow: '0 4px 14px rgba(124, 77, 255, 0.3)',
-      }}
-    >
-      <PhantomIcon />
-      {isConnecting ? (
-        'Connecting...'
-      ) : isConnected ? (
-        truncatedAddress
-      ) : (
-        'Connect Phantom'
-      )}
+    <button onClick={handleClick} disabled={isConnecting} style={style}>
+      <WalletIcon size={compact ? 16 : 20} />
+      {getLabel()}
     </button>
   )
 }
 
-function PhantomIcon() {
+function WalletIcon({ size = 20 }: { size?: number }) {
   return (
-    <svg width="20" height="20" viewBox="0 0 128 128" fill="none">
-      <circle cx="64" cy="64" r="64" fill="url(#phantom-gradient)" />
-      <path
-        d="M110.584 64.914H99.142C99.142 41.053 79.404 21.632 55.142 21.632C31.281 21.632 11.86 40.453 11.416 63.914C10.962 87.974 31.521 108.632 55.982 108.632H61.142C85.603 108.632 110.584 88.574 110.584 64.914Z"
-        fill="url(#phantom-gradient2)"
-      />
-      <circle cx="39.142" cy="62.632" r="8" fill="#ffffff" />
-      <circle cx="67.142" cy="62.632" r="8" fill="#ffffff" />
-      <defs>
-        <linearGradient id="phantom-gradient" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#534BB1" />
-          <stop offset="1" stopColor="#551BF9" />
-        </linearGradient>
-        <linearGradient id="phantom-gradient2" x1="11" y1="22" x2="111" y2="109" gradientUnits="userSpaceOnUse">
-          <stop stopColor="#534BB1" />
-          <stop offset="1" stopColor="#551BF9" />
-        </linearGradient>
-      </defs>
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="currentColor">
+      <path d="M21 7H3a1 1 0 00-1 1v12a1 1 0 001 1h18a1 1 0 001-1V8a1 1 0 00-1-1zm-1 12H4v-2h16v2zm0-4H4v-2h16v2zm0-4H4V9h16v2zM5 5h14a1 1 0 000-2H5a1 1 0 000 2z"/>
     </svg>
   )
 }
