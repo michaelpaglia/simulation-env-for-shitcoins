@@ -296,15 +296,15 @@ export default function Home() {
 
   const getAvatarColor = (type: string) => {
     const colors: Record<string, string> = {
-      kol: 'linear-gradient(135deg, #1d9bf0, #1a8cd8)',
-      degen: 'linear-gradient(135deg, #f91880, #e2177a)',
-      skeptic: 'linear-gradient(135deg, #f4212e, #dc1d28)',
-      whale: 'linear-gradient(135deg, #ffd400, #e5be00)',
-      influencer: 'linear-gradient(135deg, #7856ff, #6644ee)',
-      normie: 'linear-gradient(135deg, #71767b, #555b5f)',
-      bot: 'linear-gradient(135deg, #00ba7c, #00a76f)',
+      kol: '#1d9bf0',
+      degen: '#f91880',
+      skeptic: '#f4212e',
+      whale: '#ffd400',
+      influencer: '#7856ff',
+      normie: '#71767b',
+      bot: '#00ba7c',
     }
-    return colors[type] || 'linear-gradient(135deg, #1d9bf0, #9333ea)'
+    return colors[type] || '#71767b'
   }
 
   const isVerified = (type: string) => ['kol', 'influencer', 'whale'].includes(type)
