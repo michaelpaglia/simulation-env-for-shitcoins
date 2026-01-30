@@ -3,6 +3,11 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { config } from '@/config'
+import { useWallet, STAKE_TIERS } from '@/hooks/useWallet'
+import { WalletDisplay } from '@/components/WalletDisplay'
+import { StakingGate } from '@/components/StakingGate'
+import { ConnectWalletButton } from '@/components/ConnectWalletButton'
+import { useAuth } from '@/hooks/useAuth'
 
 const API_URL = config.apiUrl
 
@@ -135,7 +140,7 @@ const FeatherIcon = () => (
 )
 
 export default function Home() {
-  const [config, setConfig] = useState<TokenConfig>({
+  const [tokenConfig, setTokenConfig] = useState<TokenConfig>({
     name: '',
     ticker: '',
     narrative: '',
@@ -152,6 +157,11 @@ export default function Home() {
   const [progress, setProgress] = useState<{ hour: number; total: number; momentum: number } | null>(null)
   const [pastExperiments, setPastExperiments] = useState<PastExperiment[]>([])
   const [loadingExperiments, setLoadingExperiments] = useState(true)
+  const [showStakingGate, setShowStakingGate] = useState(false)
+  const [stakingHours, setStakingHours] = useState(48)
+
+  const wallet = useWallet()
+  const auth = useAuth()
 
   // Fetch past experiments on mount
   useEffect(() => {
@@ -171,7 +181,29 @@ export default function Home() {
     fetchExperiments()
   }, [])
 
-  const runSimulation = async () => {
+  // Show staking gate before running simulation
+  const handleRunClick = () => {
+    if (!auth.isConnected) {
+      // Prompt wallet connection
+      return
+    }
+    if (!tokenConfig.ticker || !tokenConfig.narrative) return
+    setShowStakingGate(true)
+  }
+
+  // Handle stake confirmation
+  const handleStake = (amount: number, hours: number) => {
+    if (!wallet.stake(amount)) {
+      setError('Insufficient balance')
+      setShowStakingGate(false)
+      return
+    }
+    setStakingHours(hours)
+    setShowStakingGate(false)
+    runSimulation(hours)
+  }
+
+  const runSimulation = async (hours: number) => {
     setIsRunning(true)
     setTweets([])
     setResult(null)
@@ -184,14 +216,14 @@ export default function Home() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           token: {
-            name: config.name || config.ticker,
-            ticker: config.ticker,
-            narrative: config.narrative || 'A new memecoin',
-            tagline: config.tagline || null,
-            meme_style: config.meme_style,
-            market_condition: config.market_condition,
+            name: tokenConfig.name || tokenConfig.ticker,
+            ticker: tokenConfig.ticker,
+            narrative: tokenConfig.narrative || 'A new memecoin',
+            tagline: tokenConfig.tagline || null,
+            meme_style: tokenConfig.meme_style,
+            market_condition: tokenConfig.market_condition,
           },
-          hours: 48,
+          hours,
           use_twitter_priors: useTwitterPriors,
         }),
       })
@@ -233,6 +265,7 @@ export default function Home() {
                 })
               } else if (data.type === 'result') {
                 setResult(data.result)
+                wallet.completeSimulation() // Return stake minus burn
               } else if (data.type === 'error') {
                 throw new Error(data.message)
               }
@@ -246,6 +279,7 @@ export default function Home() {
     } catch (err) {
       console.error('Simulation error:', err)
       setError(err instanceof Error ? err.message : 'Unknown error')
+      wallet.refundStake() // Refund on error
     } finally {
       setIsRunning(false)
       setProgress(null)
@@ -278,11 +312,49 @@ export default function Home() {
 
   return (
     <div className="container">
+      {/* Staking Gate Modal */}
+      {showStakingGate && (
+        <StakingGate
+          balance={wallet.balance}
+          onStake={handleStake}
+          onCancel={() => setShowStakingGate(false)}
+        />
+      )}
+
       {/* Left Sidebar */}
       <aside className="sidebar">
         <div className="logo" title="Hopium Lab">
           <span style={{ fontSize: '28px' }}>&#129514;</span>
         </div>
+        {/* Wallet Connection */}
+        <div style={{ padding: '0 12px', marginBottom: '12px' }}>
+          <ConnectWalletButton compact />
+        </div>
+        {/* $HOPIUM Balance */}
+        {auth.isConnected && (
+          <div style={{ padding: '0 12px', marginBottom: '16px' }}>
+            <WalletDisplay balance={wallet.balance} pendingStake={wallet.pendingStake} compact />
+            {wallet.balance <= 0 && (
+              <button
+                onClick={wallet.claimFaucet}
+                style={{
+                  width: '100%',
+                  marginTop: '8px',
+                  padding: '8px',
+                  background: 'var(--accent)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  fontSize: '12px',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Claim 1,000 $HOPIUM
+              </button>
+            )}
+          </div>
+        )}
         <nav className="nav-items">
           <div className="nav-item active">
             <HomeIcon />
@@ -461,8 +533,8 @@ export default function Home() {
                 type="text"
                 className="form-input"
                 placeholder="DogeKiller9000"
-                value={config.name}
-                onChange={e => setConfig({ ...config, name: e.target.value })}
+                value={tokenConfig.name}
+                onChange={e => setTokenConfig({ ...tokenConfig, name: e.target.value })}
               />
             </div>
 
@@ -472,8 +544,8 @@ export default function Home() {
                 type="text"
                 className="form-input"
                 placeholder="DK9000"
-                value={config.ticker}
-                onChange={e => setConfig({ ...config, ticker: e.target.value.toUpperCase() })}
+                value={tokenConfig.ticker}
+                onChange={e => setTokenConfig({ ...tokenConfig, ticker: e.target.value.toUpperCase() })}
                 maxLength={10}
               />
             </div>
@@ -484,8 +556,8 @@ export default function Home() {
                 type="text"
                 className="form-input"
                 placeholder="AI meme that roasts other memes"
-                value={config.narrative}
-                onChange={e => setConfig({ ...config, narrative: e.target.value })}
+                value={tokenConfig.narrative}
+                onChange={e => setTokenConfig({ ...tokenConfig, narrative: e.target.value })}
               />
             </div>
 
@@ -493,8 +565,8 @@ export default function Home() {
               <label className="form-label">Meme Style</label>
               <select
                 className="form-select"
-                value={config.meme_style}
-                onChange={e => setConfig({ ...config, meme_style: e.target.value })}
+                value={tokenConfig.meme_style}
+                onChange={e => setTokenConfig({ ...tokenConfig, meme_style: e.target.value })}
               >
                 <option value="cute">Cute (doge, cats)</option>
                 <option value="edgy">Edgy (dark humor)</option>
@@ -508,8 +580,8 @@ export default function Home() {
               <label className="form-label">Market Condition</label>
               <select
                 className="form-select"
-                value={config.market_condition}
-                onChange={e => setConfig({ ...config, market_condition: e.target.value })}
+                value={tokenConfig.market_condition}
+                onChange={e => setTokenConfig({ ...tokenConfig, market_condition: e.target.value })}
               >
                 <option value="bear">Bear Market</option>
                 <option value="crab">Crab Market</option>
@@ -533,10 +605,10 @@ export default function Home() {
 
             <button
               className="btn btn-primary"
-              onClick={runSimulation}
-              disabled={isRunning || !config.ticker || !config.narrative}
+              onClick={handleRunClick}
+              disabled={isRunning || !tokenConfig.ticker || !tokenConfig.narrative}
             >
-              {isRunning ? 'Summoning CT Chaos...' : 'Unleash the Degens'}
+              {isRunning ? 'Summoning CT Chaos...' : !auth.isConnected ? 'Connect Wallet to Simulate' : 'Stake & Simulate'}
             </button>
           </div>
         </div>
@@ -552,7 +624,7 @@ export default function Home() {
                   className="result-row"
                   style={{ cursor: 'pointer' }}
                   onClick={() => {
-                    setConfig(prev => ({
+                    setTokenConfig(prev => ({
                       ...prev,
                       name: exp.name,
                       ticker: exp.ticker,
