@@ -31,6 +31,9 @@ simulations/
 web/.next/
 web/node_modules/
 web/out/
+web/.env.local
+web/tsconfig.tsbuildinfo
+*.tsbuildinfo
 
 # Windows
 nul
