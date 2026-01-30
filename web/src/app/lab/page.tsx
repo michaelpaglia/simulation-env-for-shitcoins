@@ -3,6 +3,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { config } from '@/config'
+import { useWallet, STAKE_TIERS, StakeTier } from '@/hooks/useWallet'
+import { WalletDisplay } from '@/components/WalletDisplay'
 
 const API_URL = config.apiUrl
 
@@ -76,7 +78,12 @@ const TrophyIcon = () => (
   </svg>
 )
 
+// Calculate stake for harness run (base stake per experiment)
+const HARNESS_STAKE_PER_EXPERIMENT = 50
+
 export default function Lab() {
+  const wallet = useWallet()
+
   const [harnessConfig, setHarnessConfig] = useState<HarnessConfig>({
     mode: 'balanced',
     max_experiments: 5,
@@ -86,6 +93,7 @@ export default function Lab() {
   })
 
   const [isRunning, setIsRunning] = useState(false)
+  const [showStakingConfirm, setShowStakingConfirm] = useState(false)
   const [experiments, setExperiments] = useState<Experiment[]>([])
   const [currentExperiment, setCurrentExperiment] = useState<Experiment | null>(null)
   const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([])
@@ -161,6 +169,26 @@ export default function Lab() {
     }
   }
 
+  const requiredStake = harnessConfig.max_experiments * HARNESS_STAKE_PER_EXPERIMENT
+
+  const handleLaunchClick = () => {
+    if (!wallet.canAfford(requiredStake)) {
+      setError(`Insufficient balance. Need ${requiredStake} $HOPIUM for ${harnessConfig.max_experiments} experiments.`)
+      return
+    }
+    setShowStakingConfirm(true)
+  }
+
+  const confirmAndStartHarness = () => {
+    if (!wallet.stake(requiredStake)) {
+      setError('Failed to stake tokens')
+      setShowStakingConfirm(false)
+      return
+    }
+    setShowStakingConfirm(false)
+    startHarness()
+  }
+
   const startHarness = async () => {
     setIsRunning(true)
     setExperiments([])
@@ -223,6 +251,7 @@ export default function Lab() {
 
               if (event.type === 'done' || event.type === 'run_completed') {
                 setIsRunning(false)
+                wallet.completeSimulation() // Return stake minus burn
                 fetchLeaderboard()
                 fetchLearnings()
                 fetchPastExperiments()
@@ -239,7 +268,7 @@ export default function Lab() {
         console.error('Harness error:', err)
         const errorMsg = err instanceof Error ? err.message : 'Unknown error'
         setError(errorMsg)
-        // Keep showing error even after harness stops
+        wallet.refundStake() // Refund on error
       }
     } finally {
       console.log('Harness finished/stopped')
@@ -339,12 +368,123 @@ export default function Lab() {
 
   return (
     <div className="lab-container">
+      {/* Staking Confirmation Modal */}
+      {showStakingConfirm && (
+        <div style={{
+          position: 'fixed',
+          inset: 0,
+          background: 'rgba(0, 0, 0, 0.8)',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+        }}>
+          <div style={{
+            background: 'var(--bg-secondary)',
+            borderRadius: '16px',
+            padding: '24px',
+            maxWidth: '400px',
+            width: '90%',
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
+              <h2 style={{ margin: 0, fontSize: '20px' }}>🔒 Stake to Run Harness</h2>
+              <span style={{
+                padding: '2px 8px',
+                background: 'var(--warning)',
+                color: '#000',
+                borderRadius: '4px',
+                fontSize: '11px',
+                fontWeight: 700,
+              }}>
+                DEMO
+              </span>
+            </div>
+
+            <div style={{
+              background: 'var(--bg-tertiary)',
+              borderRadius: '8px',
+              padding: '16px',
+              marginBottom: '16px',
+            }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Experiments:</span>
+                <span style={{ fontWeight: 600 }}>{harnessConfig.max_experiments}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px' }}>
+                <span>Stake per experiment:</span>
+                <span style={{ fontWeight: 600 }}>{HARNESS_STAKE_PER_EXPERIMENT} $HOPIUM</span>
+              </div>
+              <div style={{ borderTop: '1px solid var(--border)', paddingTop: '8px', marginTop: '8px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between' }}>
+                  <span style={{ fontWeight: 600 }}>Total Stake:</span>
+                  <span style={{ fontWeight: 700, color: 'var(--accent)' }}>
+                    {requiredStake} $HOPIUM
+                  </span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '4px', fontSize: '13px', color: 'var(--text-secondary)' }}>
+                  <span>5% burn:</span>
+                  <span style={{ color: 'var(--danger)' }}>-{Math.floor(requiredStake * 0.05)}</span>
+                </div>
+              </div>
+            </div>
+
+            <p style={{ fontSize: '13px', color: 'var(--text-secondary)', margin: '0 0 16px 0' }}>
+              Your stake will be returned after the harness completes, minus a 5% burn.
+            </p>
+
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button
+                onClick={() => setShowStakingConfirm(false)}
+                style={{
+                  flex: 1,
+                  padding: '12px',
+                  background: 'var(--bg-tertiary)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'var(--text-primary)',
+                  fontWeight: 600,
+                  cursor: 'pointer',
+                }}
+              >
+                Cancel
+              </button>
+              <button
+                onClick={confirmAndStartHarness}
+                style={{
+                  flex: 2,
+                  padding: '12px',
+                  background: 'linear-gradient(90deg, #1d9bf0, #9333ea)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  color: 'white',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                }}
+              >
+                🔒 Stake & Launch
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Header */}
       <header className="lab-header">
         <div className="lab-header-left">
           <span className="lab-logo">&#129514;</span>
           <h1>Harness Lab</h1>
           <span className="lab-badge">Autonomous Testing</span>
+          <span style={{
+            padding: '4px 8px',
+            background: 'var(--warning)',
+            color: '#000',
+            borderRadius: '4px',
+            fontSize: '11px',
+            fontWeight: 700,
+            marginLeft: '8px',
+          }}>
+            DEMO MODE
+          </span>
           {apiStatus !== 'connected' && (
             <span className="api-status" style={{
               marginLeft: '12px',
@@ -358,11 +498,53 @@ export default function Lab() {
             </span>
           )}
         </div>
-        <Link href="/" className="nav-link">
-          <HomeIcon />
-          <span>Single Sim</span>
-        </Link>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+          <WalletDisplay balance={wallet.balance} pendingStake={wallet.pendingStake} />
+          <Link href="/arena" className="nav-link">
+            <span>🔬</span>
+            <span>Arena</span>
+          </Link>
+          <Link href="/" className="nav-link">
+            <HomeIcon />
+            <span>Single Sim</span>
+          </Link>
+        </div>
       </header>
+
+      {/* Demo Notice */}
+      <div style={{
+        background: 'rgba(255, 212, 0, 0.1)',
+        border: '1px solid var(--warning)',
+        borderRadius: '8px',
+        padding: '12px 16px',
+        margin: '0 16px 16px 16px',
+        display: 'flex',
+        alignItems: 'center',
+        gap: '12px',
+      }}>
+        <span style={{ fontSize: '20px' }}>⚠️</span>
+        <div style={{ flex: 1, fontSize: '13px' }}>
+          <strong>Demo Mode:</strong> Staking uses synthetic $HOPIUM tokens stored in your browser.
+          Each experiment costs {HARNESS_STAKE_PER_EXPERIMENT} $HOPIUM (5% burned).
+        </div>
+        {wallet.balance <= 0 && (
+          <button
+            onClick={wallet.claimFaucet}
+            style={{
+              padding: '8px 16px',
+              background: 'var(--accent)',
+              border: 'none',
+              borderRadius: '8px',
+              color: 'white',
+              fontWeight: 600,
+              cursor: 'pointer',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            🎁 Claim 1,000
+          </button>
+        )}
+      </div>
 
       <div className="lab-content">
         {/* Left Panel - Controls */}
@@ -440,8 +622,16 @@ export default function Lab() {
             </div>
 
             {!isRunning ? (
-              <button className="launch-btn" onClick={startHarness}>
-                &#128640; Launch Harness
+              <button
+                className="launch-btn"
+                onClick={handleLaunchClick}
+                disabled={!wallet.canAfford(requiredStake)}
+                style={{
+                  opacity: wallet.canAfford(requiredStake) ? 1 : 0.5,
+                  cursor: wallet.canAfford(requiredStake) ? 'pointer' : 'not-allowed',
+                }}
+              >
+                🔒 Stake {requiredStake} & Launch
               </button>
             ) : (
               <button className="stop-btn" onClick={stopHarness}>
