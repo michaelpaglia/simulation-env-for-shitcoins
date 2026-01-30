@@ -141,7 +141,7 @@ export default function WhitepaperPage() {
           left: 0,
           height: '3px',
           width: `${scrollProgress}%`,
-          background: 'linear-gradient(90deg, #1d9bf0, #9333ea)',
+          background: 'var(--accent)',
           transition: 'width 0.1s ease-out',
           zIndex: 10
         }} />
@@ -304,22 +304,19 @@ export default function WhitepaperPage() {
             alignItems: 'center',
             gap: '8px',
             padding: '14px 32px',
-            background: 'linear-gradient(90deg, #1d9bf0, #9333ea)',
+            background: 'var(--accent)',
             color: 'white',
             borderRadius: '9999px',
             textDecoration: 'none',
             fontWeight: '700',
             fontSize: '15px',
-            boxShadow: '0 4px 20px rgba(29, 155, 240, 0.4)',
-            transition: 'transform 0.2s, box-shadow 0.2s'
+            transition: 'background 0.2s'
           }}
           onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.05)'
-            e.currentTarget.style.boxShadow = '0 6px 30px rgba(29, 155, 240, 0.5)'
+            e.currentTarget.style.background = 'var(--accent-hover)'
           }}
           onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)'
-            e.currentTarget.style.boxShadow = '0 4px 20px rgba(29, 155, 240, 0.4)'
+            e.currentTarget.style.background = 'var(--accent)'
           }}
         >
           <svg viewBox="0 0 24 24" style={{ width: '20px', height: '20px', fill: 'white' }}>
