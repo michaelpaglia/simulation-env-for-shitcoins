@@ -17,6 +17,9 @@ from ..harness.runner import AutonomousRunner, RunConfig, RunMode
 from ..harness.idea_generator import IdeaStrategy
 from ..harness.experiment import ExperimentTracker, ExperimentStatus
 
+# Stake verification flag
+REQUIRE_STAKE = os.getenv("REQUIRE_STAKE_VERIFICATION", "false").lower() == "true"
+
 router = APIRouter(prefix="/harness", tags=["harness"])
 
 # Global state for the running harness
@@ -45,6 +48,9 @@ class HarnessRunRequest(BaseModel):
     simulation_hours: int = Field(default=24, ge=6, le=48)
     market_condition: str = Field(default="crab")
     target_theme: Optional[str] = None
+    # On-chain stake verification (optional)
+    wallet: Optional[str] = None
+    stake_pda: Optional[str] = None
 
 
 class HarnessRunResponse(BaseModel):
@@ -209,6 +215,25 @@ def _run_harness_thread(config: RunConfig, run_id: str):
 async def start_harness_run(request: HarnessRunRequest):
     """Start an autonomous harness run."""
     global _harness_state
+
+    # Verify stake if required
+    if REQUIRE_STAKE:
+        if not request.wallet or not request.stake_pda:
+            raise HTTPException(
+                status_code=402,
+                detail="Stake verification required. Provide wallet and stake_pda.",
+            )
+
+        from ..solana import StakeVerifier
+
+        verifier = StakeVerifier()
+        result = await verifier.verify_stake(request.wallet, request.stake_pda)
+
+        if not result.valid:
+            raise HTTPException(
+                status_code=402,
+                detail=f"Invalid stake: {result.message}",
+            )
 
     if _harness_state["is_running"]:
         raise HTTPException(status_code=409, detail="Harness is already running")

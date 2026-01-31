@@ -1,20 +1,108 @@
 'use client'
 
 import { useState } from 'react'
-import { STAKE_TIERS, StakeTier } from '@/hooks/useWallet'
+import { STAKE_TIERS as DEMO_STAKE_TIERS, StakeTier as DemoStakeTier } from '@/hooks/useWallet'
+import {
+  STAKE_TIERS as ONCHAIN_STAKE_TIERS,
+  StakeTier as OnchainStakeTier,
+  toDisplayAmount,
+  BURN_RATE_BPS,
+} from '@/lib/solana/constants'
+import { StakingStatus } from '@/hooks/useStaking'
 
-interface StakingGateProps {
+export type StakingMode = 'demo' | 'onchain'
+
+interface BaseStakingGateProps {
   balance: number
-  onStake: (amount: number, hours: number) => void
   onCancel: () => void
   isStaking?: boolean
 }
 
-export function StakingGate({ balance, onStake, onCancel, isStaking = false }: StakingGateProps) {
-  const [selectedTier, setSelectedTier] = useState<StakeTier>(100)
-  const tiers = Object.entries(STAKE_TIERS) as [string, { hours: number; lockDays: number; label: string; lockLabel: string }][]
+interface DemoStakingGateProps extends BaseStakingGateProps {
+  mode: 'demo'
+  onStake: (amount: number, hours: number) => void
+}
 
-  const canAfford = balance >= selectedTier
+interface OnchainStakingGateProps extends BaseStakingGateProps {
+  mode: 'onchain'
+  onStake: (tier: OnchainStakeTier) => void
+  stakingStatus?: StakingStatus
+  statusMessage?: string
+}
+
+type StakingGateProps = DemoStakingGateProps | OnchainStakingGateProps
+
+export function StakingGate(props: StakingGateProps) {
+  const { balance, onCancel, isStaking = false, mode } = props
+
+  // For demo mode, use the old tier system (100, 500, 1000)
+  // For on-chain, use tier indices (0, 1, 2)
+  const [selectedDemoTier, setSelectedDemoTier] = useState<DemoStakeTier>(100)
+  const [selectedOnchainTier, setSelectedOnchainTier] = useState<OnchainStakeTier>(0)
+
+  const isOnchain = mode === 'onchain'
+
+  // Get status for on-chain mode
+  const stakingStatus = isOnchain ? (props as OnchainStakingGateProps).stakingStatus : undefined
+  const statusMessage = isOnchain ? (props as OnchainStakingGateProps).statusMessage : undefined
+
+  // Get display balance
+  const displayBalance = isOnchain
+    ? balance // Already in display units for on-chain
+    : balance // Demo uses whole numbers
+
+  // Build tier display data
+  const tierOptions = isOnchain
+    ? Object.entries(ONCHAIN_STAKE_TIERS).map(([tierStr, config]) => ({
+        tier: parseInt(tierStr) as OnchainStakeTier,
+        amount: toDisplayAmount(config.amount),
+        hours: config.simHours,
+        lockDays: config.lockDays,
+        label: config.label,
+      }))
+    : Object.entries(DEMO_STAKE_TIERS).map(([amountStr, config]) => ({
+        tier: parseInt(amountStr) as DemoStakeTier,
+        amount: parseInt(amountStr),
+        hours: config.hours,
+        lockDays: config.lockDays,
+        label: config.label,
+      }))
+
+  const selectedTierData = isOnchain
+    ? tierOptions.find(t => t.tier === selectedOnchainTier)!
+    : tierOptions.find(t => t.tier === selectedDemoTier)!
+
+  const canAfford = displayBalance >= selectedTierData.amount
+
+  const handleStake = () => {
+    if (isOnchain) {
+      (props as OnchainStakingGateProps).onStake(selectedOnchainTier)
+    } else {
+      const demoConfig = DEMO_STAKE_TIERS[selectedDemoTier]
+      ;(props as DemoStakingGateProps).onStake(selectedDemoTier, demoConfig.hours)
+    }
+  }
+
+  const getStatusText = () => {
+    if (!isOnchain || !stakingStatus) return isStaking ? 'Staking...' : `Stake ${selectedTierData.amount.toLocaleString()} $HOPIUM`
+
+    switch (stakingStatus) {
+      case 'building':
+        return 'Building transaction...'
+      case 'signing':
+        return 'Approve in wallet...'
+      case 'confirming':
+        return 'Confirming on chain...'
+      case 'success':
+        return 'Stake confirmed!'
+      case 'error':
+        return statusMessage || 'Staking failed'
+      default:
+        return `Stake ${selectedTierData.amount.toLocaleString()} $HOPIUM`
+    }
+  }
+
+  const isProcessing = isStaking || (stakingStatus && !['idle', 'success', 'error'].includes(stakingStatus))
 
   return (
     <div style={{
@@ -34,25 +122,29 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
         width: '90%',
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
-          <h2 style={{ margin: 0, fontSize: '20px' }}>🔒 Stake to Simulate</h2>
+          <h2 style={{ margin: 0, fontSize: '20px' }}>Stake to Simulate</h2>
           <span style={{
             padding: '2px 8px',
-            background: 'var(--warning)',
+            background: isOnchain ? 'var(--success)' : 'var(--warning)',
             color: '#000',
             borderRadius: '4px',
             fontSize: '11px',
             fontWeight: 700,
             textTransform: 'uppercase',
           }}>
-            Demo Mode
+            {isOnchain ? 'On-Chain' : 'Demo Mode'}
           </span>
         </div>
         <p style={{ color: 'var(--text-secondary)', margin: '0 0 20px 0', fontSize: '14px' }}>
           Stake $HOPIUM to run this simulation. Your stake is locked for a period based on tier, then returned minus 5% burn.
-          <br />
-          <span style={{ fontSize: '12px', fontStyle: 'italic' }}>
-            Higher stake = shorter lock period. Demo mode: lock periods are simulated.
-          </span>
+          {!isOnchain && (
+            <>
+              <br />
+              <span style={{ fontSize: '12px', fontStyle: 'italic' }}>
+                Higher stake = shorter lock period. Demo mode: lock periods are simulated.
+              </span>
+            </>
+          )}
         </p>
 
         <div style={{
@@ -64,10 +156,12 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
           borderRadius: '8px',
           marginBottom: '20px',
         }}>
-          <span style={{ fontSize: '24px' }}>💰</span>
+          <span style={{ fontSize: '24px' }}>{isOnchain ? '💎' : '💰'}</span>
           <div>
-            <div style={{ fontWeight: 700, fontSize: '18px' }}>{balance.toLocaleString()}</div>
-            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>Available Balance</div>
+            <div style={{ fontWeight: 700, fontSize: '18px' }}>{displayBalance.toLocaleString()}</div>
+            <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+              {isOnchain ? 'Wallet Balance' : 'Demo Balance'}
+            </div>
           </div>
         </div>
 
@@ -76,16 +170,24 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
             Select Tier
           </label>
           <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
-            {tiers.map(([amount, tier]) => {
-              const amountNum = parseInt(amount)
-              const affordable = balance >= amountNum
-              const isSelected = selectedTier === amountNum
+            {tierOptions.map((option) => {
+              const affordable = displayBalance >= option.amount
+              const isSelected = isOnchain
+                ? selectedOnchainTier === option.tier
+                : selectedDemoTier === option.tier
 
               return (
                 <button
-                  key={amount}
-                  onClick={() => affordable && setSelectedTier(amountNum as StakeTier)}
-                  disabled={!affordable}
+                  key={option.tier}
+                  onClick={() => {
+                    if (!affordable) return
+                    if (isOnchain) {
+                      setSelectedOnchainTier(option.tier as OnchainStakeTier)
+                    } else {
+                      setSelectedDemoTier(option.tier as DemoStakeTier)
+                    }
+                  }}
+                  disabled={!affordable || !!isProcessing}
                   style={{
                     display: 'flex',
                     justifyContent: 'space-between',
@@ -95,21 +197,29 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
                     border: isSelected ? '2px solid var(--accent)' : '2px solid transparent',
                     borderRadius: '8px',
                     color: isSelected ? 'white' : affordable ? 'var(--text-primary)' : 'var(--text-secondary)',
-                    cursor: affordable ? 'pointer' : 'not-allowed',
+                    cursor: affordable && !isProcessing ? 'pointer' : 'not-allowed',
                     opacity: affordable ? 1 : 0.5,
                     textAlign: 'left',
                   }}
                 >
                   <div>
-                    <div style={{ fontWeight: 600 }}>{amountNum.toLocaleString()} $HOPIUM</div>
-                    <div style={{ fontSize: '12px', opacity: 0.8 }}>{tier.label}</div>
+                    <div style={{ fontWeight: 600 }}>{option.amount.toLocaleString()} $HOPIUM</div>
+                    <div style={{ fontSize: '12px', opacity: 0.8 }}>{option.label}</div>
                   </div>
-                  <div style={{ textAlign: 'center', fontSize: '11px', padding: '4px 8px', background: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)', borderRadius: '4px' }}>
-                    <div>🔒 {tier.lockLabel}</div>
+                  <div style={{
+                    textAlign: 'center',
+                    fontSize: '11px',
+                    padding: '4px 8px',
+                    background: isSelected ? 'rgba(255,255,255,0.2)' : 'var(--bg-secondary)',
+                    borderRadius: '4px',
+                  }}>
+                    <div>{option.lockDays} day lock</div>
                   </div>
                   <div style={{ textAlign: 'right', fontSize: '12px' }}>
-                    <div>Returns: {(amountNum * 0.95).toLocaleString()}</div>
-                    <div style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--danger)' }}>Burns: {(amountNum * 0.05).toLocaleString()}</div>
+                    <div>Returns: {(option.amount * 0.95).toLocaleString()}</div>
+                    <div style={{ color: isSelected ? 'rgba(255,255,255,0.7)' : 'var(--danger)' }}>
+                      Burns: {(option.amount * 0.05).toLocaleString()}
+                    </div>
                   </div>
                 </button>
               )
@@ -117,10 +227,28 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
           </div>
         </div>
 
+        {/* Status message for on-chain mode */}
+        {isOnchain && stakingStatus && stakingStatus !== 'idle' && (
+          <div style={{
+            padding: '12px',
+            marginBottom: '16px',
+            borderRadius: '8px',
+            background: stakingStatus === 'error' ? 'var(--danger-bg)' : stakingStatus === 'success' ? 'var(--success-bg)' : 'var(--bg-tertiary)',
+            color: stakingStatus === 'error' ? 'var(--danger)' : stakingStatus === 'success' ? 'var(--success)' : 'var(--text-primary)',
+            fontSize: '14px',
+          }}>
+            {stakingStatus === 'building' && '🔧 Building transaction...'}
+            {stakingStatus === 'signing' && '✍️ Please approve the transaction in your wallet...'}
+            {stakingStatus === 'confirming' && '⏳ Confirming on the blockchain...'}
+            {stakingStatus === 'success' && '✅ Stake confirmed!'}
+            {stakingStatus === 'error' && `❌ ${statusMessage || 'Transaction failed'}`}
+          </div>
+        )}
+
         <div style={{ display: 'flex', gap: '12px' }}>
           <button
             onClick={onCancel}
-            disabled={isStaking}
+            disabled={!!isProcessing}
             style={{
               flex: 1,
               padding: '12px',
@@ -129,26 +257,27 @@ export function StakingGate({ balance, onStake, onCancel, isStaking = false }: S
               borderRadius: '8px',
               color: 'var(--text-primary)',
               fontWeight: 600,
-              cursor: 'pointer',
+              cursor: isProcessing ? 'not-allowed' : 'pointer',
             }}
           >
             Cancel
           </button>
           <button
-            onClick={() => onStake(selectedTier, STAKE_TIERS[selectedTier].hours)}
-            disabled={!canAfford || isStaking}
+            onClick={handleStake}
+            disabled={!canAfford || !!isProcessing}
             style={{
               flex: 2,
               padding: '12px',
-              background: canAfford ? 'linear-gradient(90deg, #1d9bf0, #9333ea)' : 'var(--bg-tertiary)',
+              background: canAfford && !isProcessing ? 'var(--accent)' : 'var(--bg-tertiary)',
               border: 'none',
               borderRadius: '8px',
-              color: canAfford ? 'white' : 'var(--text-secondary)',
+              color: canAfford && !isProcessing ? 'white' : 'var(--text-secondary)',
               fontWeight: 700,
-              cursor: canAfford ? 'pointer' : 'not-allowed',
+              cursor: canAfford && !isProcessing ? 'pointer' : 'not-allowed',
             }}
           >
-            {isStaking ? '🔄 Staking...' : `🔒 Stake ${selectedTier.toLocaleString()} $HOPIUM`}
+            {isProcessing ? '🔄 ' : '🔒 '}
+            {getStatusText()}
           </button>
         </div>
       </div>
