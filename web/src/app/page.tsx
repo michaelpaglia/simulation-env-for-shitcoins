@@ -32,6 +32,14 @@ interface Tweet {
   retweets: number
   replies: number
   sentiment: number
+  // Interaction fields
+  tweet_type?: 'original' | 'reply' | 'quote'
+  is_reply_to?: string | null
+  quotes_tweet?: string | null
+  thread_depth?: number
+  reply_to_author?: string | null
+  quoted_content?: string | null
+  quoted_author?: string | null
 }
 
 interface SimulationResult {
@@ -310,6 +318,54 @@ export default function Home() {
   const isVerified = (type: string) => ['kol', 'influencer', 'whale'].includes(type)
   const isGoldVerified = (type: string) => type === 'whale'
 
+  // Group tweets into threads (parent tweets with their replies)
+  const groupTweetsIntoThreads = (tweets: Tweet[]) => {
+    const tweetMap = new Map<string, Tweet>()
+    const threads: { parent: Tweet; replies: Tweet[]; quotes: Tweet[] }[] = []
+    const usedIds = new Set<string>()
+
+    // Build tweet map
+    tweets.forEach(t => tweetMap.set(t.id, t))
+
+    // First pass: find parent tweets (original or quoted)
+    tweets.forEach(tweet => {
+      if (tweet.tweet_type === 'original' || !tweet.tweet_type) {
+        threads.push({ parent: tweet, replies: [], quotes: [] })
+        usedIds.add(tweet.id)
+      }
+    })
+
+    // Second pass: attach replies and quotes to their parents
+    tweets.forEach(tweet => {
+      if (usedIds.has(tweet.id)) return
+
+      if (tweet.tweet_type === 'reply' && tweet.is_reply_to) {
+        const thread = threads.find(t => t.parent.id === tweet.is_reply_to)
+        if (thread) {
+          thread.replies.push(tweet)
+          usedIds.add(tweet.id)
+        }
+      } else if (tweet.tweet_type === 'quote' && tweet.quotes_tweet) {
+        const thread = threads.find(t => t.parent.id === tweet.quotes_tweet)
+        if (thread) {
+          thread.quotes.push(tweet)
+          usedIds.add(tweet.id)
+        }
+      }
+    })
+
+    // Add any orphaned tweets as standalone
+    tweets.forEach(tweet => {
+      if (!usedIds.has(tweet.id)) {
+        threads.push({ parent: tweet, replies: [], quotes: [] })
+      }
+    })
+
+    return threads
+  }
+
+  const threadedTweets = groupTweetsIntoThreads(tweets)
+
   return (
     <div className="container">
       {/* Staking Gate Modal */}
@@ -422,47 +478,149 @@ export default function Home() {
           </div>
         ) : (
           <>
-            {tweets.map(tweet => (
-              <div key={tweet.id} className="tweet">
-                <div className="avatar" style={{ background: getAvatarColor(tweet.author_type) }}>
-                  {getAvatarInitial(tweet.author_name)}
-                </div>
-                <div className="tweet-content">
-                  <div className="tweet-header">
-                    <span className="tweet-name">{tweet.author_name}</span>
-                    {isVerified(tweet.author_type) && <VerifiedBadge gold={isGoldVerified(tweet.author_type)} />}
-                    <span className="tweet-handle">@{tweet.author_handle}</span>
-                    <span className="tweet-time">· {tweet.hour}h</span>
-                    <span className={`tweet-type-badge ${tweet.author_type}`}>
-                      {tweet.author_type}
-                    </span>
+            {threadedTweets.map(({ parent, replies, quotes }) => (
+              <div key={parent.id} className="tweet-thread">
+                {/* Parent tweet */}
+                <div className="tweet">
+                  <div className="avatar" style={{ background: getAvatarColor(parent.author_type) }}>
+                    {getAvatarInitial(parent.author_name)}
                   </div>
-                  <div className="tweet-text">{tweet.content}</div>
-                  <div className="tweet-actions">
-                    <span className="tweet-action reply">
-                      <ReplyIcon />
-                      {tweet.replies > 0 && formatNumber(tweet.replies)}
-                    </span>
-                    <span className="tweet-action repost">
-                      <RepostIcon />
-                      {tweet.retweets > 0 && formatNumber(tweet.retweets)}
-                    </span>
-                    <span className="tweet-action like">
-                      <LikeIcon />
-                      {tweet.likes > 0 && formatNumber(tweet.likes)}
-                    </span>
-                    <span className="tweet-action views">
-                      <ViewsIcon />
-                      {formatNumber(Math.floor((tweet.likes + tweet.retweets) * 12.5))}
-                    </span>
-                    <span className="tweet-action">
-                      <BookmarkIcon />
-                    </span>
-                    <span className="tweet-action">
-                      <ShareIcon />
-                    </span>
+                  <div className="tweet-content">
+                    <div className="tweet-header">
+                      <span className="tweet-name">{parent.author_name}</span>
+                      {isVerified(parent.author_type) && <VerifiedBadge gold={isGoldVerified(parent.author_type)} />}
+                      <span className="tweet-handle">@{parent.author_handle}</span>
+                      <span className="tweet-time">· {parent.hour}h</span>
+                      <span className={`tweet-type-badge ${parent.author_type}`}>
+                        {parent.author_type}
+                      </span>
+                    </div>
+                    <div className="tweet-text">{parent.content}</div>
+                    <div className="tweet-actions">
+                      <span className="tweet-action reply">
+                        <ReplyIcon />
+                        {parent.replies > 0 && formatNumber(parent.replies)}
+                      </span>
+                      <span className="tweet-action repost">
+                        <RepostIcon />
+                        {parent.retweets > 0 && formatNumber(parent.retweets)}
+                      </span>
+                      <span className="tweet-action like">
+                        <LikeIcon />
+                        {parent.likes > 0 && formatNumber(parent.likes)}
+                      </span>
+                      <span className="tweet-action views">
+                        <ViewsIcon />
+                        {formatNumber(Math.floor((parent.likes + parent.retweets) * 12.5))}
+                      </span>
+                      <span className="tweet-action">
+                        <BookmarkIcon />
+                      </span>
+                      <span className="tweet-action">
+                        <ShareIcon />
+                      </span>
+                    </div>
                   </div>
                 </div>
+
+                {/* Replies */}
+                {replies.map(reply => (
+                  <div key={reply.id} className="tweet tweet-reply">
+                    <div className="thread-line" />
+                    <div className="avatar" style={{ background: getAvatarColor(reply.author_type) }}>
+                      {getAvatarInitial(reply.author_name)}
+                    </div>
+                    <div className="tweet-content">
+                      <div className="reply-indicator">
+                        Replying to <span className="reply-to-handle">@{reply.reply_to_author || parent.author_handle}</span>
+                      </div>
+                      <div className="tweet-header">
+                        <span className="tweet-name">{reply.author_name}</span>
+                        {isVerified(reply.author_type) && <VerifiedBadge gold={isGoldVerified(reply.author_type)} />}
+                        <span className="tweet-handle">@{reply.author_handle}</span>
+                        <span className="tweet-time">· {reply.hour}h</span>
+                        <span className={`tweet-type-badge ${reply.author_type}`}>
+                          {reply.author_type}
+                        </span>
+                      </div>
+                      <div className="tweet-text">{reply.content}</div>
+                      <div className="tweet-actions">
+                        <span className="tweet-action reply">
+                          <ReplyIcon />
+                          {reply.replies > 0 && formatNumber(reply.replies)}
+                        </span>
+                        <span className="tweet-action repost">
+                          <RepostIcon />
+                          {reply.retweets > 0 && formatNumber(reply.retweets)}
+                        </span>
+                        <span className="tweet-action like">
+                          <LikeIcon />
+                          {reply.likes > 0 && formatNumber(reply.likes)}
+                        </span>
+                        <span className="tweet-action views">
+                          <ViewsIcon />
+                          {formatNumber(Math.floor((reply.likes + reply.retweets) * 12.5))}
+                        </span>
+                        <span className="tweet-action">
+                          <BookmarkIcon />
+                        </span>
+                        <span className="tweet-action">
+                          <ShareIcon />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+
+                {/* Quote tweets */}
+                {quotes.map(quote => (
+                  <div key={quote.id} className="tweet tweet-quote">
+                    <div className="avatar" style={{ background: getAvatarColor(quote.author_type) }}>
+                      {getAvatarInitial(quote.author_name)}
+                    </div>
+                    <div className="tweet-content">
+                      <div className="tweet-header">
+                        <span className="tweet-name">{quote.author_name}</span>
+                        {isVerified(quote.author_type) && <VerifiedBadge gold={isGoldVerified(quote.author_type)} />}
+                        <span className="tweet-handle">@{quote.author_handle}</span>
+                        <span className="tweet-time">· {quote.hour}h</span>
+                        <span className={`tweet-type-badge ${quote.author_type}`}>
+                          {quote.author_type}
+                        </span>
+                      </div>
+                      <div className="tweet-text">{quote.content}</div>
+                      {/* Quoted tweet embed */}
+                      <div className="quote-embed">
+                        <div className="quote-author">@{quote.quoted_author || parent.author_handle}</div>
+                        <div className="quote-content">{quote.quoted_content || parent.content}</div>
+                      </div>
+                      <div className="tweet-actions">
+                        <span className="tweet-action reply">
+                          <ReplyIcon />
+                          {quote.replies > 0 && formatNumber(quote.replies)}
+                        </span>
+                        <span className="tweet-action repost">
+                          <RepostIcon />
+                          {quote.retweets > 0 && formatNumber(quote.retweets)}
+                        </span>
+                        <span className="tweet-action like">
+                          <LikeIcon />
+                          {quote.likes > 0 && formatNumber(quote.likes)}
+                        </span>
+                        <span className="tweet-action views">
+                          <ViewsIcon />
+                          {formatNumber(Math.floor((quote.likes + quote.retweets) * 12.5))}
+                        </span>
+                        <span className="tweet-action">
+                          <BookmarkIcon />
+                        </span>
+                        <span className="tweet-action">
+                          <ShareIcon />
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
               </div>
             ))}
             {isRunning && (

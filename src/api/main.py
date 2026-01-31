@@ -15,6 +15,7 @@ from ..models.token import Token, MarketCondition, MemeStyle
 from ..simulation.engine import SimulationEngine
 from ..utils.twitter import TwitterClient, get_market_sentiment
 from .harness_routes import router as harness_router
+from .stake_routes import router as stake_router
 
 load_dotenv()
 
@@ -37,6 +38,56 @@ app.add_middleware(
 
 # Include harness routes
 app.include_router(harness_router)
+
+# Include stake routes
+app.include_router(stake_router)
+
+
+# Stake verification (enabled via env var)
+REQUIRE_STAKE = os.getenv("REQUIRE_STAKE_VERIFICATION", "false").lower() == "true"
+
+
+async def verify_stake_if_required(
+    wallet: Optional[str],
+    stake_pda: Optional[str],
+    required_hours: int,
+) -> Optional[int]:
+    """Verify stake if required, returns allowed sim hours or raises HTTPException.
+
+    Returns None if stake verification is disabled or not provided.
+    Returns allowed hours if stake is valid.
+    Raises HTTPException if stake is invalid.
+    """
+    if not REQUIRE_STAKE:
+        return None
+
+    if not wallet or not stake_pda:
+        if REQUIRE_STAKE:
+            raise HTTPException(
+                status_code=402,
+                detail="Stake verification required. Provide wallet and stake_pda.",
+            )
+        return None
+
+    from ..solana import StakeVerifier
+
+    verifier = StakeVerifier()
+    result = await verifier.verify_stake(wallet, stake_pda)
+
+    if not result.valid:
+        raise HTTPException(
+            status_code=402,
+            detail=f"Invalid stake: {result.message}",
+        )
+
+    # Verify stake tier supports requested hours
+    if result.sim_hours and required_hours > result.sim_hours:
+        raise HTTPException(
+            status_code=402,
+            detail=f"Stake tier only allows {result.sim_hours}h simulations, requested {required_hours}h",
+        )
+
+    return result.sim_hours
 
 
 def get_engine() -> SimulationEngine:
@@ -63,6 +114,9 @@ class SimulationRequest(BaseModel):
     hours: int = Field(default=48, ge=1, le=168)
     use_twitter_priors: bool = Field(default=False)
     similar_tokens: Optional[list[str]] = Field(default=None)
+    # On-chain stake verification (optional)
+    wallet: Optional[str] = Field(default=None, description="Wallet public key for stake verification")
+    stake_pda: Optional[str] = Field(default=None, description="Stake account PDA address")
 
 
 class TweetResponse(BaseModel):
@@ -76,6 +130,15 @@ class TweetResponse(BaseModel):
     retweets: int
     replies: int
     sentiment: float
+    # Interaction fields
+    tweet_type: str = "original"
+    is_reply_to: Optional[str] = None
+    quotes_tweet: Optional[str] = None
+    thread_depth: int = 0
+    # Denormalized for UI display
+    reply_to_author: Optional[str] = None
+    quoted_content: Optional[str] = None
+    quoted_author: Optional[str] = None
 
 
 class SimulationResponse(BaseModel):
@@ -124,6 +187,9 @@ async def health():
 async def run_simulation(request: SimulationRequest):
     """Run a full simulation for a token."""
 
+    # Verify stake if required
+    await verify_stake_if_required(request.wallet, request.stake_pda, request.hours)
+
     # Enums are already validated by Pydantic, just extract values
     meme_style = request.token.meme_style
     market_condition = request.token.market_condition
@@ -169,6 +235,13 @@ async def run_simulation(request: SimulationRequest):
                     retweets=tweet["retweets"],
                     replies=tweet["replies"],
                     sentiment=tweet["sentiment"],
+                    tweet_type=tweet.get("tweet_type", "original"),
+                    is_reply_to=tweet.get("is_reply_to"),
+                    quotes_tweet=tweet.get("quotes_tweet"),
+                    thread_depth=tweet.get("thread_depth", 0),
+                    reply_to_author=tweet.get("reply_to_author"),
+                    quoted_content=tweet.get("quoted_content"),
+                    quoted_author=tweet.get("quoted_author"),
                 ))
         elif event["type"] == "result":
             final_result = event["result"]
@@ -197,6 +270,9 @@ async def run_simulation(request: SimulationRequest):
 @app.post("/simulate/stream")
 async def stream_simulation(request: SimulationRequest):
     """Stream simulation tweets as they're generated using Server-Sent Events."""
+
+    # Verify stake if required
+    await verify_stake_if_required(request.wallet, request.stake_pda, request.hours)
 
     # Enums are already validated by Pydantic
     meme_style = request.token.meme_style

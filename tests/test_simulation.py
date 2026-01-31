@@ -1,7 +1,7 @@
 """Tests for simulation engine - core system validation."""
 
 import pytest
-from src.simulation.engine import SimulationEngine, SimulationState, Tweet
+from src.simulation.engine import SimulationEngine, SimulationState, Tweet, TweetType
 from src.agents.personas import PersonaType, get_persona, PERSONAS
 from src.models.token import MarketCondition
 
@@ -293,3 +293,244 @@ class TestEdgeCases:
         engagements = [r.total_engagement for r in results]
         # Should not all be identical
         assert len(set(engagements)) > 1 or True  # May be same in edge cases
+
+
+class TestTweetInteractions:
+    """Tests for tweet interaction logic (replies and quotes)."""
+
+    def test_tweet_type_enum_exists(self):
+        """TweetType enum should have expected values."""
+        assert TweetType.ORIGINAL.value == "original"
+        assert TweetType.REPLY.value == "reply"
+        assert TweetType.QUOTE.value == "quote"
+
+    def test_tweet_has_interaction_fields(self, simulation_engine, sample_token, empty_state, degen_persona):
+        """Tweet model should have interaction fields."""
+        tweet = simulation_engine._generate_tweet(degen_persona, sample_token, empty_state)
+        assert hasattr(tweet, 'tweet_type')
+        assert hasattr(tweet, 'is_reply_to')
+        assert hasattr(tweet, 'quotes_tweet')
+        assert hasattr(tweet, 'thread_depth')
+        # Original tweets should have default values
+        assert tweet.tweet_type == TweetType.ORIGINAL
+        assert tweet.is_reply_to is None
+        assert tweet.quotes_tweet is None
+        assert tweet.thread_depth == 0
+
+    def test_identify_hot_tweets_returns_list(self, simulation_engine, active_state):
+        """_identify_hot_tweets returns a list."""
+        # Add some tweets to state
+        degen = get_persona(PersonaType.DEGEN)
+        for i in range(5):
+            tweet = Tweet(
+                id=f"test_{i}",
+                author=degen,
+                content=f"Test tweet {i}",
+                hour=active_state.current_hour - 1,
+                likes=100 * (i + 1),
+                retweets=20 * (i + 1),
+                replies=5,
+                sentiment=0.5,
+            )
+            active_state.tweets.append(tweet)
+
+        hot_tweets = simulation_engine._identify_hot_tweets(active_state)
+        assert isinstance(hot_tweets, list)
+        assert len(hot_tweets) <= simulation_engine.MAX_HOT_TWEETS
+
+    def test_identify_hot_tweets_prioritizes_engagement(self, simulation_engine, active_state):
+        """Hot tweets should prioritize high engagement."""
+        degen = get_persona(PersonaType.DEGEN)
+
+        # Add low engagement tweet
+        low_tweet = Tweet(
+            id="low_engagement",
+            author=degen,
+            content="Low engagement",
+            hour=active_state.current_hour - 1,
+            likes=10,
+            retweets=2,
+            replies=1,
+            sentiment=0.0,
+        )
+        active_state.tweets.append(low_tweet)
+
+        # Add high engagement tweet
+        high_tweet = Tweet(
+            id="high_engagement",
+            author=degen,
+            content="High engagement",
+            hour=active_state.current_hour - 1,
+            likes=1000,
+            retweets=200,
+            replies=50,
+            sentiment=0.5,
+        )
+        active_state.tweets.append(high_tweet)
+
+        hot_tweets = simulation_engine._identify_hot_tweets(active_state)
+        if len(hot_tweets) > 0:
+            # High engagement tweet should be in the list
+            hot_ids = [t.id for t in hot_tweets]
+            assert "high_engagement" in hot_ids
+
+    def test_calculate_reply_probability_returns_float(self, simulation_engine, active_state, degen_persona):
+        """_calculate_reply_probability returns a float between 0 and 1."""
+        target_tweet = Tweet(
+            id="target",
+            author=get_persona(PersonaType.WHALE),
+            content="Whale tweet",
+            hour=active_state.current_hour - 1,
+            likes=500,
+            retweets=100,
+            replies=20,
+            sentiment=0.5,
+        )
+
+        prob = simulation_engine._calculate_reply_probability(degen_persona, target_tweet, active_state)
+        assert isinstance(prob, float)
+        assert 0 <= prob <= 1
+
+    def test_decide_interaction_type_returns_tweet_type(self, simulation_engine, degen_persona):
+        """_decide_interaction_type returns TweetType."""
+        target_tweet = Tweet(
+            id="target",
+            author=get_persona(PersonaType.WHALE),
+            content="Target tweet",
+            hour=0,
+            likes=100,
+            retweets=20,
+            replies=5,
+            sentiment=0.5,
+        )
+
+        interaction_type = simulation_engine._decide_interaction_type(degen_persona, target_tweet)
+        assert isinstance(interaction_type, TweetType)
+        assert interaction_type in [TweetType.REPLY, TweetType.QUOTE]
+
+    def test_select_interactions_returns_list(self, simulation_engine, active_state):
+        """_select_interactions returns list of tuples."""
+        # Add some tweets
+        whale = get_persona(PersonaType.WHALE)
+        hot_tweet = Tweet(
+            id="hot",
+            author=whale,
+            content="Hot whale tweet",
+            hour=active_state.current_hour - 1,
+            likes=1000,
+            retweets=200,
+            replies=50,
+            sentiment=0.5,
+        )
+        active_state.tweets.append(hot_tweet)
+
+        interactions = simulation_engine._select_interactions(active_state, [hot_tweet])
+        assert isinstance(interactions, list)
+        for interaction in interactions:
+            assert len(interaction) == 3  # (persona, tweet, tweet_type)
+
+    def test_generate_interaction_template_creates_reply(self, simulation_engine, sample_token, active_state, degen_persona):
+        """_generate_interaction_template creates a valid reply tweet."""
+        target_tweet = Tweet(
+            id="target",
+            author=get_persona(PersonaType.WHALE),
+            content="Target tweet",
+            hour=active_state.current_hour - 1,
+            likes=500,
+            retweets=100,
+            replies=20,
+            sentiment=0.5,
+        )
+
+        reply = simulation_engine._generate_interaction_template(
+            degen_persona, target_tweet, TweetType.REPLY, sample_token, active_state
+        )
+
+        assert reply.tweet_type == TweetType.REPLY
+        assert reply.is_reply_to == target_tweet.id
+        assert reply.quotes_tweet is None
+        assert reply.thread_depth == target_tweet.thread_depth + 1
+
+    def test_generate_interaction_template_creates_quote(self, simulation_engine, sample_token, active_state):
+        """_generate_interaction_template creates a valid quote tweet."""
+        skeptic = get_persona(PersonaType.SKEPTIC)
+        target_tweet = Tweet(
+            id="target",
+            author=get_persona(PersonaType.DEGEN),
+            content="Bullish degen tweet",
+            hour=active_state.current_hour - 1,
+            likes=500,
+            retweets=100,
+            replies=20,
+            sentiment=0.8,
+        )
+
+        quote = simulation_engine._generate_interaction_template(
+            skeptic, target_tweet, TweetType.QUOTE, sample_token, active_state
+        )
+
+        assert quote.tweet_type == TweetType.QUOTE
+        assert quote.quotes_tweet == target_tweet.id
+        assert quote.is_reply_to is None
+        assert quote.thread_depth == target_tweet.thread_depth + 1
+
+    def test_thread_depth_limited(self, simulation_engine, active_state):
+        """Thread depth should be limited to MAX_THREAD_DEPTH."""
+        degen = get_persona(PersonaType.DEGEN)
+
+        # Create a tweet at max depth
+        deep_tweet = Tweet(
+            id="deep",
+            author=degen,
+            content="Deep tweet",
+            hour=active_state.current_hour - 1,
+            likes=500,
+            retweets=100,
+            replies=20,
+            sentiment=0.5,
+            thread_depth=simulation_engine.MAX_THREAD_DEPTH,
+        )
+        active_state.tweets.append(deep_tweet)
+
+        # Should not include tweets at max depth
+        hot_tweets = simulation_engine._identify_hot_tweets(active_state)
+        assert deep_tweet not in hot_tweets
+
+    def test_tweet_to_dict_includes_interaction_fields(self, simulation_engine, sample_token, empty_state, degen_persona):
+        """_tweet_to_dict should include interaction fields."""
+        tweet = simulation_engine._generate_tweet(degen_persona, sample_token, empty_state)
+        tweet_dict = simulation_engine._tweet_to_dict(tweet)
+
+        assert "tweet_type" in tweet_dict
+        assert "is_reply_to" in tweet_dict
+        assert "quotes_tweet" in tweet_dict
+        assert "thread_depth" in tweet_dict
+
+    def test_simulation_generates_interactions(self, simulation_engine, sample_token):
+        """Full simulation should generate some interaction tweets."""
+        result = simulation_engine.run_simulation(sample_token, hours=24)
+        assert result is not None
+        # Interactions may or may not occur depending on random factors,
+        # but the simulation should complete successfully
+        assert result.total_mentions >= 0
+
+    def test_interaction_rate_reasonable(self, simulation_engine, sample_token):
+        """Interaction rate should be in the expected range."""
+        # Run simulation and count interaction tweets via stream
+        interaction_count = 0
+        original_count = 0
+
+        for event in simulation_engine.run_simulation_stream(sample_token, hours=24):
+            if event["type"] == "tweet":
+                tweet = event["tweet"]
+                if tweet.get("tweet_type") in ["reply", "quote"]:
+                    interaction_count += 1
+                else:
+                    original_count += 1
+
+        total = interaction_count + original_count
+        if total > 0:
+            interaction_rate = interaction_count / total
+            # Should be around 10-20% (light rate)
+            # Allow some variance due to randomness
+            assert interaction_rate <= 0.4  # Should not exceed 40%

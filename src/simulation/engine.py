@@ -4,6 +4,7 @@ import random
 import json
 import re
 import logging
+from enum import Enum
 from typing import Optional
 from pydantic import BaseModel, Field
 import anthropic
@@ -15,6 +16,13 @@ from ..agents.personas import Persona, PersonaType, get_all_personas, get_person
 
 # Use Haiku for speed and cost efficiency
 DEFAULT_MODEL = "claude-3-5-haiku-20241022"
+
+
+class TweetType(str, Enum):
+    """Type of tweet interaction."""
+    ORIGINAL = "original"
+    REPLY = "reply"
+    QUOTE = "quote"
 
 
 class Tweet(BaseModel):
@@ -30,7 +38,12 @@ class Tweet(BaseModel):
     replies: int = 0
 
     sentiment: float = Field(default=0, ge=-1, le=1)  # -1 FUD to 1 hype
-    is_reply_to: Optional[str] = None
+
+    # Interaction fields
+    tweet_type: TweetType = TweetType.ORIGINAL
+    is_reply_to: Optional[str] = None  # ID of parent tweet if reply
+    quotes_tweet: Optional[str] = None  # ID of quoted tweet if quote
+    thread_depth: int = 0  # Depth in conversation (0 = root, max 3)
 
 
 class SimulationState(BaseModel):
@@ -335,6 +348,322 @@ sentiment: -1 (FUD) to 1 (hype)"""
 
         return active
 
+    # --- Interaction Logic (replies/quotes) ---
+
+    MAX_THREAD_DEPTH = 3
+    INTERACTION_RATE = 0.15  # ~15% of tweets are interactions (light rate)
+    MAX_HOT_TWEETS = 5  # Limit hot tweets per hour to prevent explosion
+
+    def _identify_hot_tweets(self, state: SimulationState) -> list[Tweet]:
+        """Find tweets likely to generate replies (high engagement, controversial, influential)."""
+        # Look at tweets from last 2 hours
+        recent_tweets = [
+            t for t in state.tweets
+            if t.hour >= state.current_hour - 2
+            and t.thread_depth < self.MAX_THREAD_DEPTH
+        ]
+
+        scored_tweets = []
+        for tweet in recent_tweets:
+            # Engagement score (normalized)
+            engagement_score = (tweet.likes + tweet.retweets) / 1000
+
+            # Controversy score (extreme sentiment = more replies)
+            controversy_score = abs(tweet.sentiment) * 0.5
+
+            # Influence bonus (whale/influencer posts attract replies)
+            influence_bonus = 0.3 if tweet.author.type in [
+                PersonaType.WHALE, PersonaType.INFLUENCER, PersonaType.KOL
+            ] else 0
+
+            total_score = engagement_score + controversy_score + influence_bonus
+            scored_tweets.append((tweet, total_score))
+
+        # Sort by score and return top N
+        scored_tweets.sort(key=lambda x: x[1], reverse=True)
+        return [t for t, _ in scored_tweets[:self.MAX_HOT_TWEETS]]
+
+    def _select_interactions(
+        self,
+        state: SimulationState,
+        hot_tweets: list[Tweet]
+    ) -> list[tuple[Persona, Tweet, TweetType]]:
+        """Select which personas will interact with which tweets."""
+        interactions = []
+
+        if not hot_tweets:
+            return interactions
+
+        # Calculate target number of interactions (10-20% of expected tweets)
+        target_interactions = max(1, int(len(self.personas) * state.awareness * self.INTERACTION_RATE))
+
+        for _ in range(target_interactions):
+            # Pick a random hot tweet
+            target_tweet = random.choice(hot_tweets)
+
+            # Pick a persona that might reply (not the author)
+            available_personas = [p for p in self.personas if p.handle != target_tweet.author.handle]
+            if not available_personas:
+                continue
+
+            persona = random.choice(available_personas)
+
+            # Check if this persona would reply based on dynamics
+            reply_prob = self._calculate_reply_probability(persona, target_tweet, state)
+            if random.random() > reply_prob:
+                continue
+
+            # Decide reply vs quote
+            tweet_type = self._decide_interaction_type(persona, target_tweet)
+            interactions.append((persona, target_tweet, tweet_type))
+
+        return interactions
+
+    def _calculate_reply_probability(
+        self,
+        persona: Persona,
+        target_tweet: Tweet,
+        state: SimulationState
+    ) -> float:
+        """Calculate probability that a persona replies to a tweet."""
+        base_rate = 0.3  # Base chance when selected
+
+        # Engagement modifier
+        engagement_score = (target_tweet.likes + target_tweet.retweets) / 1000
+        engagement_mod = min(engagement_score * 0.2, 0.2)
+
+        # Persona conflict dynamics (balanced as per user preference)
+        conflict_mod = 0.0
+        if persona.type == PersonaType.SKEPTIC and target_tweet.sentiment > 0.5:
+            conflict_mod = 0.15  # Skeptics challenge bullish takes
+        elif persona.type == PersonaType.DEGEN and target_tweet.author.type == PersonaType.WHALE:
+            conflict_mod = 0.15  # Degens hype whale posts
+        elif persona.type == PersonaType.NORMIE:
+            conflict_mod = 0.1  # Normies ask questions
+        elif persona.type == PersonaType.INFLUENCER and target_tweet.author.type == PersonaType.WHALE:
+            conflict_mod = 0.15  # Influencers amplify whales
+
+        # Sentiment polarization (extreme sentiment attracts replies)
+        sentiment_mod = abs(target_tweet.sentiment) * 0.1
+
+        # Thread depth penalty (less likely to reply deep in threads)
+        depth_penalty = target_tweet.thread_depth * 0.1
+
+        return min(base_rate + engagement_mod + conflict_mod + sentiment_mod - depth_penalty, 0.6)
+
+    def _decide_interaction_type(self, persona: Persona, target_tweet: Tweet) -> TweetType:
+        """Decide whether persona should reply or quote-tweet."""
+        # Influencers and KOLs prefer quotes (builds their profile)
+        if persona.type in [PersonaType.INFLUENCER, PersonaType.KOL]:
+            return TweetType.QUOTE if random.random() < 0.5 else TweetType.REPLY
+
+        # Skeptics quote to expose/critique publicly
+        if persona.type == PersonaType.SKEPTIC and target_tweet.sentiment > 0.5:
+            return TweetType.QUOTE if random.random() < 0.6 else TweetType.REPLY
+
+        # Normies mostly reply
+        if persona.type == PersonaType.NORMIE:
+            return TweetType.REPLY
+
+        # Default: slight preference for replies
+        return TweetType.REPLY if random.random() < 0.7 else TweetType.QUOTE
+
+    def _generate_interactions_batch(
+        self,
+        interactions: list[tuple[Persona, Tweet, TweetType]],
+        token: Token,
+        state: SimulationState
+    ) -> list[Tweet]:
+        """Generate reply and quote tweets for selected interactions."""
+        if not interactions:
+            return []
+
+        if not self.client:
+            # Fallback to template interactions
+            return [
+                self._generate_interaction_template(persona, target, tweet_type, token, state)
+                for persona, target, tweet_type in interactions
+            ]
+
+        # Build batch prompt for all interactions
+        interaction_specs = []
+        for i, (persona, target, tweet_type) in enumerate(interactions):
+            relationship = self._describe_relationship(persona, target.author)
+            spec = f"""Interaction {i + 1}:
+Original by @{target.author.handle} ({target.author.type.value}): "{target.content}"
+{tweet_type.value.upper()} from @{persona.handle} ({persona.type.value})
+Relationship: {relationship}"""
+            interaction_specs.append(spec)
+
+        system_prompt = """You are simulating Crypto Twitter interactions.
+Generate realistic REPLIES and QUOTE TWEETS. Match each persona's voice:
+- degen: Supportive, apes in, "ser", "wagmi", often agrees with bullish takes
+- skeptic: Challenges claims, asks hard questions, "source?", "anon team btw"
+- whale: Minimal, cryptic, might just say "..." or "interesting"
+- influencer: Adds context, builds narrative, subtle flex
+- normie: Asks clarifying questions, unsure, "is this good?"
+- kol: Gives opinion with authority, may agree or disagree thoughtfully
+- bot: Stats, alerts only
+
+REPLIES are short (under 140 chars), directly responding.
+QUOTES add commentary (100-200 chars), can stand alone."""
+
+        user_prompt = f"""Token: ${token.ticker} - {token.name}
+CT mood: {"bullish" if state.momentum > 0.3 else "bearish" if state.momentum < -0.3 else "neutral"}
+
+Generate these interactions:
+{chr(10).join(interaction_specs)}
+
+Return as JSON array:
+[{{"index": 0, "content": "reply/quote text", "sentiment": 0.5}}]"""
+
+        try:
+            response = self.client.messages.create(
+                model=self.model,
+                max_tokens=1000,
+                system=system_prompt,
+                messages=[{"role": "user", "content": user_prompt}],
+            )
+            raw = response.content[0].text
+
+            # Parse JSON array
+            match = re.search(r'\[[\s\S]*\]', raw)
+            if match:
+                responses_data = json.loads(match.group())
+            else:
+                logger.warning("No JSON array in interaction response, using templates")
+                responses_data = []
+
+            # Create tweets from responses
+            index_to_data = {r.get("index", i): r for i, r in enumerate(responses_data)}
+            tweets = []
+
+            for i, (persona, target, tweet_type) in enumerate(interactions):
+                data = index_to_data.get(i, {})
+                content = data.get("content", "")
+                sentiment = float(data.get("sentiment", 0))
+
+                if not content:
+                    tweet = self._generate_interaction_template(persona, target, tweet_type, token, state)
+                else:
+                    tweet = self._create_interaction_tweet(
+                        persona, content, sentiment, target, tweet_type, state
+                    )
+                tweets.append(tweet)
+
+            return tweets
+
+        except Exception as e:
+            logger.warning(f"LLM interaction generation failed: {e}")
+            return [
+                self._generate_interaction_template(persona, target, tweet_type, token, state)
+                for persona, target, tweet_type in interactions
+            ]
+
+    def _describe_relationship(self, replier: Persona, author: Persona) -> str:
+        """Describe the relationship/dynamic between two personas."""
+        if replier.type == PersonaType.SKEPTIC:
+            if author.type in [PersonaType.DEGEN, PersonaType.INFLUENCER]:
+                return "challenges bullish narratives"
+            return "questions everything"
+        elif replier.type == PersonaType.DEGEN:
+            if author.type == PersonaType.WHALE:
+                return "follows whale activity closely"
+            return "adds to the hype"
+        elif replier.type == PersonaType.NORMIE:
+            return "trying to understand"
+        elif replier.type == PersonaType.INFLUENCER:
+            if author.type == PersonaType.WHALE:
+                return "amplifies whale signals"
+            return "building narrative"
+        return "engaging"
+
+    def _create_interaction_tweet(
+        self,
+        persona: Persona,
+        content: str,
+        sentiment: float,
+        target: Tweet,
+        tweet_type: TweetType,
+        state: SimulationState
+    ) -> Tweet:
+        """Create an interaction tweet (reply or quote)."""
+        # Lower engagement for replies/quotes vs original tweets
+        base_engagement = int(persona.influence_score * 500)
+        momentum_multiplier = 1 + (state.momentum * 0.3)
+
+        return Tweet(
+            id=f"tweet_{state.current_hour}_{persona.handle}_{tweet_type.value}",
+            author=persona,
+            content=content,
+            hour=state.current_hour,
+            likes=int(base_engagement * momentum_multiplier * random.uniform(0.3, 1.2)),
+            retweets=int(base_engagement * 0.2 * momentum_multiplier * random.uniform(0.2, 1.0)),
+            replies=int(base_engagement * 0.1 * random.uniform(0.3, 1.5)),
+            sentiment=max(-1, min(1, sentiment)),
+            tweet_type=tweet_type,
+            is_reply_to=target.id if tweet_type == TweetType.REPLY else None,
+            quotes_tweet=target.id if tweet_type == TweetType.QUOTE else None,
+            thread_depth=target.thread_depth + 1,
+        )
+
+    def _generate_interaction_template(
+        self,
+        persona: Persona,
+        target: Tweet,
+        tweet_type: TweetType,
+        token: Token,
+        state: SimulationState
+    ) -> Tweet:
+        """Generate interaction using templates (fallback)."""
+        reply_templates = {
+            PersonaType.DEGEN: [
+                ("ser this is the way", 0.7),
+                ("absolutely based", 0.8),
+                ("LFG 🚀", 0.9),
+            ],
+            PersonaType.SKEPTIC: [
+                ("source?", -0.3),
+                ("how is this different from every other rug?", -0.7),
+                ("anon team btw", -0.5),
+            ],
+            PersonaType.WHALE: [
+                ("...", 0.1),
+                ("interesting", 0.2),
+            ],
+            PersonaType.INFLUENCER: [
+                ("Adding this to my watchlist", 0.5),
+                ("This thread needs more context 👇", 0.4),
+            ],
+            PersonaType.NORMIE: [
+                ("Wait is this good?", 0.1),
+                ("Should I buy?", 0.2),
+                ("Can someone explain?", 0.0),
+            ],
+            PersonaType.KOL: [
+                ("Interesting take. Here's my view:", 0.3),
+                ("Worth watching this one", 0.4),
+            ],
+        }
+
+        quote_templates = {
+            PersonaType.DEGEN: [
+                (f"CT is waking up to ${token.ticker}. Early gang knows.", 0.8),
+            ],
+            PersonaType.SKEPTIC: [
+                (f"And this is why you DYOR on ${token.ticker}. Red flags everywhere.", -0.7),
+            ],
+            PersonaType.INFLUENCER: [
+                (f"Let me add some context on ${token.ticker} for my followers 👇", 0.5),
+            ],
+        }
+
+        templates = quote_templates if tweet_type == TweetType.QUOTE else reply_templates
+        options = templates.get(persona.type, [("interesting", 0.0)])
+        content, sentiment = random.choice(options)
+
+        return self._create_interaction_tweet(persona, content, sentiment, target, tweet_type, state)
+
     def run_simulation(
         self,
         token: Token,
@@ -362,8 +691,14 @@ sentiment: -1 (FUD) to 1 (hype)"""
             recent_tweets = state.tweets[-5:] if state.tweets else []
             context = "\n".join(f"@{t.author.handle}: {t.content}" for t in recent_tweets)
 
-            # Generate tweets in batch (single API call per hour)
+            # Phase 1: Generate original tweets in batch
             new_tweets = self._generate_tweets_batch(active_personas, token, state, context)
+
+            # Phase 2: Generate interactions (replies/quotes) to hot tweets
+            hot_tweets = self._identify_hot_tweets(state)
+            interactions = self._select_interactions(state, hot_tweets)
+            interaction_tweets = self._generate_interactions_batch(interactions, token, state)
+            new_tweets.extend(interaction_tweets)
 
             self._update_state(state, new_tweets)
 
@@ -396,7 +731,7 @@ sentiment: -1 (FUD) to 1 (hype)"""
         # Yield initial tweet
         yield {
             "type": "tweet",
-            "tweet": self._tweet_to_dict(initial_tweet),
+            "tweet": self._tweet_to_dict(initial_tweet, state.tweets),
         }
 
         yield {
@@ -416,15 +751,29 @@ sentiment: -1 (FUD) to 1 (hype)"""
             recent_tweets = state.tweets[-5:] if state.tweets else []
             context = "\n".join(f"@{t.author.handle}: {t.content}" for t in recent_tweets)
 
-            # Generate tweets in batch (single API call per hour - much faster!)
+            # Phase 1: Generate original tweets in batch
             new_tweets = self._generate_tweets_batch(active_personas, token, state, context)
 
-            # Yield each tweet
+            # Yield original tweets
             for tweet in new_tweets:
                 yield {
                     "type": "tweet",
-                    "tweet": self._tweet_to_dict(tweet),
+                    "tweet": self._tweet_to_dict(tweet, state.tweets),
                 }
+
+            # Phase 2: Generate interactions (replies/quotes) to hot tweets
+            hot_tweets = self._identify_hot_tweets(state)
+            interactions = self._select_interactions(state, hot_tweets)
+            interaction_tweets = self._generate_interactions_batch(interactions, token, state)
+
+            # Yield interaction tweets
+            for tweet in interaction_tweets:
+                yield {
+                    "type": "tweet",
+                    "tweet": self._tweet_to_dict(tweet, state.tweets + new_tweets),
+                }
+
+            new_tweets.extend(interaction_tweets)
 
             self._update_state(state, new_tweets)
 
@@ -467,9 +816,9 @@ sentiment: -1 (FUD) to 1 (hype)"""
             }
         }
 
-    def _tweet_to_dict(self, tweet: Tweet) -> dict:
+    def _tweet_to_dict(self, tweet: Tweet, all_tweets: Optional[list[Tweet]] = None) -> dict:
         """Convert a Tweet to a serializable dict."""
-        return {
+        result = {
             "id": tweet.id,
             "author_name": tweet.author.name,
             "author_handle": tweet.author.handle,
@@ -480,7 +829,26 @@ sentiment: -1 (FUD) to 1 (hype)"""
             "retweets": tweet.retweets,
             "replies": tweet.replies,
             "sentiment": tweet.sentiment,
+            "tweet_type": tweet.tweet_type.value,
+            "is_reply_to": tweet.is_reply_to,
+            "quotes_tweet": tweet.quotes_tweet,
+            "thread_depth": tweet.thread_depth,
         }
+
+        # Denormalize parent/quoted tweet info for UI
+        if all_tweets:
+            tweet_map = {t.id: t for t in all_tweets}
+
+            if tweet.is_reply_to and tweet.is_reply_to in tweet_map:
+                parent = tweet_map[tweet.is_reply_to]
+                result["reply_to_author"] = parent.author.handle
+
+            if tweet.quotes_tweet and tweet.quotes_tweet in tweet_map:
+                quoted = tweet_map[tweet.quotes_tweet]
+                result["quoted_content"] = quoted.content[:100]
+                result["quoted_author"] = quoted.author.handle
+
+        return result
 
     def _compile_results(self, state: SimulationState) -> SimulationResult:
         """Compile final simulation results."""

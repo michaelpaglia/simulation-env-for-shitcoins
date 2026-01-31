@@ -369,6 +369,67 @@ body {
 }
 .tweet-action.views:hover svg { fill: var(--accent); }
 
+/* Tweet Threads */
+.tweet-thread {
+  border-bottom: 1px solid var(--border);
+}
+
+.tweet-thread .tweet {
+  border-bottom: none;
+}
+
+.tweet-thread .tweet:last-child {
+  border-bottom: none;
+}
+
+.tweet-reply {
+  position: relative;
+  padding-left: 52px;
+}
+
+.tweet-reply .thread-line {
+  position: absolute;
+  left: 31px;
+  top: 0;
+  width: 2px;
+  height: 20px;
+  background: var(--border);
+}
+
+.reply-indicator {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.reply-to-handle {
+  color: var(--accent);
+}
+
+.tweet-quote {
+  margin-left: 0;
+}
+
+.quote-embed {
+  margin-top: 12px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--bg-secondary);
+}
+
+.quote-author {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.quote-content {
+  font-size: 14px;
+  color: var(--text-primary);
+  line-height: 1.4;
+}
+
 /* Config Panel (Right Sidebar) */
 .config-panel {
   padding: 12px 24px;
