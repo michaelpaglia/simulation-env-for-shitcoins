@@ -14,6 +14,11 @@
 - [ ] **Strategy Performance Heatmap** - Cross-tabulate strategy × market condition performance
 - [ ] **Tweet Drill-down** - Expose actual tweets from past experiments in UI (data exists, not shown)
 
+## Solana Integration (Next Session)
+
+- [ ] **Deploy to Devnet** - Run `anchor deploy --provider.cluster devnet` in WSL Ubuntu
+- [ ] **Run Anchor Tests** - Run `anchor test` to verify staking program works
+
 ## Larger Features (1-3 days)
 
 - [ ] **LLM Feedback Loop in UI** - Connect `llm_feedback/` module to web UI with "Improve This Token" button
