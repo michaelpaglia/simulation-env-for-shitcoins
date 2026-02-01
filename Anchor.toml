@@ -3,10 +3,10 @@ seeds = false
 skip-lint = false
 
 [programs.devnet]
-hopium_staking = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+hopium_staking = "7xUNHtezv3M6uxMfKRG8JNQYafMtJp9dSqAYJHP1fx8F"
 
 [programs.mainnet]
-hopium_staking = "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"
+hopium_staking = "7xUNHtezv3M6uxMfKRG8JNQYafMtJp9dSqAYJHP1fx8F"
 
 [registry]
 url = "https://api.apr.dev"

@@ -6,7 +6,7 @@ from typing import Final
 # Program and token addresses (loaded from environment)
 HOPIUM_PROGRAM_ID: Final[str] = os.getenv(
     "HOPIUM_PROGRAM_ID",
-    "Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS"  # Placeholder
+    "7xUNHtezv3M6uxMfKRG8JNQYafMtJp9dSqAYJHP1fx8F"
 )
 
 HOPIUM_MINT_ADDRESS: Final[str] = os.getenv(

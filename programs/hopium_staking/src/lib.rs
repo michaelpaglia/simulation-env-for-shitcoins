@@ -6,7 +6,7 @@ pub mod state;
 
 use instructions::*;
 
-declare_id!("Fg6PaFpoGXkYsidMpWTK6W2BeZ7FEfcYkg476zPFsLnS");
+declare_id!("7xUNHtezv3M6uxMfKRG8JNQYafMtJp9dSqAYJHP1fx8F");
 
 #[program]
 pub mod hopium_staking {
