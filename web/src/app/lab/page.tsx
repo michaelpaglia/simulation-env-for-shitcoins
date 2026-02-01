@@ -3,8 +3,10 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { config } from '@/config'
-import { useWallet, STAKE_TIERS, StakeTier } from '@/hooks/useWallet'
+import { useWallet } from '@/hooks/useWallet'
+import { useAuth } from '@/hooks/useAuth'
 import { WalletDisplay } from '@/components/WalletDisplay'
+import { MobileNav } from '@/components/MobileNav'
 
 const API_URL = config.apiUrl
 
@@ -83,6 +85,7 @@ const HARNESS_STAKE_PER_EXPERIMENT = 50
 
 export default function Lab() {
   const wallet = useWallet()
+  const auth = useAuth()
 
   const [harnessConfig, setHarnessConfig] = useState<HarnessConfig>({
     mode: 'balanced',
@@ -899,6 +902,13 @@ export default function Lab() {
           )}
         </main>
       </div>
+
+      {/* Mobile Navigation */}
+      <MobileNav
+        isConnected={auth.isConnected}
+        balance={wallet.balance}
+        configPanel={null}
+      />
     </div>
   )
 }

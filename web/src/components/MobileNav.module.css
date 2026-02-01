@@ -1,0 +1,195 @@
+/* Mobile Navigation */
+
+.mobileNav {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--bg-primary);
+  border-top: 1px solid var(--border);
+  padding: 8px 0;
+  padding-bottom: max(8px, env(safe-area-inset-bottom));
+  z-index: 1000;
+}
+
+.navItems {
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.navItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 16px;
+  background: none;
+  border: none;
+  color: var(--text-secondary);
+  cursor: pointer;
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.2s;
+}
+
+.navItem:hover,
+.navItem:focus {
+  background: var(--bg-hover);
+}
+
+.navItem:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.navItem.active {
+  color: var(--text-primary);
+}
+
+.navItem.connected {
+  color: var(--success);
+}
+
+.navItem.connected svg {
+  fill: var(--success);
+}
+
+.navItem svg {
+  width: 24px;
+  height: 24px;
+  fill: currentColor;
+}
+
+.navLabel {
+  font-size: 10px;
+  font-weight: 500;
+}
+
+/* Config Toggle */
+.configToggle {
+  position: relative;
+}
+
+.configToggle.hasNotification::after {
+  content: '';
+  position: absolute;
+  top: 6px;
+  right: 12px;
+  width: 8px;
+  height: 8px;
+  background: var(--accent);
+  border-radius: 50%;
+}
+
+/* Config Sheet */
+.configSheet {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  top: 0;
+  z-index: 999;
+}
+
+.configSheet.open {
+  display: block;
+}
+
+.configBackdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.6);
+  animation: fadeIn 0.2s ease-out;
+}
+
+.configContent {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 85vh;
+  background: var(--bg-primary);
+  border-top-left-radius: 16px;
+  border-top-right-radius: 16px;
+  overflow-y: auto;
+  animation: slideUp 0.3s ease-out;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
+}
+
+.configHandle {
+  display: flex;
+  justify-content: center;
+  padding: 12px;
+  position: sticky;
+  top: 0;
+  background: var(--bg-primary);
+  z-index: 1;
+}
+
+.configHandleBar {
+  width: 40px;
+  height: 4px;
+  background: var(--border);
+  border-radius: 2px;
+}
+
+.configHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 16px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.configTitle {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.closeBtn {
+  padding: 8px;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  cursor: pointer;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.closeBtn:hover {
+  background: var(--bg-hover);
+}
+
+.closeBtn svg {
+  width: 20px;
+  height: 20px;
+  fill: currentColor;
+}
+
+.configBody {
+  padding: 16px;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
+/* Show on mobile only */
+@media (max-width: 1000px) {
+  .mobileNav {
+    display: block;
+  }
+}

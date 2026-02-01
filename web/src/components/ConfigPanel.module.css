@@ -1,0 +1,436 @@
+/* Config Panel Styles */
+
+.panel {
+  padding: 12px 24px;
+  position: fixed;
+  right: 0;
+  top: 0;
+  height: 100vh;
+  width: 350px;
+  overflow-y: auto;
+}
+
+.searchBox {
+  background: var(--bg-secondary);
+  border-radius: 9999px;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+  border: 1px solid transparent;
+  transition: all 0.2s;
+}
+
+.searchBox:focus-within {
+  background: transparent;
+  border-color: var(--accent);
+}
+
+.searchBox svg {
+  width: 18px;
+  height: 18px;
+  fill: var(--text-secondary);
+}
+
+.searchBox input {
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-size: 15px;
+  width: 100%;
+  outline: none;
+}
+
+.searchBox.disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.searchBox.disabled input {
+  cursor: not-allowed;
+}
+
+/* Config Card */
+.card {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.cardHeader {
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  background: var(--bg-tertiary);
+  border-bottom: 1px solid var(--border);
+}
+
+.cardBody {
+  padding: 0 16px 16px;
+}
+
+/* Form Elements */
+.formGroup {
+  margin-bottom: 12px;
+}
+
+.formLabel {
+  display: block;
+  margin-bottom: 6px;
+  color: var(--text-secondary);
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.formInput {
+  width: 100%;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--text-primary);
+  font-size: 15px;
+  transition: border-color 0.2s;
+}
+
+.formInput:focus {
+  outline: none;
+  border-color: var(--accent);
+}
+
+.formInput.error {
+  border-color: var(--danger);
+}
+
+.formInputWrapper {
+  position: relative;
+}
+
+.charCounter {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  font-size: 11px;
+  color: var(--text-secondary);
+}
+
+.charCounter.warning {
+  color: var(--warning);
+}
+
+.charCounter.error {
+  color: var(--danger);
+}
+
+.formError {
+  color: var(--danger);
+  font-size: 12px;
+  margin-top: 4px;
+}
+
+.formSelect {
+  width: 100%;
+  padding: 12px;
+  border-radius: 4px;
+  border: 1px solid var(--border);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-size: 15px;
+}
+
+.checkboxGroup {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid var(--border);
+  margin-top: 8px;
+}
+
+.checkboxGroup input[type="checkbox"] {
+  width: 20px;
+  height: 20px;
+  accent-color: var(--accent);
+  cursor: pointer;
+  margin-top: 2px;
+}
+
+.checkboxLabel {
+  font-size: 15px;
+}
+
+.checkboxHint {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 2px;
+}
+
+/* Buttons */
+.btn {
+  width: 100%;
+  padding: 12px;
+  border-radius: 9999px;
+  border: none;
+  font-size: 15px;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+}
+
+.btnPrimary {
+  background: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.btnPrimary:hover:not(:disabled) {
+  background: #d7dbdc;
+}
+
+.btnPrimary:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.btnPrimary:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.stakeHint {
+  text-align: center;
+  margin-top: 8px;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+/* Tooltip */
+.tooltip {
+  position: relative;
+}
+
+.tooltip::after {
+  content: attr(data-tooltip);
+  position: absolute;
+  bottom: 100%;
+  left: 50%;
+  transform: translateX(-50%);
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.2s, visibility 0.2s;
+  pointer-events: none;
+  z-index: 100;
+}
+
+.tooltip:hover::after,
+.tooltip:focus::after {
+  opacity: 1;
+  visibility: visible;
+}
+
+/* Results Card */
+.resultsCard {
+  background: var(--bg-secondary);
+  border-radius: 16px;
+  overflow: hidden;
+}
+
+.resultsHeader {
+  padding: 12px 16px;
+  font-size: 15px;
+  font-weight: 700;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-tertiary);
+}
+
+.resultRow {
+  display: flex;
+  justify-content: space-between;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.2s;
+}
+
+.resultRow:hover {
+  background: var(--bg-hover);
+}
+
+.resultRow:last-child {
+  border-bottom: none;
+}
+
+.resultLabel {
+  color: var(--text-secondary);
+}
+
+.resultValue {
+  font-weight: 700;
+}
+
+.resultValue.positive { color: var(--success); }
+.resultValue.negative { color: var(--danger); }
+.resultValue.neutral { color: var(--warning); }
+
+/* Prediction */
+.predictionSection {
+  padding: 16px;
+  text-align: center;
+  border-top: 1px solid var(--border);
+}
+
+.predictionBadge {
+  display: inline-block;
+  padding: 8px 20px;
+  border-radius: 9999px;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.predictionBadge.moon {
+  background: rgba(0, 186, 124, 0.2);
+  color: var(--success);
+}
+
+.predictionBadge.rug {
+  background: rgba(244, 33, 46, 0.2);
+  color: var(--danger);
+}
+
+.predictionBadge.pump_and_dump {
+  background: rgba(255, 212, 0, 0.2);
+  color: var(--warning);
+}
+
+.predictionBadge.cult_classic {
+  background: rgba(29, 155, 240, 0.2);
+  color: var(--accent);
+}
+
+.predictionBadge.slow_bleed {
+  background: rgba(113, 118, 123, 0.2);
+  color: var(--text-secondary);
+}
+
+.confidenceText {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-top: 8px;
+}
+
+.narrativeSection {
+  padding: 16px;
+  border-top: 1px solid var(--border);
+}
+
+.narrativeLabel {
+  font-size: 13px;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.narrativeText {
+  font-style: italic;
+  font-size: 15px;
+}
+
+/* Past Experiments */
+.pastExperiments {
+  padding: 0;
+}
+
+.experimentItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 16px;
+  border-bottom: 1px solid var(--border);
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.experimentItem:hover {
+  background: var(--bg-hover);
+}
+
+.experimentItem:last-child {
+  border-bottom: none;
+}
+
+.experimentInfo {
+  flex: 1;
+}
+
+.experimentTicker {
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.experimentName {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.outcomeBadge {
+  font-size: 10px;
+  padding: 4px 8px;
+  border-radius: 9999px;
+  font-weight: 600;
+  text-transform: capitalize;
+}
+
+.outcomeBadge.moon { background: rgba(0, 186, 124, 0.2); color: var(--success); }
+.outcomeBadge.rug { background: rgba(244, 33, 46, 0.2); color: var(--danger); }
+.outcomeBadge.pump_and_dump { background: rgba(255, 212, 0, 0.2); color: var(--warning); }
+.outcomeBadge.cult_classic { background: rgba(29, 155, 240, 0.2); color: var(--accent); }
+.outcomeBadge.pending,
+.outcomeBadge.running { background: rgba(113, 118, 123, 0.2); color: var(--text-secondary); }
+.outcomeBadge.completed { background: rgba(29, 155, 240, 0.2); color: var(--accent); }
+.outcomeBadge.failed { background: rgba(244, 33, 46, 0.2); color: var(--danger); }
+
+/* Footer */
+.footer {
+  padding: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.footer span {
+  color: var(--text-secondary);
+  font-size: 12px;
+}
+
+.footer a {
+  color: var(--text-secondary);
+  font-size: 13px;
+  text-decoration: none;
+}
+
+.footer a:hover {
+  text-decoration: underline;
+}
+
+/* Responsive */
+@media (max-width: 1200px) {
+  .panel {
+    width: 320px;
+    padding: 12px 16px;
+  }
+}
+
+@media (max-width: 1000px) {
+  .panel {
+    position: relative;
+    width: 100%;
+    height: auto;
+    padding: 16px;
+  }
+}
