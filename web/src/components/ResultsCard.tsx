@@ -132,7 +132,7 @@ export function ResultsCard({
             onClick={handleImprove}
             disabled={isImproving}
           >
-            {isImproving ? 'Analyzing...' : '&#128161; Improve This Token'}
+            {isImproving ? 'Analyzing...' : 'Improve This Token'}
           </button>
         </div>
       )}
