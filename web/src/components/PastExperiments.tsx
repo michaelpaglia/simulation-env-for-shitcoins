@@ -4,6 +4,7 @@ export interface PastExperiment {
   id: string
   ticker: string
   name: string
+  narrative: string
   strategy: string
   status: string
   score: number | null

@@ -97,21 +97,12 @@ export function SentimentChart({ tweets }: SentimentChartProps) {
           opacity={0.5}
         />
 
-        {/* Area fill */}
+        {/* Area fill - simple accent color */}
         <path
           d={areaD}
-          fill="url(#sentimentGradient)"
-          opacity={0.3}
+          fill="var(--accent)"
+          opacity={0.1}
         />
-
-        {/* Gradient definition */}
-        <defs>
-          <linearGradient id="sentimentGradient" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="var(--success)" />
-            <stop offset="50%" stopColor="var(--text-secondary)" />
-            <stop offset="100%" stopColor="var(--danger)" />
-          </linearGradient>
-        </defs>
 
         {/* Line */}
         <path

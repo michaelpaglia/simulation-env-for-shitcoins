@@ -185,6 +185,7 @@ export default function Home() {
       ...prev,
       name: exp.name,
       ticker: exp.ticker,
+      narrative: exp.narrative,
     }))
   }, [])
 
