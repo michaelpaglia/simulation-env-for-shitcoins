@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 
 from ..models.token import Token, MarketCondition, MemeStyle
 from ..simulation.engine import SimulationEngine
+from ..simulation.competition import CompetitionSimulator
 from ..utils.twitter import TwitterClient, get_market_sentiment
 from .harness_routes import router as harness_router
 from .stake_routes import router as stake_router
@@ -395,3 +396,209 @@ async def list_personas():
         })
 
     return {"personas": personas}
+
+
+# --- LLM Feedback Loop: Improve Token ---
+
+class ConceptFeedback(BaseModel):
+    """Feedback from a simulation run."""
+    viability_score: float
+    strengths: list[str]
+    weaknesses: list[str]
+    suggestions: list[str]
+    predicted_outcome: str
+    reasoning: str
+    confidence: float
+
+
+class ImproveTokenRequest(BaseModel):
+    """Request to improve a token concept based on simulation feedback."""
+    token: TokenConfig
+    feedback: ConceptFeedback
+
+
+class TokenVariation(BaseModel):
+    """An improved token concept variation."""
+    name: str
+    ticker: str
+    narrative: str
+    hook: str
+    meme_style: str
+    changes: str  # What was changed from the original
+
+
+class ImproveTokenResponse(BaseModel):
+    """Response with improved token variations."""
+    variations: list[TokenVariation]
+
+
+@app.post("/improve-token", response_model=ImproveTokenResponse)
+async def improve_token(request: ImproveTokenRequest):
+    """Generate improved token variations based on simulation feedback."""
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+    if not api_key:
+        raise HTTPException(status_code=503, detail="LLM API not configured")
+
+    try:
+        import anthropic
+
+        client = anthropic.Anthropic(api_key=api_key)
+
+        # Build context from the token and feedback
+        context = f"""Based on this simulation feedback, generate 2-3 improved token concept variations.
+
+Original Token:
+- Name: {request.token.name}
+- Ticker: ${request.token.ticker}
+- Narrative: {request.token.narrative}
+- Meme Style: {request.token.meme_style.value}
+
+Simulation Feedback:
+- Viability Score: {request.feedback.viability_score:.0%}
+- Predicted Outcome: {request.feedback.predicted_outcome}
+- Strengths: {', '.join(request.feedback.strengths) if request.feedback.strengths else 'None identified'}
+- Weaknesses: {', '.join(request.feedback.weaknesses) if request.feedback.weaknesses else 'None identified'}
+- Suggestions: {', '.join(request.feedback.suggestions) if request.feedback.suggestions else 'None provided'}
+- Analysis: {request.feedback.reasoning}
+
+Generate improved variations that:
+1. Address the identified weaknesses
+2. Build on the strengths
+3. Follow the suggestions where practical
+4. Keep the core concept recognizable but improved
+
+Return JSON:
+{{
+    "variations": [
+        {{
+            "name": "Improved Token Name",
+            "ticker": "TICKER",
+            "narrative": "The improved narrative/pitch",
+            "hook": "The viral hook/angle",
+            "meme_style": "ironic|sincere|absurdist|topical|nostalgic",
+            "changes": "Brief description of what was changed and why"
+        }}
+    ]
+}}"""
+
+        response = client.messages.create(
+            model="claude-sonnet-4-20250514",
+            max_tokens=1500,
+            messages=[{"role": "user", "content": context}],
+        )
+
+        # Parse response
+        raw = response.content[0].text
+        start = raw.find("{")
+        end = raw.rfind("}") + 1
+
+        if start >= 0 and end > start:
+            data = json.loads(raw[start:end])
+            variations = []
+            for v in data.get("variations", []):
+                variations.append(TokenVariation(
+                    name=v.get("name", request.token.name),
+                    ticker=v.get("ticker", request.token.ticker),
+                    narrative=v.get("narrative", request.token.narrative),
+                    hook=v.get("hook", ""),
+                    meme_style=v.get("meme_style", request.token.meme_style.value),
+                    changes=v.get("changes", ""),
+                ))
+            return ImproveTokenResponse(variations=variations)
+        else:
+            raise HTTPException(status_code=500, detail="Failed to parse LLM response")
+
+    except json.JSONDecodeError:
+        raise HTTPException(status_code=500, detail="Failed to parse improvement suggestions")
+    except Exception as e:
+        logger.error(f"Token improvement failed: {e}")
+        raise HTTPException(status_code=500, detail=f"Improvement failed: {str(e)}")
+
+
+# --- Multi-Token Competition ---
+
+class CompetitionRequest(BaseModel):
+    """Request to simulate multiple tokens competing."""
+    tokens: list[TokenConfig] = Field(..., min_length=2, max_length=4)
+    hours: int = Field(default=48, ge=1, le=168)
+    market_condition: MarketCondition = Field(default=MarketCondition.CRAB)
+
+
+class TokenCompetitionResult(BaseModel):
+    """Result for a single token in competition."""
+    token: TokenConfig
+    viral_coefficient: float
+    peak_sentiment: float
+    total_engagement: int
+    influencer_pickups: int
+    predicted_outcome: str
+    confidence: float
+    rank: int
+    market_share: float  # % of total engagement
+
+
+class CompetitionResponse(BaseModel):
+    """Response from multi-token competition simulation."""
+    results: list[TokenCompetitionResult]
+    winner: str  # ticker of winning token
+    analysis: str  # LLM analysis of the competition
+
+
+@app.post("/simulate/competition", response_model=CompetitionResponse)
+async def run_competition(request: CompetitionRequest):
+    """Simulate multiple tokens competing on CT simultaneously."""
+
+    api_key = os.getenv("ANTHROPIC_API_KEY")
+
+    # Create tokens
+    tokens = []
+    for tc in request.tokens:
+        tokens.append(Token(
+            name=tc.name,
+            ticker=tc.ticker.upper(),
+            narrative=tc.narrative,
+            tagline=tc.tagline,
+            meme_style=tc.meme_style,
+            market_condition=request.market_condition,
+        ))
+
+    # Run competition simulation
+    simulator = CompetitionSimulator(api_key=api_key)
+    results = simulator.run_competition(tokens, hours=request.hours)
+
+    # Calculate rankings and market share
+    total_engagement = sum(r.total_engagement for r in results)
+    ranked_results = sorted(
+        enumerate(results),
+        key=lambda x: (x[1].viral_coefficient, x[1].total_engagement),
+        reverse=True
+    )
+
+    competition_results = []
+    for rank, (idx, result) in enumerate(ranked_results, 1):
+        tc = request.tokens[idx]
+        market_share = result.total_engagement / total_engagement if total_engagement > 0 else 0
+
+        competition_results.append(TokenCompetitionResult(
+            token=tc,
+            viral_coefficient=result.viral_coefficient,
+            peak_sentiment=result.peak_sentiment,
+            total_engagement=result.total_engagement,
+            influencer_pickups=result.influencer_pickups,
+            predicted_outcome=result.predicted_outcome,
+            confidence=result.confidence,
+            rank=rank,
+            market_share=market_share,
+        ))
+
+    winner = competition_results[0].token.ticker
+
+    # Generate competition analysis
+    analysis = simulator.analyze_competition(tokens, results)
+
+    return CompetitionResponse(
+        results=competition_results,
+        winner=winner,
+        analysis=analysis,
+    )
