@@ -241,33 +241,54 @@ sentiment: -1 (FUD) to 1 (hype)"""
                 (f"${token.ticker} looks interesting, aped a smol bag LFG 🚀", 0.7),
                 (f"ser this ${token.ticker} chart is doing things to me", 0.5),
                 (f"${token.ticker}??? say less, I'm in", 0.8),
+                (f"just market bought ${token.ticker} with my rent money. landlord can wait", 0.9),
+                (f"${token.ticker} is giving me 2021 vibes fr fr", 0.6),
+                (f"imagine not buying ${token.ticker} rn. ngmi", 0.7),
             ],
             PersonaType.SKEPTIC: [
                 (f"${token.ticker} - anon team, no audit, unlocked LP. Classic rug setup.", -0.8),
                 (f"Why would anyone buy ${token.ticker}? Genuine question.", -0.5),
                 (f"${token.ticker} holders are exit liquidity. DYOR.", -0.7),
+                (f"${token.ticker} tokenomics are trash. 90% team wallet btw", -0.9),
+                (f"another day another ${token.ticker} shill. how original", -0.4),
+                (f"${token.ticker}? more like ${token.ticker[0]}UG amirite", -0.8),
             ],
             PersonaType.WHALE: [
-                (f"${token.ticker}", 0.3),
-                ("interesting", 0.4),
-                ("watching.", 0.2),
+                (f"watching ${token.ticker}", 0.3),
+                (f"${token.ticker}. interesting.", 0.4),
+                (f"hmm ${token.ticker}", 0.2),
+                (f"added ${token.ticker} to my watchlist", 0.5),
+                ("...", 0.1),
             ],
             PersonaType.INFLUENCER: [
                 (f"Just found ${token.ticker} - this could be big. Early alpha for my followers 👀", 0.8),
                 (f"${token.ticker} thread coming soon. You're not ready.", 0.6),
                 (f"CT is sleeping on ${token.ticker}. Don't say I didn't warn you.", 0.7),
+                (f"Been researching ${token.ticker} all week. Here's why I'm bullish 🧵", 0.8),
+                (f"${token.ticker} just hit my radar. Dev is based, community is strong.", 0.7),
             ],
             PersonaType.NORMIE: [
                 (f"Is ${token.ticker} legit? Should I buy?", 0.2),
                 (f"Just bought some ${token.ticker}, hope this moons!", 0.5),
                 (f"What's the deal with ${token.ticker}?", 0.0),
+                (f"my friend told me to buy ${token.ticker}. is it too late?", 0.3),
+                (f"how do I even buy ${token.ticker}?? someone help", 0.1),
             ],
             PersonaType.BOT: [
                 (f"🚨 NEW TOKEN: ${token.ticker}\nHolders: {random.randint(50, 500)}\nVol: ${random.randint(10, 100)}K", 0.0),
+                (f"📊 ${token.ticker} 24h: +{random.randint(10, 500)}%\nMC: ${random.randint(100, 999)}K", 0.0),
+            ],
+            PersonaType.KOL: [
+                (f"${token.ticker} has that special something. Reminds me of early $DOGE.", 0.7),
+                (f"Did my DD on ${token.ticker}. Strong fundamentals for a memecoin.", 0.6),
+                (f"${token.ticker} narrative is compelling. Worth a small position.", 0.5),
+                (f"I'm seeing ${token.ticker} everywhere. Social metrics looking good.", 0.6),
+                (f"${token.ticker} - not financial advice but I'm personally bullish here.", 0.7),
+                (f"The ${token.ticker} community reminds me of early $SHIB. Just saying.", 0.8),
             ],
         }
 
-        options = templates.get(persona.type, [(f"${token.ticker}", 0.0)])
+        options = templates.get(persona.type, [(f"Interesting project ${token.ticker}", 0.3)])
         return random.choice(options)
 
     def _update_state(self, state: SimulationState, new_tweets: list[Tweet]) -> None:
@@ -623,45 +644,85 @@ Return as JSON array:
                 ("ser this is the way", 0.7),
                 ("absolutely based", 0.8),
                 ("LFG 🚀", 0.9),
+                ("wagmi fren", 0.8),
+                ("this guy gets it", 0.7),
+                ("bullish af on this take", 0.8),
+                ("wen moon ser", 0.6),
             ],
             PersonaType.SKEPTIC: [
                 ("source?", -0.3),
                 ("how is this different from every other rug?", -0.7),
                 ("anon team btw", -0.5),
+                ("have fun staying poor i guess", -0.6),
+                ("this aged well", -0.4),
+                ("remind me in 2 weeks", -0.5),
+                ("cope", -0.6),
             ],
             PersonaType.WHALE: [
                 ("...", 0.1),
                 ("interesting", 0.2),
+                ("noted", 0.3),
+                ("👀", 0.2),
             ],
             PersonaType.INFLUENCER: [
                 ("Adding this to my watchlist", 0.5),
                 ("This thread needs more context 👇", 0.4),
+                ("Great alpha here", 0.6),
+                ("My followers need to see this", 0.7),
+                ("Saving this for later", 0.5),
             ],
             PersonaType.NORMIE: [
                 ("Wait is this good?", 0.1),
                 ("Should I buy?", 0.2),
                 ("Can someone explain?", 0.0),
+                ("I don't understand but I'm in", 0.4),
+                ("what does this mean for my bag?", 0.2),
             ],
             PersonaType.KOL: [
                 ("Interesting take. Here's my view:", 0.3),
                 ("Worth watching this one", 0.4),
+                ("I've been saying this for weeks", 0.5),
+                ("The data supports this", 0.6),
+                ("Solid analysis here", 0.5),
+            ],
+            PersonaType.BOT: [
+                ("🔔 Alert triggered", 0.0),
+                ("📈 Tracking this", 0.0),
             ],
         }
 
         quote_templates = {
             PersonaType.DEGEN: [
                 (f"CT is waking up to ${token.ticker}. Early gang knows.", 0.8),
+                (f"${token.ticker} believers where you at 🚀", 0.9),
+                (f"this is why I'm all in on ${token.ticker}", 0.8),
             ],
             PersonaType.SKEPTIC: [
                 (f"And this is why you DYOR on ${token.ticker}. Red flags everywhere.", -0.7),
+                (f"${token.ticker} maxis coping hard rn", -0.6),
+                (f"imagine believing ${token.ticker} is going anywhere", -0.8),
             ],
             PersonaType.INFLUENCER: [
                 (f"Let me add some context on ${token.ticker} for my followers 👇", 0.5),
+                (f"${token.ticker} alpha that CT isn't talking about:", 0.7),
+                (f"Important ${token.ticker} thread from a reliable source", 0.6),
+            ],
+            PersonaType.KOL: [
+                (f"My thoughts on ${token.ticker} and this take:", 0.5),
+                (f"${token.ticker} analysis - here's what I'm seeing:", 0.6),
+            ],
+            PersonaType.NORMIE: [
+                (f"is ${token.ticker} really doing this??", 0.3),
+                (f"someone explain ${token.ticker} to me like I'm 5", 0.1),
+            ],
+            PersonaType.WHALE: [
+                (f"${token.ticker}", 0.3),
+                ("👀", 0.2),
             ],
         }
 
         templates = quote_templates if tweet_type == TweetType.QUOTE else reply_templates
-        options = templates.get(persona.type, [("interesting", 0.0)])
+        options = templates.get(persona.type, [("interesting take", 0.2)])
         content, sentiment = random.choice(options)
 
         return self._create_interaction_tweet(persona, content, sentiment, target, tweet_type, state)
