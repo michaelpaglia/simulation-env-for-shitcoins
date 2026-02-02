@@ -59,6 +59,10 @@ interface PastExperiment {
   total_engagement: number | null
   dominant_narrative: string | null
   created_at: string
+  // Risk assessment
+  risk_factors: string[] | null
+  reasoning: string | null
+  confidence: number | null
 }
 
 // Icons
@@ -107,7 +111,42 @@ export default function Lab() {
   const [viewMode, setViewMode] = useState<'current' | 'history'>('history')
   const [apiStatus, setApiStatus] = useState<'loading' | 'connected' | 'error'>('loading')
 
+  // Filtering state
+  const [outcomeFilter, setOutcomeFilter] = useState<string>('all')
+  const [strategyFilter, setStrategyFilter] = useState<string>('all')
+  const [sortBy, setSortBy] = useState<'score' | 'date' | 'viral'>('date')
+  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc')
+  const [expandedExperiment, setExpandedExperiment] = useState<string | null>(null)
+
   const eventSourceRef = useRef<AbortController | null>(null)
+
+  // Get unique strategies and outcomes for filter options
+  const uniqueStrategies = [...new Set(pastExperiments.map(e => e.strategy).filter(Boolean))]
+  const uniqueOutcomes = [...new Set(pastExperiments.map(e => e.outcome).filter(Boolean))]
+
+  // Filter and sort experiments
+  const filteredExperiments = pastExperiments
+    .filter(exp => {
+      if (outcomeFilter !== 'all' && exp.outcome !== outcomeFilter) return false
+      if (strategyFilter !== 'all' && exp.strategy !== strategyFilter) return false
+      return true
+    })
+    .sort((a, b) => {
+      let comparison = 0
+      switch (sortBy) {
+        case 'score':
+          comparison = (a.score ?? 0) - (b.score ?? 0)
+          break
+        case 'viral':
+          comparison = (a.viral_coefficient ?? 0) - (b.viral_coefficient ?? 0)
+          break
+        case 'date':
+        default:
+          comparison = new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
+          break
+      }
+      return sortOrder === 'desc' ? -comparison : comparison
+    })
 
   // Load initial data
   useEffect(() => {
@@ -847,6 +886,99 @@ export default function Lab() {
                 </div>
               ) : (
                 <div className="experiments-table">
+                  {/* Filter Controls */}
+                  <div className="filter-controls" style={{
+                    display: 'flex',
+                    gap: '12px',
+                    padding: '12px 16px',
+                    background: 'var(--bg-tertiary)',
+                    borderRadius: '8px',
+                    marginBottom: '12px',
+                    flexWrap: 'wrap',
+                    alignItems: 'center',
+                  }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Outcome:</label>
+                      <select
+                        value={outcomeFilter}
+                        onChange={e => setOutcomeFilter(e.target.value)}
+                        style={{
+                          padding: '6px 10px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          color: 'var(--text-primary)',
+                          fontSize: '13px',
+                        }}
+                      >
+                        <option value="all">All</option>
+                        {uniqueOutcomes.map(o => (
+                          <option key={o} value={o!}>{o?.replace('_', ' ')}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Strategy:</label>
+                      <select
+                        value={strategyFilter}
+                        onChange={e => setStrategyFilter(e.target.value)}
+                        style={{
+                          padding: '6px 10px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          color: 'var(--text-primary)',
+                          fontSize: '13px',
+                        }}
+                      >
+                        <option value="all">All</option>
+                        {uniqueStrategies.map(s => (
+                          <option key={s} value={s}>{s}</option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                      <label style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>Sort:</label>
+                      <select
+                        value={sortBy}
+                        onChange={e => setSortBy(e.target.value as 'score' | 'date' | 'viral')}
+                        style={{
+                          padding: '6px 10px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          color: 'var(--text-primary)',
+                          fontSize: '13px',
+                        }}
+                      >
+                        <option value="date">Date</option>
+                        <option value="score">Score</option>
+                        <option value="viral">Viral Coefficient</option>
+                      </select>
+                      <button
+                        onClick={() => setSortOrder(o => o === 'asc' ? 'desc' : 'asc')}
+                        style={{
+                          padding: '6px 10px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '6px',
+                          color: 'var(--text-primary)',
+                          fontSize: '13px',
+                          cursor: 'pointer',
+                        }}
+                        title={sortOrder === 'desc' ? 'Descending' : 'Ascending'}
+                      >
+                        {sortOrder === 'desc' ? '↓' : '↑'}
+                      </button>
+                    </div>
+
+                    <div style={{ marginLeft: 'auto', fontSize: '12px', color: 'var(--text-secondary)' }}>
+                      {filteredExperiments.length} of {pastExperiments.length} experiments
+                    </div>
+                  </div>
+
                   <div className="table-header">
                     <span className="col-token">Token</span>
                     <span className="col-score">Score</span>
@@ -856,44 +988,115 @@ export default function Lab() {
                     <span className="col-fud">FUD Res.</span>
                     <span className="col-strategy">Strategy</span>
                   </div>
-                  {pastExperiments.map(exp => (
-                    <div key={exp.id} className="experiment-row">
-                      <div className="col-token">
-                        <span className="token-ticker">${exp.ticker}</span>
-                        <span className="token-name">{exp.name}</span>
-                        <span className="token-id">{exp.id}</span>
-                      </div>
-                      <div className="col-score">
-                        <span className="score-value" style={{ color: exp.score && exp.score >= 0.8 ? 'var(--success)' : exp.score && exp.score >= 0.5 ? 'var(--warning)' : 'var(--text-secondary)' }}>
-                          {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
-                        </span>
-                      </div>
-                      <div className="col-outcome">
-                        <span className="outcome-badge" style={{ background: getOutcomeColor(exp.outcome) }}>
-                          {exp.outcome === 'moon' ? '🌕 moon' :
-                           exp.outcome === 'rug' ? '💣 rug' :
-                           exp.outcome === 'cult_classic' ? '⭐ cult' :
-                           exp.outcome === 'pump_and_dump' ? '📈 pump' :
-                           exp.outcome === 'slow_bleed' ? '📉 bleed' : exp.status}
-                        </span>
-                      </div>
-                      <div className="col-viral">
-                        {exp.viral_coefficient !== null ? `${exp.viral_coefficient.toFixed(1)}x` : '--'}
-                      </div>
-                      <div className="col-sentiment">
-                        {exp.peak_sentiment !== null ? (
-                          <span style={{ color: exp.peak_sentiment > 0.5 ? 'var(--success)' : exp.peak_sentiment > 0 ? 'var(--warning)' : 'var(--danger)' }}>
-                            {exp.peak_sentiment > 0 ? '+' : ''}{(exp.peak_sentiment * 100).toFixed(0)}%
+                  {filteredExperiments.map(exp => (
+                    <div key={exp.id}>
+                      <div
+                        className="experiment-row"
+                        onClick={() => setExpandedExperiment(expandedExperiment === exp.id ? null : exp.id)}
+                        style={{ cursor: 'pointer' }}
+                      >
+                        <div className="col-token">
+                          <span className="token-ticker">${exp.ticker}</span>
+                          <span className="token-name">{exp.name}</span>
+                          <span className="token-id">{exp.id}</span>
+                        </div>
+                        <div className="col-score">
+                          <span className="score-value" style={{ color: exp.score && exp.score >= 0.8 ? 'var(--success)' : exp.score && exp.score >= 0.5 ? 'var(--warning)' : 'var(--text-secondary)' }}>
+                            {exp.score !== null ? `${(exp.score * 100).toFixed(0)}%` : '--'}
                           </span>
-                        ) : '--'}
+                        </div>
+                        <div className="col-outcome">
+                          <span className="outcome-badge" style={{ background: getOutcomeColor(exp.outcome) }}>
+                            {exp.outcome === 'moon' ? '🌕 moon' :
+                             exp.outcome === 'rug' ? '💣 rug' :
+                             exp.outcome === 'cult_classic' ? '⭐ cult' :
+                             exp.outcome === 'pump_and_dump' ? '📈 pump' :
+                             exp.outcome === 'slow_bleed' ? '📉 bleed' : exp.status}
+                          </span>
+                        </div>
+                        <div className="col-viral">
+                          {exp.viral_coefficient !== null ? `${exp.viral_coefficient.toFixed(1)}x` : '--'}
+                        </div>
+                        <div className="col-sentiment">
+                          {exp.peak_sentiment !== null ? (
+                            <span style={{ color: exp.peak_sentiment > 0.5 ? 'var(--success)' : exp.peak_sentiment > 0 ? 'var(--warning)' : 'var(--danger)' }}>
+                              {exp.peak_sentiment > 0 ? '+' : ''}{(exp.peak_sentiment * 100).toFixed(0)}%
+                            </span>
+                          ) : '--'}
+                        </div>
+                        <div className="col-fud">
+                          {exp.fud_resistance !== null ? `${(exp.fud_resistance * 100).toFixed(0)}%` : '--'}
+                        </div>
+                        <div className="col-strategy">
+                          <span className="strategy-tag">{exp.strategy}</span>
+                          <span className="style-tag">{exp.meme_style}</span>
+                        </div>
                       </div>
-                      <div className="col-fud">
-                        {exp.fud_resistance !== null ? `${(exp.fud_resistance * 100).toFixed(0)}%` : '--'}
-                      </div>
-                      <div className="col-strategy">
-                        <span className="strategy-tag">{exp.strategy}</span>
-                        <span className="style-tag">{exp.meme_style}</span>
-                      </div>
+
+                      {/* Expanded Details Panel */}
+                      {expandedExperiment === exp.id && (
+                        <div style={{
+                          padding: '16px',
+                          background: 'var(--bg-tertiary)',
+                          borderBottom: '1px solid var(--border)',
+                          display: 'grid',
+                          gridTemplateColumns: '1fr 1fr',
+                          gap: '16px',
+                        }}>
+                          {/* Left: Hook & Reasoning */}
+                          <div>
+                            <div style={{ marginBottom: '12px' }}>
+                              <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Hook</div>
+                              <div style={{ fontSize: '14px', fontStyle: 'italic' }}>&quot;{exp.hook}&quot;</div>
+                            </div>
+                            {exp.reasoning && (
+                              <div style={{ marginBottom: '12px' }}>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Strategy Reasoning</div>
+                                <div style={{ fontSize: '13px', color: 'var(--text-primary)' }}>{exp.reasoning}</div>
+                              </div>
+                            )}
+                            {exp.confidence !== null && (
+                              <div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '4px' }}>Idea Confidence</div>
+                                <div style={{ fontSize: '14px', fontWeight: 600, color: exp.confidence > 0.7 ? 'var(--success)' : exp.confidence > 0.4 ? 'var(--warning)' : 'var(--text-secondary)' }}>
+                                  {(exp.confidence * 100).toFixed(0)}%
+                                </div>
+                              </div>
+                            )}
+                          </div>
+
+                          {/* Right: Risk Factors */}
+                          <div>
+                            {exp.risk_factors && exp.risk_factors.length > 0 && (
+                              <div>
+                                <div style={{ fontSize: '12px', color: 'var(--text-secondary)', marginBottom: '8px' }}>Risk Factors</div>
+                                <div style={{ display: 'flex', flexWrap: 'wrap', gap: '6px' }}>
+                                  {exp.risk_factors.map((risk, i) => (
+                                    <span
+                                      key={i}
+                                      style={{
+                                        padding: '4px 10px',
+                                        background: 'rgba(244, 33, 46, 0.15)',
+                                        color: 'var(--danger)',
+                                        borderRadius: '12px',
+                                        fontSize: '12px',
+                                        fontWeight: 500,
+                                      }}
+                                    >
+                                      {risk}
+                                    </span>
+                                  ))}
+                                </div>
+                              </div>
+                            )}
+                            {(!exp.risk_factors || exp.risk_factors.length === 0) && (
+                              <div style={{ color: 'var(--text-secondary)', fontSize: '13px' }}>
+                                No risk factors identified
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      )}
                     </div>
                   ))}
                 </div>

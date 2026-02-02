@@ -2,10 +2,10 @@
 
 ## Quick Wins (1-2 hours each)
 
-- [ ] **Sentiment Chart** - Add line chart showing sentiment evolution over simulation hours (data already captured, just not visualized)
-- [ ] **Persona Impact in UI** - Display persona contribution breakdown from `src/analysis/impact.py` (already calculated, not shown)
-- [ ] **Experiment Filtering/Sorting** - Add filter by outcome, sort by score, search by strategy to past experiments table
-- [ ] **Show Risk Factors** - Display `risk_factors` and `reasoning` from idea generator (captured but hidden)
+- [x] **Sentiment Chart** - Add line chart showing sentiment evolution over simulation hours (data already captured, just not visualized)
+- [x] **Persona Impact in UI** - Display persona contribution breakdown from `src/analysis/impact.py` (already calculated, not shown)
+- [x] **Experiment Filtering/Sorting** - Add filter by outcome, sort by score, search by strategy to past experiments table
+- [x] **Show Risk Factors** - Display `risk_factors` and `reasoning` from idea generator (captured but hidden)
 
 ## Medium Effort (half day each)
 

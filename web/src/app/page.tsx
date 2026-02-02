@@ -204,7 +204,7 @@ export default function Home() {
         />
       )}
 
-      {result && <ResultsCard result={result} />}
+      {result && <ResultsCard result={result} tweets={tweets} />}
 
       <div className={styles.footer}>
         <span>&#129514; Hopium Lab - For research purposes only</span>

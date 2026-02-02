@@ -383,6 +383,10 @@ async def list_experiments():
                 "total_engagement": e.result.total_engagement if e.result else None,
                 "dominant_narrative": e.result.dominant_narrative if e.result else None,
                 "created_at": e.created_at,
+                # Risk assessment data
+                "risk_factors": e.idea.risk_factors,
+                "reasoning": e.idea.reasoning,
+                "confidence": e.idea.confidence,
             }
             for e in sorted(experiments, key=lambda x: x.created_at, reverse=True)[:50]
         ]
