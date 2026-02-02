@@ -37,3 +37,9 @@ web/tsconfig.tsbuildinfo
 
 # Windows
 nul
+
+# Anchor/Solana
+.anchor/
+target/
+**/Cargo.lock
+test-ledger/
