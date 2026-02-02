@@ -258,6 +258,248 @@ class TestErrorHandling:
         assert response.status_code == 405
 
 
+class TestImproveTokenEndpoint:
+    """Tests for /improve-token endpoint."""
+
+    def test_improve_token_valid_request(self, client):
+        """Valid improve token request returns variations."""
+        response = client.post("/improve-token", json={
+            "token": {
+                "name": "TestToken",
+                "ticker": "TEST",
+                "narrative": "A test token",
+                "meme_style": "absurd",
+                "market_condition": "crab"
+            },
+            "feedback": {
+                "viability_score": 0.4,
+                "strengths": ["Good meme potential"],
+                "weaknesses": ["Weak narrative", "No clear hook"],
+                "suggestions": ["Add a viral hook", "Improve narrative"],
+                "predicted_outcome": "pump_and_dump",
+                "reasoning": "Generic concept needs improvement",
+                "confidence": 0.6
+            }
+        })
+        # May return 503 if no API key, 500 if API error (rate limit, credits, etc.)
+        assert response.status_code in [200, 500, 503]
+        if response.status_code == 200:
+            data = response.json()
+            assert "variations" in data
+            assert isinstance(data["variations"], list)
+
+    def test_improve_token_missing_token(self, client):
+        """Missing token returns validation error."""
+        response = client.post("/improve-token", json={
+            "feedback": {
+                "viability_score": 0.5,
+                "strengths": [],
+                "weaknesses": [],
+                "suggestions": [],
+                "predicted_outcome": "unknown",
+                "reasoning": "",
+                "confidence": 0.5
+            }
+        })
+        assert response.status_code == 422
+
+    def test_improve_token_missing_feedback(self, client):
+        """Missing feedback returns validation error."""
+        response = client.post("/improve-token", json={
+            "token": {
+                "name": "Test",
+                "ticker": "TEST",
+                "narrative": "Test"
+            }
+        })
+        assert response.status_code == 422
+
+    def test_improve_token_variation_structure(self, client):
+        """Variation response has expected structure."""
+        response = client.post("/improve-token", json={
+            "token": {
+                "name": "StructTest",
+                "ticker": "STRUCT",
+                "narrative": "Testing structure",
+                "meme_style": "absurd",
+                "market_condition": "crab"
+            },
+            "feedback": {
+                "viability_score": 0.3,
+                "strengths": [],
+                "weaknesses": ["Everything"],
+                "suggestions": ["Start over"],
+                "predicted_outcome": "slow_bleed",
+                "reasoning": "Needs work",
+                "confidence": 0.7
+            }
+        })
+        if response.status_code == 200:
+            data = response.json()
+            if len(data["variations"]) > 0:
+                variation = data["variations"][0]
+                assert "name" in variation
+                assert "ticker" in variation
+                assert "narrative" in variation
+                assert "hook" in variation
+                assert "changes" in variation
+
+
+class TestCompetitionEndpoint:
+    """Tests for /simulate/competition endpoint."""
+
+    def test_competition_valid_request(self, client):
+        """Valid competition request returns results."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {
+                    "name": "Token A",
+                    "ticker": "TOKA",
+                    "narrative": "First test token",
+                    "meme_style": "absurd",
+                    "market_condition": "crab"
+                },
+                {
+                    "name": "Token B",
+                    "ticker": "TOKB",
+                    "narrative": "Second test token",
+                    "meme_style": "cute",
+                    "market_condition": "crab"
+                }
+            ],
+            "hours": 12,
+            "market_condition": "crab"
+        })
+        assert response.status_code == 200
+        data = response.json()
+        assert "results" in data
+        assert "winner" in data
+        assert "analysis" in data
+        assert len(data["results"]) == 2
+
+    def test_competition_minimum_tokens(self, client):
+        """Competition requires at least 2 tokens."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {
+                    "name": "Only One",
+                    "ticker": "ONE",
+                    "narrative": "Single token"
+                }
+            ],
+            "hours": 12
+        })
+        assert response.status_code == 422
+
+    def test_competition_maximum_tokens(self, client):
+        """Competition allows up to 4 tokens."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {"name": f"Token {i}", "ticker": f"TOK{i}", "narrative": f"Token {i}"}
+                for i in range(5)  # 5 tokens - over limit
+            ],
+            "hours": 12
+        })
+        assert response.status_code == 422
+
+    def test_competition_four_tokens(self, client):
+        """Competition works with 4 tokens."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {"name": f"Token {i}", "ticker": f"TOK{i}", "narrative": f"Token {i}"}
+                for i in range(4)
+            ],
+            "hours": 6
+        })
+        assert response.status_code == 200
+        data = response.json()
+        assert len(data["results"]) == 4
+
+    def test_competition_result_structure(self, client):
+        """Competition result has expected structure."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {"name": "Alpha", "ticker": "ALPHA", "narrative": "First"},
+                {"name": "Beta", "ticker": "BETA", "narrative": "Second"}
+            ],
+            "hours": 6
+        })
+        assert response.status_code == 200
+        data = response.json()
+
+        for result in data["results"]:
+            assert "token" in result
+            assert "viral_coefficient" in result
+            assert "peak_sentiment" in result
+            assert "total_engagement" in result
+            assert "influencer_pickups" in result
+            assert "predicted_outcome" in result
+            assert "confidence" in result
+            assert "rank" in result
+            assert "market_share" in result
+
+    def test_competition_ranks_ordered(self, client):
+        """Competition results are ranked correctly."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {"name": "A", "ticker": "A", "narrative": "Token A"},
+                {"name": "B", "ticker": "B", "narrative": "Token B"},
+                {"name": "C", "ticker": "C", "narrative": "Token C"}
+            ],
+            "hours": 6
+        })
+        assert response.status_code == 200
+        data = response.json()
+
+        ranks = [r["rank"] for r in data["results"]]
+        assert sorted(ranks) == [1, 2, 3]
+
+    def test_competition_winner_is_rank_one(self, client):
+        """Winner ticker matches rank 1 result."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {"name": "X", "ticker": "TOKX", "narrative": "Token X"},
+                {"name": "Y", "ticker": "TOKY", "narrative": "Token Y"}
+            ],
+            "hours": 6
+        })
+        assert response.status_code == 200
+        data = response.json()
+
+        winner = data["winner"]
+        rank_one = next(r for r in data["results"] if r["rank"] == 1)
+        assert winner == rank_one["token"]["ticker"]
+
+    def test_competition_market_share_sums_to_one(self, client):
+        """Market shares sum to approximately 1."""
+        response = client.post("/simulate/competition", json={
+            "tokens": [
+                {"name": "A", "ticker": "A", "narrative": "A"},
+                {"name": "B", "ticker": "B", "narrative": "B"}
+            ],
+            "hours": 12
+        })
+        assert response.status_code == 200
+        data = response.json()
+
+        total_share = sum(r["market_share"] for r in data["results"])
+        assert 0.99 <= total_share <= 1.01  # Allow small floating point error
+
+    def test_competition_all_market_conditions(self, client):
+        """Competition works with all market conditions."""
+        conditions = ["bear", "crab", "bull", "euphoria"]
+        for condition in conditions:
+            response = client.post("/simulate/competition", json={
+                "tokens": [
+                    {"name": "A", "ticker": "A", "narrative": "A"},
+                    {"name": "B", "ticker": "B", "narrative": "B"}
+                ],
+                "hours": 6,
+                "market_condition": condition
+            })
+            assert response.status_code == 200, f"Condition {condition} failed"
+
+
 class TestResponseFormat:
     """Tests for API response format consistency."""
 
