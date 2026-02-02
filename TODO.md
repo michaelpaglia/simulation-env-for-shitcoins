@@ -19,14 +19,15 @@
 - [x] **Program Build** - `anchor build` succeeds with Anchor 0.32.0
 - [x] **Program ID Synced** - Updated to `GFZLBYNKT7aaGncQ5rL3yGC1zjGF71zLCwceh73Y23nC`
 - [x] **WSL2 Upgrade** - Ubuntu upgraded to WSL2 for better compatibility
-- [ ] **Deploy to Devnet** - Blocked by faucet rate limiting. Get SOL from https://faucet.solana.com then run:
+- [ ] **Get Devnet SOL** - Request airdrop at https://faucet.solana.com for wallet `6Q9vBhmSqwqHLAhcwJS953N8TcKTKQKCsPP9R3bWUjhz` (need ~2-3 SOL)
+- [ ] **Deploy to Devnet** - After getting SOL, run:
   ```bash
   wsl -d Ubuntu bash -l -c "cd '/mnt/c/Users/micha/Programming Work/simulation-env-for-shitcoins' && anchor deploy --provider.cluster devnet"
   ```
-- [ ] **Run Anchor Tests** - Blocked by Solana 3.x io_uring requirement (not supported on WSL2). Options:
-  1. Downgrade to Solana 2.x for local testing
-  2. Run tests directly on devnet after deployment
-  3. Use native Linux or macOS for local tests
+- [ ] **Run Anchor Tests** - Solana 3.x requires io_uring (not supported on WSL2). Options:
+  - Use native Linux/macOS
+  - Downgrade: `solana-install init 2.0.21`
+  - Test on devnet after deployment
 
 ## Larger Features (1-3 days)
 
