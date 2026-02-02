@@ -1,12 +1,20 @@
+[toolchain]
+
 [features]
-seeds = false
+resolution = true
 skip-lint = false
 
+[programs.localnet]
+hopium_staking = "GFZLBYNKT7aaGncQ5rL3yGC1zjGF71zLCwceh73Y23nC"
+
 [programs.devnet]
-hopium_staking = "7xUNHtezv3M6uxMfKRG8JNQYafMtJp9dSqAYJHP1fx8F"
+hopium_staking = "GFZLBYNKT7aaGncQ5rL3yGC1zjGF71zLCwceh73Y23nC"
 
 [programs.mainnet]
 hopium_staking = "7xUNHtezv3M6uxMfKRG8JNQYafMtJp9dSqAYJHP1fx8F"
+
+[test]
+startup_wait = 10000
 
 [registry]
 url = "https://api.apr.dev"
