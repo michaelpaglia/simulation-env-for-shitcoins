@@ -21,6 +21,6 @@
 
 ## Larger Features (1-3 days)
 
-- [ ] **LLM Feedback Loop in UI** - Connect `llm_feedback/` module to web UI with "Improve This Token" button
-- [ ] **Multi-Token Competition** - Simulate 2-3 tokens launching simultaneously
+- [x] **LLM Feedback Loop in UI** - Connect `llm_feedback/` module to web UI with "Improve This Token" button
+- [x] **Multi-Token Competition** - Simulate 2-3 tokens launching simultaneously
 - [ ] **Batch/Scheduled Runs** - Queue experiments to run overnight with summary reports

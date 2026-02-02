@@ -10,11 +10,12 @@ import { Sidebar } from '@/components/Sidebar'
 import { MobileNav } from '@/components/MobileNav'
 import { TweetThread, groupTweetsIntoThreads } from '@/components/TweetThread'
 import { TokenForm, TokenConfig } from '@/components/TokenForm'
-import { ResultsCard, SimulationResult } from '@/components/ResultsCard'
+import { ResultsCard, SimulationResult, TokenVariation } from '@/components/ResultsCard'
 import { PastExperiments, PastExperiment } from '@/components/PastExperiments'
 import { StakingGate } from '@/components/StakingGate'
 import { SearchIcon } from '@/components/icons'
 import { TweetData } from '@/components/Tweet'
+import { CompetitionForm, CompetitorToken, CompetitionResponse } from '@/components/CompetitionForm'
 import styles from '@/components/ConfigPanel.module.css'
 
 const API_URL = config.apiUrl
@@ -48,6 +49,12 @@ export default function Home() {
   const [activeTab, setActiveTab] = useState<'foryou' | 'following'>('foryou')
   const [showStakingGate, setShowStakingGate] = useState(false)
   const [stakingHours, setStakingHours] = useState(48)
+  const [isImproving, setIsImproving] = useState(false)
+  const [mode, setMode] = useState<'single' | 'competition'>('single')
+
+  // Competition state
+  const [isRunningCompetition, setIsRunningCompetition] = useState(false)
+  const [competitionResult, setCompetitionResult] = useState<CompetitionResponse | null>(null)
 
   // Past experiments
   const [pastExperiments, setPastExperiments] = useState<PastExperiment[]>([])
@@ -181,30 +188,163 @@ export default function Home() {
     }))
   }, [])
 
+  // Improve token using LLM feedback
+  const handleImproveToken = useCallback(async (): Promise<TokenVariation[]> => {
+    if (!result) return []
+
+    setIsImproving(true)
+    try {
+      const response = await fetch(`${API_URL}/improve-token`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          token: {
+            name: tokenConfig.name || tokenConfig.ticker,
+            ticker: tokenConfig.ticker,
+            narrative: tokenConfig.narrative,
+            tagline: tokenConfig.tagline || null,
+            meme_style: tokenConfig.meme_style,
+            market_condition: tokenConfig.market_condition,
+          },
+          feedback: {
+            viability_score: result.viral_coefficient > 1 ? 0.6 : 0.3,
+            strengths: result.viral_coefficient > 1 ? ['Good viral potential'] : [],
+            weaknesses: result.top_fud_points,
+            suggestions: [],
+            predicted_outcome: result.predicted_outcome,
+            reasoning: result.dominant_narrative,
+            confidence: result.confidence,
+          },
+        }),
+      })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.detail || 'Failed to get improvements')
+      }
+
+      const data = await response.json()
+      return data.variations || []
+    } catch (err) {
+      console.error('Improve token error:', err)
+      setError(err instanceof Error ? err.message : 'Failed to get improvements')
+      return []
+    } finally {
+      setIsImproving(false)
+    }
+  }, [result, tokenConfig])
+
+  // Apply a suggested variation
+  const handleSelectVariation = useCallback((variation: TokenVariation) => {
+    setTokenConfig(prev => ({
+      ...prev,
+      name: variation.name,
+      ticker: variation.ticker,
+      narrative: variation.narrative,
+      tagline: variation.hook,
+      meme_style: variation.meme_style as TokenConfig['meme_style'],
+    }))
+    // Clear results to encourage re-running with the new config
+    setResult(null)
+    setTweets([])
+  }, [])
+
+  // Run competition simulation
+  const handleRunCompetition = useCallback(async (tokens: CompetitorToken[], hours: number) => {
+    setIsRunningCompetition(true)
+    setCompetitionResult(null)
+    setError(null)
+
+    try {
+      const response = await fetch(`${API_URL}/simulate/competition`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          tokens: tokens.map(t => ({
+            name: t.name || t.ticker,
+            ticker: t.ticker,
+            narrative: t.narrative,
+            meme_style: t.meme_style,
+            market_condition: tokenConfig.market_condition,
+          })),
+          hours,
+          market_condition: tokenConfig.market_condition,
+        }),
+      })
+
+      if (!response.ok) {
+        const err = await response.json()
+        throw new Error(err.detail || 'Competition failed')
+      }
+
+      const data = await response.json()
+      setCompetitionResult(data)
+    } catch (err) {
+      console.error('Competition error:', err)
+      setError(err instanceof Error ? err.message : 'Competition failed')
+    } finally {
+      setIsRunningCompetition(false)
+    }
+  }, [tokenConfig.market_condition])
+
   const threadedTweets = groupTweetsIntoThreads(tweets)
 
   // Config panel content (shared between desktop sidebar and mobile sheet)
   const configPanelContent = (
     <>
-      <TokenForm
-        config={tokenConfig}
-        onChange={setTokenConfig}
-        onSubmit={handleRunClick}
-        isRunning={isRunning}
-        isConnected={auth.isConnected}
-        useTwitterPriors={useTwitterPriors}
-        onTwitterPriorsChange={setUseTwitterPriors}
-      />
+      {/* Mode Toggle */}
+      <div className={styles.modeToggle}>
+        <button
+          className={`${styles.modeBtn} ${mode === 'single' ? styles.active : ''}`}
+          onClick={() => setMode('single')}
+        >
+          Single Token
+        </button>
+        <button
+          className={`${styles.modeBtn} ${mode === 'competition' ? styles.active : ''}`}
+          onClick={() => setMode('competition')}
+        >
+          Competition
+        </button>
+      </div>
 
-      {!result && (
-        <PastExperiments
-          experiments={pastExperiments}
-          loading={loadingExperiments}
-          onSelect={handleSelectExperiment}
+      {mode === 'single' ? (
+        <>
+          <TokenForm
+            config={tokenConfig}
+            onChange={setTokenConfig}
+            onSubmit={handleRunClick}
+            isRunning={isRunning}
+            isConnected={auth.isConnected}
+            useTwitterPriors={useTwitterPriors}
+            onTwitterPriorsChange={setUseTwitterPriors}
+          />
+
+          {!result && (
+            <PastExperiments
+              experiments={pastExperiments}
+              loading={loadingExperiments}
+              onSelect={handleSelectExperiment}
+            />
+          )}
+
+          {result && (
+            <ResultsCard
+              result={result}
+              tweets={tweets}
+              onImprove={handleImproveToken}
+              onSelectVariation={handleSelectVariation}
+              isImproving={isImproving}
+            />
+          )}
+        </>
+      ) : (
+        <CompetitionForm
+          onRun={handleRunCompetition}
+          isRunning={isRunningCompetition}
+          result={competitionResult}
         />
       )}
-
-      {result && <ResultsCard result={result} tweets={tweets} />}
 
       <div className={styles.footer}>
         <span>&#129514; Hopium Lab - For research purposes only</span>
