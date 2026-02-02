@@ -126,6 +126,7 @@ sentiment: -1 (FUD) to 1 (hype)"""
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=1000,
+                temperature=1.2,  # Higher temp for more varied CT-style tweets
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
             )
@@ -521,6 +522,7 @@ Return as JSON array:
             response = self.client.messages.create(
                 model=self.model,
                 max_tokens=1000,
+                temperature=1.2,  # Higher temp for more varied replies/quotes
                 system=system_prompt,
                 messages=[{"role": "user", "content": user_prompt}],
             )
