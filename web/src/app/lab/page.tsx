@@ -430,19 +430,9 @@ export default function Lab() {
             maxWidth: '400px',
             width: '90%',
           }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '16px' }}>
-              <h2 style={{ margin: 0, fontSize: '20px' }}>🔒 Stake to Run Harness</h2>
-              <span style={{
-                padding: '2px 8px',
-                background: 'var(--warning)',
-                color: '#000',
-                borderRadius: '4px',
-                fontSize: '11px',
-                fontWeight: 700,
-              }}>
-                DEMO
-              </span>
-            </div>
+            <h2 style={{ margin: '0 0 16px 0', fontSize: '18px', fontWeight: 600 }}>
+              Confirm Experiment Run
+            </h2>
 
             <div style={{
               background: 'var(--bg-tertiary)',
@@ -520,28 +510,18 @@ export default function Lab() {
         <div className="lab-header-left">
           <span className="lab-logo">&#129514;</span>
           <h1>Harness Lab</h1>
-          <span className="lab-badge">Autonomous Testing</span>
-          <span style={{
-            padding: '4px 8px',
-            background: 'var(--warning)',
-            color: '#000',
-            borderRadius: '4px',
-            fontSize: '11px',
-            fontWeight: 700,
-            marginLeft: '8px',
-          }}>
-            DEMO MODE
-          </span>
           {apiStatus !== 'connected' && (
-            <span className="api-status" style={{
+            <span style={{
               marginLeft: '12px',
-              padding: '4px 8px',
+              padding: '3px 8px',
               borderRadius: '4px',
-              fontSize: '12px',
-              background: apiStatus === 'error' ? 'var(--danger)' : 'var(--warning)',
-              color: '#000'
+              fontSize: '11px',
+              fontWeight: 600,
+              background: 'rgba(244, 33, 46, 0.15)',
+              color: 'var(--danger)',
+              border: '1px solid rgba(244, 33, 46, 0.3)',
             }}>
-              {apiStatus === 'error' ? 'API Offline' : 'Connecting...'}
+              {apiStatus === 'error' ? 'Offline' : 'Connecting'}
             </span>
           )}
         </div>
@@ -554,49 +534,57 @@ export default function Lab() {
         </div>
       </header>
 
-      {/* Demo Notice */}
-      <div style={{
-        background: 'rgba(255, 212, 0, 0.1)',
-        border: '1px solid var(--warning)',
-        borderRadius: '8px',
-        padding: '12px 16px',
-        margin: '0 16px 16px 16px',
-        display: 'flex',
-        alignItems: 'center',
-        gap: '12px',
-      }}>
-        <span style={{ fontSize: '20px' }}>⚠️</span>
-        <div style={{ flex: 1, fontSize: '13px' }}>
-          <strong>Demo Mode:</strong> Staking uses synthetic $HOPIUM tokens stored in your browser.
-          Each experiment costs {HARNESS_STAKE_PER_EXPERIMENT} $HOPIUM (5% burned).
-        </div>
-        {wallet.balance <= 0 && (
+      {/* Demo Notice - Minimal */}
+      {wallet.balance <= 0 && (
+        <div style={{
+          background: 'rgba(59, 130, 246, 0.08)',
+          border: '1px solid rgba(59, 130, 246, 0.2)',
+          borderRadius: '8px',
+          padding: '10px 16px',
+          margin: '0 16px 16px 16px',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: '12px',
+        }}>
+          <div style={{ fontSize: '13px', color: 'var(--text-secondary)' }}>
+            Demo mode • Get test tokens to start experimenting
+          </div>
           <button
             onClick={wallet.claimFaucet}
             style={{
-              padding: '8px 16px',
+              padding: '6px 14px',
               background: 'var(--accent)',
               border: 'none',
-              borderRadius: '8px',
+              borderRadius: '6px',
               color: 'white',
               fontWeight: 600,
               cursor: 'pointer',
               whiteSpace: 'nowrap',
+              fontSize: '13px',
             }}
           >
-            🎁 Claim 1,000
+            Claim 1,000 $HOPIUM
           </button>
-        )}
-      </div>
+        </div>
+      )}
 
       <div className="lab-content">
         {/* Left Panel - Controls */}
         <aside className="lab-controls">
           <div className="control-card">
-            <div className="control-card-header">
+            <h3 style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              margin: '0 0 20px 0',
+              color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
               <FlaskIcon />
-              <span>Experiment Config</span>
-            </div>
+              Configuration
+            </h3>
 
             <div className="control-group" data-onboarding="lab-mode">
               <label>Mode</label>
@@ -700,13 +688,28 @@ export default function Lab() {
 
           {/* Leaderboard */}
           <div className="control-card" data-onboarding="lab-leaderboard">
-            <div className="control-card-header">
+            <h3 style={{
+              fontSize: '14px',
+              fontWeight: 600,
+              margin: '0 0 16px 0',
+              color: 'var(--text-primary)',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '8px',
+            }}>
               <TrophyIcon />
-              <span>Leaderboard</span>
-            </div>
+              Top Performers
+            </h3>
             <div className="leaderboard">
               {leaderboard.length === 0 ? (
-                <div className="empty-leaderboard">No experiments yet</div>
+                <div className="empty-leaderboard" style={{
+                  padding: '20px',
+                  textAlign: 'center',
+                  color: 'var(--text-secondary)',
+                  fontSize: '13px',
+                }}>
+                  No experiments yet
+                </div>
               ) : (
                 leaderboard.slice(0, 5).map((entry, i) => (
                   <div key={entry.id} className="leaderboard-entry">
@@ -730,13 +733,28 @@ export default function Lab() {
           {/* Insights */}
           {insights.length > 0 && (
             <div className="control-card">
-              <div className="control-card-header">
+              <h3 style={{
+                fontSize: '14px',
+                fontWeight: 600,
+                margin: '0 0 16px 0',
+                color: 'var(--text-primary)',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '8px',
+              }}>
                 <span>&#128161;</span>
-                <span>Insights</span>
-              </div>
+                Insights
+              </h3>
               <div className="insights-list">
                 {insights.map((insight, i) => (
-                  <div key={i} className="insight-item">{insight}</div>
+                  <div key={i} className="insight-item" style={{
+                    fontSize: '13px',
+                    lineHeight: '1.5',
+                    padding: '10px 0',
+                    borderBottom: i < insights.length - 1 ? '1px solid var(--border)' : 'none',
+                  }}>
+                    {insight}
+                  </div>
                 ))}
               </div>
             </div>
@@ -853,16 +871,17 @@ export default function Lab() {
 
               {/* Empty State for Current Run */}
               {!isRunning && experiments.length === 0 && !currentExperiment && (
-                <div className="empty-feed">
-                  <span className="empty-icon">&#129514;</span>
-                  <h3>No Active Run</h3>
-                  <p>
-                    Configure your experiment parameters and launch the harness
-                    to automatically generate and test shitcoin concepts.
-                  </p>
-                  <p className="empty-hint">
-                    The AI will brainstorm ideas, simulate CT reactions, and learn
-                    what strategies work best.
+                <div className="empty-feed" style={{
+                  padding: '80px 40px',
+                  textAlign: 'center',
+                }}>
+                  <div style={{ fontSize: '48px', marginBottom: '16px', opacity: 0.6 }}>&#129514;</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: 600, margin: '0 0 8px 0' }}>
+                    Ready to Run
+                  </h3>
+                  <p style={{ fontSize: '14px', color: 'var(--text-secondary)', margin: '0 0 6px 0', maxWidth: '400px', marginLeft: 'auto', marginRight: 'auto' }}>
+                    Configure parameters and launch the harness to automatically
+                    generate and test token concepts.
                   </p>
                 </div>
               )}
