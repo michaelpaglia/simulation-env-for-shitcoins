@@ -125,9 +125,15 @@ sentiment: -1 (FUD) to 1 (hype)"""
         try:
             response = self.client.messages.create(
                 model=self.model,
-                max_tokens=1000,
+                max_tokens=700,
                 temperature=1.2,  # Higher temp for more varied CT-style tweets
-                system=system_prompt,
+                system=[
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                        "cache_control": {"type": "ephemeral"}
+                    }
+                ],
                 messages=[{"role": "user", "content": user_prompt}],
             )
             raw = response.content[0].text
@@ -379,11 +385,14 @@ sentiment: -1 (FUD) to 1 (hype)"""
     def _identify_hot_tweets(self, state: SimulationState) -> list[Tweet]:
         """Find tweets likely to generate replies (high engagement, controversial, influential)."""
         # Look at tweets from last 2 hours
-        recent_tweets = [
-            t for t in state.tweets
-            if t.hour >= state.current_hour - 2
-            and t.thread_depth < self.MAX_THREAD_DEPTH
-        ]
+        # Optimize: iterate backwards since tweets are chronologically ordered
+        recent_tweets = []
+        cutoff_hour = state.current_hour - 2
+        for tweet in reversed(state.tweets):
+            if tweet.hour < cutoff_hour:
+                break  # Stop early - all remaining tweets are too old
+            if tweet.thread_depth < self.MAX_THREAD_DEPTH:
+                recent_tweets.append(tweet)
 
         scored_tweets = []
         for tweet in recent_tweets:
@@ -542,9 +551,15 @@ Return as JSON array:
         try:
             response = self.client.messages.create(
                 model=self.model,
-                max_tokens=1000,
+                max_tokens=700,
                 temperature=1.2,  # Higher temp for more varied replies/quotes
-                system=system_prompt,
+                system=[
+                    {
+                        "type": "text",
+                        "text": system_prompt,
+                        "cache_control": {"type": "ephemeral"}
+                    }
+                ],
                 messages=[{"role": "user", "content": user_prompt}],
             )
             raw = response.content[0].text
