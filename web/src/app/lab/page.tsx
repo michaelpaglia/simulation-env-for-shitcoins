@@ -7,6 +7,7 @@ import { useWallet } from '@/hooks/useWallet'
 import { useAuth } from '@/hooks/useAuth'
 import { WalletDisplay } from '@/components/WalletDisplay'
 import { MobileNav } from '@/components/MobileNav'
+import { OnboardingOverlay, useOnboarding } from '@/components/onboarding'
 
 const API_URL = config.apiUrl
 
@@ -90,6 +91,7 @@ const HARNESS_STAKE_PER_EXPERIMENT = 50
 export default function Lab() {
   const wallet = useWallet()
   const auth = useAuth()
+  const onboarding = useOnboarding()
 
   const [harnessConfig, setHarnessConfig] = useState<HarnessConfig>({
     mode: 'balanced',
@@ -510,8 +512,11 @@ export default function Lab() {
         </div>
       )}
 
+      {/* Onboarding Overlay */}
+      <OnboardingOverlay />
+
       {/* Header */}
-      <header className="lab-header">
+      <header className="lab-header" data-onboarding="lab-header">
         <div className="lab-header-left">
           <span className="lab-logo">&#129514;</span>
           <h1>Harness Lab</h1>
@@ -593,7 +598,7 @@ export default function Lab() {
               <span>Experiment Config</span>
             </div>
 
-            <div className="control-group">
+            <div className="control-group" data-onboarding="lab-mode">
               <label>Mode</label>
               <select
                 value={harnessConfig.mode}
@@ -620,7 +625,7 @@ export default function Lab() {
               </div>
             )}
 
-            <div className="control-group">
+            <div className="control-group" data-onboarding="lab-experiments">
               <label>Experiments</label>
               <input
                 type="number"
@@ -664,6 +669,7 @@ export default function Lab() {
                 className="launch-btn"
                 onClick={handleLaunchClick}
                 disabled={!wallet.canAfford(requiredStake)}
+                data-onboarding="lab-launch"
                 style={{
                   opacity: wallet.canAfford(requiredStake) ? 1 : 0.5,
                   cursor: wallet.canAfford(requiredStake) ? 'pointer' : 'not-allowed',
@@ -693,7 +699,7 @@ export default function Lab() {
           </div>
 
           {/* Leaderboard */}
-          <div className="control-card">
+          <div className="control-card" data-onboarding="lab-leaderboard">
             <div className="control-card-header">
               <TrophyIcon />
               <span>Leaderboard</span>
@@ -750,6 +756,7 @@ export default function Lab() {
             <button
               className={`toggle-btn ${viewMode === 'history' ? 'active' : ''}`}
               onClick={() => setViewMode('history')}
+              data-onboarding="lab-history"
             >
               Past Experiments ({pastExperiments.length})
             </button>
@@ -1104,6 +1111,31 @@ export default function Lab() {
             </>
           )}
         </main>
+      </div>
+
+      {/* Footer with Tutorial Link */}
+      <div style={{
+        padding: '16px 24px',
+        borderTop: '1px solid var(--border)',
+        display: 'flex',
+        justifyContent: 'center',
+        gap: '16px',
+        fontSize: '13px',
+        color: 'var(--text-secondary)',
+      }}>
+        <button
+          onClick={onboarding.start}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontSize: 'inherit',
+            padding: 0,
+          }}
+        >
+          Show Tutorial
+        </button>
       </div>
 
       {/* Mobile Navigation */}
