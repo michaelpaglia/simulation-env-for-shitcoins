@@ -89,7 +89,7 @@ class IdeaGenerator:
     def __init__(
         self,
         api_key: Optional[str] = None,
-        model: str = "claude-sonnet-4-20250514",
+        model: str = "claude-3-5-haiku-20241022",
     ):
         self.client = anthropic.Anthropic(api_key=api_key) if api_key else None
         self.model = model
@@ -121,7 +121,13 @@ class IdeaGenerator:
         response = self.client.messages.create(
             model=self.model,
             max_tokens=2000,
-            system=GENERATION_PROMPT,
+            system=[
+                {
+                    "type": "text",
+                    "text": GENERATION_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }
+            ],
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -158,7 +164,13 @@ Return JSON array of variations."""
         response = self.client.messages.create(
             model=self.model,
             max_tokens=2000,
-            system=GENERATION_PROMPT,
+            system=[
+                {
+                    "type": "text",
+                    "text": GENERATION_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }
+            ],
             messages=[{"role": "user", "content": prompt}],
         )
 
@@ -186,7 +198,13 @@ Return JSON array with your ideas."""
         response = self.client.messages.create(
             model=self.model,
             max_tokens=2500,
-            system=GENERATION_PROMPT,
+            system=[
+                {
+                    "type": "text",
+                    "text": GENERATION_PROMPT,
+                    "cache_control": {"type": "ephemeral"}
+                }
+            ],
             messages=[{"role": "user", "content": prompt}],
         )
 
