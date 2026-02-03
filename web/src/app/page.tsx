@@ -16,6 +16,7 @@ import { StakingGate } from '@/components/StakingGate'
 import { SearchIcon } from '@/components/icons'
 import { TweetData } from '@/components/Tweet'
 import { CompetitionForm, CompetitorToken, CompetitionResponse } from '@/components/CompetitionForm'
+import { OnboardingOverlay, useOnboarding } from '@/components/onboarding'
 import styles from '@/components/ConfigPanel.module.css'
 
 const API_URL = config.apiUrl
@@ -63,6 +64,7 @@ export default function Home() {
   // Hooks
   const wallet = useWallet()
   const auth = useAuth()
+  const onboarding = useOnboarding()
 
   // Fetch past experiments on mount
   useEffect(() => {
@@ -355,6 +357,19 @@ export default function Home() {
         <a href="#">Privacy? LOL</a>
         <a href="#">Not Financial Advice</a>
         <a href="#">DYOR</a>
+        <button
+          onClick={onboarding.start}
+          style={{
+            background: 'none',
+            border: 'none',
+            color: 'var(--text-secondary)',
+            cursor: 'pointer',
+            fontSize: 'inherit',
+            padding: 0,
+          }}
+        >
+          Show Tutorial
+        </button>
       </div>
     </>
   )
@@ -375,6 +390,9 @@ export default function Home() {
           onCancel={() => setShowStakingGate(false)}
         />
       )}
+
+      {/* Onboarding Overlay */}
+      <OnboardingOverlay />
 
       {/* Left Sidebar (Desktop) */}
       <Sidebar

@@ -79,6 +79,7 @@ export function MobileNav({ isConnected, balance, configPanel }: MobileNavProps)
             className={`${styles.navItem} ${isConnected ? styles.connected : ''}`}
             onClick={handleWalletClick}
             aria-label={isConnected ? `Wallet: ${balance} HOPIUM` : 'Connect wallet'}
+            data-onboarding="mobile-wallet"
           >
             <WalletIcon />
             <span className={styles.navLabel}>

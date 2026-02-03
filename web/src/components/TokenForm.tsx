@@ -97,6 +97,7 @@ export function TokenForm({
               maxLength={TICKER_MAX}
               aria-invalid={!!tickerError}
               aria-describedby={tickerError ? 'ticker-error' : undefined}
+              data-onboarding="ticker"
             />
             <span
               className={`${styles.charCounter} ${
@@ -156,6 +157,7 @@ export function TokenForm({
             className={styles.formSelect}
             value={config.meme_style}
             onChange={e => handleChange('meme_style', e.target.value)}
+            data-onboarding="meme-style"
           >
             <option value="cute">Cute (doge, cats)</option>
             <option value="edgy">Edgy (dark humor)</option>
@@ -203,6 +205,7 @@ export function TokenForm({
           disabled={!canSubmit}
           data-tooltip={getButtonTooltip()}
           aria-busy={isRunning}
+          data-onboarding="simulate-btn"
         >
           {getButtonText()}
         </button>

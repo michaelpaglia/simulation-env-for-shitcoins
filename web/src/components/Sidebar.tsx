@@ -29,7 +29,7 @@ export function Sidebar({ isConnected, balance, pendingStake, onClaimFaucet }: S
       </button>
 
       {/* Wallet Connection */}
-      <div className={styles.walletSection}>
+      <div className={styles.walletSection} data-onboarding="wallet">
         <ConnectWalletButton compact />
       </div>
 

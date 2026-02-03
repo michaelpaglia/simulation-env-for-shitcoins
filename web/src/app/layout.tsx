@@ -1,5 +1,6 @@
 import type { Metadata } from 'next'
 import { ClientProviders } from '@/components/ClientProviders'
+import { OnboardingProvider } from '@/components/onboarding'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -16,7 +17,9 @@ export default function RootLayout({
     <html lang="en">
       <body>
         <ClientProviders>
-          {children}
+          <OnboardingProvider>
+            {children}
+          </OnboardingProvider>
         </ClientProviders>
       </body>
     </html>
