@@ -2,6 +2,7 @@
 
 import Link from 'next/link'
 import { useState, useEffect } from 'react'
+import { OnboardingOverlay, useOnboarding } from '@/components/onboarding'
 
 interface WhitepaperTweet {
   id: number
@@ -117,6 +118,7 @@ const VerifiedBadge = () => (
 
 export default function WhitepaperPage() {
   const [scrollProgress, setScrollProgress] = useState(0)
+  const onboarding = useOnboarding()
 
   useEffect(() => {
     const handleScroll = () => {
@@ -132,8 +134,11 @@ export default function WhitepaperPage() {
 
   return (
     <div className="container">
+      {/* Onboarding Overlay */}
+      <OnboardingOverlay />
+
       {/* Header with progress bar */}
-      <div className="feed-header" style={{ padding: 0 }}>
+      <div className="feed-header" style={{ padding: 0 }} data-onboarding="wp-progress">
         {/* Progress bar */}
         <div style={{
           position: 'absolute',
@@ -179,7 +184,7 @@ export default function WhitepaperPage() {
       </div>
 
       {/* Thread */}
-      <div style={{ maxWidth: '600px', margin: '0 auto', paddingBottom: '100px' }}>
+      <div style={{ maxWidth: '600px', margin: '0 auto', paddingBottom: '100px' }} data-onboarding="wp-thread">
         {whitepaperThread.map((tweet, index) => {
           const engagement = getEngagement(tweet.id)
           const isFirst = index === 0
@@ -281,7 +286,20 @@ export default function WhitepaperPage() {
         {/* Footer */}
         <div style={{ padding: '32px 16px', textAlign: 'center', color: 'var(--text-secondary)' }}>
           <p style={{ marginBottom: '8px' }}>Hopium Lab 2026</p>
-          <p style={{ fontSize: '13px' }}>This is a memecoin with utility. NFA. DYOR.</p>
+          <p style={{ fontSize: '13px', marginBottom: '12px' }}>This is a memecoin with utility. NFA. DYOR.</p>
+          <button
+            onClick={onboarding.start}
+            style={{
+              background: 'none',
+              border: 'none',
+              color: 'var(--text-secondary)',
+              cursor: 'pointer',
+              fontSize: '13px',
+              padding: 0,
+            }}
+          >
+            Show Tutorial
+          </button>
         </div>
       </div>
 
@@ -299,6 +317,7 @@ export default function WhitepaperPage() {
       }}>
         <a
           href="/HOPIUM_Whitepaper.pdf"
+          data-onboarding="wp-download"
           style={{
             display: 'flex',
             alignItems: 'center',
