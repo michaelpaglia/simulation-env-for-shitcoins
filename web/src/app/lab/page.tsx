@@ -576,7 +576,8 @@ export default function Lab() {
             <h3 style={{
               fontSize: '14px',
               fontWeight: 600,
-              margin: '0 0 20px 0',
+              margin: 0,
+              padding: '16px 16px 12px 16px',
               color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
@@ -691,7 +692,8 @@ export default function Lab() {
             <h3 style={{
               fontSize: '14px',
               fontWeight: 600,
-              margin: '0 0 16px 0',
+              margin: 0,
+              padding: '16px 16px 12px 16px',
               color: 'var(--text-primary)',
               display: 'flex',
               alignItems: 'center',
@@ -736,7 +738,8 @@ export default function Lab() {
               <h3 style={{
                 fontSize: '14px',
                 fontWeight: 600,
-                margin: '0 0 16px 0',
+                margin: 0,
+                padding: '16px 16px 12px 16px',
                 color: 'var(--text-primary)',
                 display: 'flex',
                 alignItems: 'center',
