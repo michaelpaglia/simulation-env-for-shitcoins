@@ -1,0 +1,6 @@
+export { OnboardingProvider, useOnboarding } from './OnboardingProvider'
+export { OnboardingOverlay } from './OnboardingOverlay'
+export { OnboardingArrow } from './OnboardingArrow'
+export { OnboardingTooltip } from './OnboardingTooltip'
+export { PAGE_ONBOARDING, CURRENT_VERSION, getOnboardingForPath } from './steps'
+export type { OnboardingStep, PageOnboarding } from './steps'
