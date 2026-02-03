@@ -91,13 +91,53 @@ async def verify_stake_if_required(
     return result.sim_hours
 
 
-def get_engine() -> SimulationEngine:
-    """Create a SimulationEngine instance for this request.
+# Global engine instance (thread-safe, reused across requests)
+_engine_instance: Optional[SimulationEngine] = None
 
-    Each request gets its own engine instance to ensure thread safety
-    when handling concurrent requests from multiple users.
+
+def get_engine() -> SimulationEngine:
+    """Get the shared SimulationEngine instance.
+
+    The engine is thread-safe and can be reused across requests since it
+    doesn't maintain mutable state - all state is passed via parameters.
+    This improves performance by reusing the Anthropic client connection.
     """
-    return SimulationEngine(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    global _engine_instance
+    if _engine_instance is None:
+        _engine_instance = SimulationEngine(api_key=os.getenv("ANTHROPIC_API_KEY"))
+    return _engine_instance
+
+
+def prepare_token_for_simulation(request: "SimulationRequest") -> Token:
+    """Prepare a Token object from a simulation request.
+
+    Handles market condition fetching from Twitter priors if enabled.
+
+    Args:
+        request: The simulation request containing token config
+
+    Returns:
+        Token object ready for simulation
+    """
+    meme_style = request.token.meme_style
+    market_condition = request.token.market_condition
+
+    # Optionally fetch Twitter priors to calibrate market condition
+    if request.use_twitter_priors and os.getenv("TWITTER_BEARER_TOKEN"):
+        try:
+            market_data = get_market_sentiment(request.similar_tokens)
+            market_condition = MarketCondition(market_data["condition"])
+        except Exception as e:
+            logger.warning(f"Twitter prior fetch failed, using defaults: {e}")
+
+    return Token(
+        name=request.token.name,
+        ticker=request.token.ticker.upper(),
+        narrative=request.token.narrative,
+        tagline=request.token.tagline,
+        meme_style=meme_style,
+        market_condition=market_condition,
+    )
 
 
 # Request/Response Models
@@ -191,29 +231,10 @@ async def run_simulation(request: SimulationRequest):
     # Verify stake if required
     await verify_stake_if_required(request.wallet, request.stake_pda, request.hours)
 
-    # Enums are already validated by Pydantic, just extract values
-    meme_style = request.token.meme_style
-    market_condition = request.token.market_condition
+    # Prepare token for simulation
+    token = prepare_token_for_simulation(request)
 
-    # Optionally fetch Twitter priors to calibrate
-    if request.use_twitter_priors and os.getenv("TWITTER_BEARER_TOKEN"):
-        try:
-            market_data = get_market_sentiment(request.similar_tokens)
-            market_condition = MarketCondition(market_data["condition"])
-        except Exception as e:
-            logger.warning(f"Twitter prior fetch failed, using defaults: {e}")
-
-    # Create token
-    token = Token(
-        name=request.token.name,
-        ticker=request.token.ticker.upper(),
-        narrative=request.token.narrative,
-        tagline=request.token.tagline,
-        meme_style=meme_style,
-        market_condition=market_condition,
-    )
-
-    # Create per-request engine instance for thread safety
+    # Get shared engine instance
     engine = get_engine()
 
     # Run simulation ONCE using streaming to capture both tweets and results
@@ -275,28 +296,10 @@ async def stream_simulation(request: SimulationRequest):
     # Verify stake if required
     await verify_stake_if_required(request.wallet, request.stake_pda, request.hours)
 
-    # Enums are already validated by Pydantic
-    meme_style = request.token.meme_style
-    market_condition = request.token.market_condition
+    # Prepare token for simulation
+    token = prepare_token_for_simulation(request)
 
-    # Optionally fetch Twitter priors
-    if request.use_twitter_priors and os.getenv("TWITTER_BEARER_TOKEN"):
-        try:
-            market_data = get_market_sentiment(request.similar_tokens)
-            market_condition = MarketCondition(market_data["condition"])
-        except Exception as e:
-            logger.warning(f"Twitter prior fetch failed, using defaults: {e}")
-
-    token = Token(
-        name=request.token.name,
-        ticker=request.token.ticker.upper(),
-        narrative=request.token.narrative,
-        tagline=request.token.tagline,
-        meme_style=meme_style,
-        market_condition=market_condition,
-    )
-
-    # Create per-request engine instance for thread safety
+    # Get shared engine instance
     engine = get_engine()
 
     async def event_generator():
