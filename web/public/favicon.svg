@@ -1,0 +1,36 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <circle cx="32" cy="32" r="32" fill="url(#gradient)"/>
+
+  <!-- Test tube body -->
+  <path d="M 24 18 L 24 42 Q 24 48 28 50 Q 32 52 36 50 Q 40 48 40 42 L 40 18 Z"
+        fill="white" opacity="0.9"/>
+
+  <!-- Test tube liquid (purple/blue gradient) -->
+  <path d="M 25 35 L 25 42 Q 25 47 28 49 Q 32 51 36 49 Q 39 47 39 42 L 39 35 Z"
+        fill="url(#liquidGradient)"/>
+
+  <!-- Test tube opening -->
+  <rect x="22" y="16" width="20" height="4" rx="1" fill="white" opacity="0.9"/>
+
+  <!-- Upward arrow/chart inside liquid -->
+  <path d="M 32 45 L 32 38 M 32 38 L 29 41 M 32 38 L 35 41"
+        stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+
+  <!-- Bubbles -->
+  <circle cx="28" cy="40" r="1.5" fill="white" opacity="0.6"/>
+  <circle cx="36" cy="42" r="1" fill="white" opacity="0.5"/>
+  <circle cx="30" cy="44" r="1.2" fill="white" opacity="0.7"/>
+
+  <!-- Gradients -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#667eea;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#764ba2;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="liquidGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+      <stop offset="100%" style="stop-color:#8b5cf6;stop-opacity:0.9" />
+    </linearGradient>
+  </defs>
+</svg>

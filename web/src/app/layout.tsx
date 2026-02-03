@@ -4,8 +4,13 @@ import { OnboardingProvider } from '@/components/onboarding'
 import './globals.css'
 
 export const metadata: Metadata = {
-  title: 'Hopium Lab',
-  description: 'Synthesize fictional shitcoins and simulate CT reactions',
+  title: 'Hopium Lab - Token CT Simulation',
+  description: 'Simulate how your token performs on Crypto Twitter before launch. AI personas predict viral spread, sentiment & FUD.',
+  icons: {
+    icon: [
+      { url: '/favicon.svg', type: 'image/svg+xml' },
+    ],
+  },
 }
 
 export default function RootLayout({
