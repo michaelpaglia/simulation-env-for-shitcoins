@@ -42,8 +42,8 @@ class CompetitionSimulator:
         Returns:
             List of SimulationResult for each token (same order as input)
         """
-        # Create engine and state for each token
-        engines = [SimulationEngine(api_key=self.api_key) for _ in tokens]
+        # Create single shared engine and state for each token
+        engine = SimulationEngine(api_key=self.api_key)
         states = [SimulationState(token=token) for token in tokens]
 
         # Competition dynamics: attention is split
@@ -53,7 +53,7 @@ class CompetitionSimulator:
         from ..agents.personas import get_persona, PersonaType
         bot = get_persona(PersonaType.BOT)
 
-        for i, (engine, state) in enumerate(zip(engines, states)):
+        for i, state in enumerate(states):
             initial_tweet = engine._generate_tweet(bot, tokens[i], state)
             engine._update_state(state, [initial_tweet])
 
@@ -66,7 +66,7 @@ class CompetitionSimulator:
             ]
 
             # Update each token's simulation
-            for i, (engine, state, token) in enumerate(zip(engines, states, tokens)):
+            for i, (state, token) in enumerate(zip(states, tokens)):
                 # Attention modifier based on competition
                 attention_modifier = attention_shares[i] / attention_split
 
@@ -110,7 +110,7 @@ class CompetitionSimulator:
 
         # Compile results for all tokens
         results = []
-        for engine, state in zip(engines, states):
+        for state in states:
             result = engine._compile_results(state)
             results.append(result)
 
